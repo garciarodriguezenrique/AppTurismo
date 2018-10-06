@@ -14,6 +14,14 @@ class CommentList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def get_queryset(self):
+        queryset = Comment.objects.all()
+        venue = self.request.query_params.get('venue')
+        if venue is not None:
+            queryset = queryset.filter(venue=venue)
+   
+        return queryset
+
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Comment.objects.all()
@@ -27,6 +35,17 @@ class ImageList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        queryset = Image.objects.all()
+        venue = self.request.query_params.get('venue')
+        user = self.request.query_params.get('user')
+        if user is not None:
+            queryset = queryset.filter(owner=self.request.user)
+        else:
+            queryset = queryset.filter(venue=venue)
+   
+        return queryset
 
 class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)

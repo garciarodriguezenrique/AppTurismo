@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class CommentSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.username')
+    venue = serializers.CharField(required=True)
 
     class Meta:
         model = Comment
@@ -13,6 +14,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.username')
+    venue = serializers.CharField(required=True)
 
     class Meta:
         model = Image
