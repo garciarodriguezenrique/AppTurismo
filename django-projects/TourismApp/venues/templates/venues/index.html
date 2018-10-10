@@ -1,0 +1,47 @@
+<title>Tourism App - Search</title>
+
+<form action="{% url 'venues:mapview' %}" method="post">
+	{% csrf_token %}
+
+
+<div class="row "> 
+
+  <div class="input-field col s12">
+    <select name="travel_mode">
+          <option value="DRIVING">Driving</option>
+        <option value="WALKING">Walking</option>
+          <option value="BICYCLING">Bicycling</option>
+          <option value="TRANSIT">Transit</option>
+      </select>
+    <label>Método de transporte</label>
+  </div>
+
+
+
+  <div class="input-field col s12">
+	<input id="radius" type="text" name="radius"/>
+    <label for="radius" >Radio</label> 
+  </div>
+
+
+
+<div class="input-field col s12">
+    <select name="category">
+          <option value="DRIVING">Driving</option>
+        <option value="WALKING">Walking</option>
+          <option value="BICYCLING">Bicycling</option>
+          <option value="TRANSIT">Transit</option>
+      </select>
+    <label>Categoría</label>
+  </div>
+
+
+
+<div class="input-field col s12">
+<div class="center">
+   <button  class="waves-effect waves-light btn" type="submit">Buscar</button>
+   </div>
+</div>
+  
+	
+</form>
