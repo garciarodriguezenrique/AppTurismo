@@ -1,5 +1,22 @@
 <title>Tourism App - Search</title>
 
+{% if request.user.is_authenticated %}
+	<div class="col s6">
+            Hola {{ request.user.username}} <BR>
+        </div>
+
+        <div class="col s6">
+            <a href="{% url 'logout' %}">logout</a>
+        </div>
+{% else %}
+             
+        <div class="col s12">
+            <div class="center">
+            <a href="{% url 'login' %}">login</a>
+            </div>
+        </div>
+{% endif %}
+
 <form action="{% url 'venues:mapview' %}" method="post">
 	{% csrf_token %}
 

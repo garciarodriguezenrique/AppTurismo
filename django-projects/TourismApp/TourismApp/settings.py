@@ -119,3 +119,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+#Redirect to index after login
+LOGIN_REDIRECT_URL = '/venues/'
+
+LOGOUT_REDIRECT_URL = '/venues/'
+
+#Mainly for password reset requests
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails/")
