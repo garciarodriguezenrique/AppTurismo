@@ -70,22 +70,6 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 
-MAX_RETRIES = 3 #Max number of attemps to retrieve whatever data from a given external API
-
-class ExternalAPI(APIView):
-    
-    def get(self, request, format=None):
-        attempts = 0
-        while attempts < MAX_RETRIES:
-            r = requests.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=43.4917400,-8.2006500&radius=1500&type=restaurant&key=AIzaSyD5k4YFA5vGzVTaR0EvHRLEAVdhN0GV__s", timeout=10)
-            if r.status_code == 200:
-                data = r.json()
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                attempt_num += 1
-                # Should probably log this error using logger
-                time.sleep(5)  # Wait for 5 seconds before re-trying
-        return Response("error : Request failed", status=r.status_code)
 
 
 

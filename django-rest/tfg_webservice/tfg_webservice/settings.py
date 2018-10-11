@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'usercontent.apps.UsercontentConfig',
+    'externalapis.apps.ExternalapisConfig',
 ]
 
 MIDDLEWARE = [
