@@ -5,6 +5,7 @@ from externalapis import views
 urlpatterns = [
     url(r'^external-api/$', views.ExternalAPI.as_view()), 
     url(r'^external-api/getmap/$', views.ExternalAPI_getmap.as_view()), 
+    url(r'^external-api/getvenues/$', views.ExternalAPI_getvenues.as_view()), 
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
