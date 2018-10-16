@@ -22,6 +22,13 @@ class Index(View):
         context = {}
         return render(request, self.template_name, context)
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 class Mapview(View):
     template_name = 'venues/mapview.html'
@@ -31,7 +38,8 @@ class Mapview(View):
         radius = request.POST['radius']
         category = request.POST['category']
 
-        myloc = geocoder.ip('me')
+        client_ip = get_client_ip(request)
+        myloc = geocoder.ip("me") #Necesario durante las pruebas (recupera mi dirección ip pública), cuando la aplicación se despliegue hay que cambiarlo por client_ip, si no obtendrá la ubicación de la máquina en la que corre la aplicación.
         if myloc is not None:
             user_coordinates = {'lat': myloc.lat, 'long': myloc.lng}
 
