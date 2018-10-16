@@ -1,5 +1,6 @@
 import requests
 import json
+import geocoder
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm
@@ -30,10 +31,14 @@ class Mapview(View):
         radius = request.POST['radius']
         category = request.POST['category']
 
-        user_coordinates = {'lat': "43.3712591", 'long': "-8.4188010"}
+        myloc = geocoder.ip('me')
+        if myloc is not None:
+            user_coordinates = {'lat': myloc.lat, 'long': myloc.lng}
 
-        url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
-        response = requests.get(url)
+            url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
+            response = requests.get(url)
+        else:
+            raise Exception("Geolocation data for your current position could not be retrieved.")
 
         if response.ok:
             jData = json.loads(response.content.decode('utf-8'))
@@ -44,8 +49,9 @@ class Mapview(View):
                 dict_entry = {'lat': venue['geometry']['location']['lat'], 'long': venue['geometry']['location']['lng']}
                 venue_dict[name] = dict_entry
             r = json.dumps(venue_dict)
-            loaded_r = json.loads(r)
-            context = {'venues':venue_dict, 'venues_json':loaded_r, 'dump':r}
+            loaded_r = json.loads(json.dumps(venue_dict))
+            user_coordinates_json = json.loads(json.dumps(user_coordinates))
+            context = {'venues':venue_dict, 'venues_json':loaded_r, 'user_location': user_coordinates_json}
             return render(request, self.template_name, context)
         else:
             error_msg = str(response.status_code)+":"+response.reason
