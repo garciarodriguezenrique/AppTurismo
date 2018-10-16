@@ -1,3 +1,6 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'venues/mapview.css' %}">
+
 <html>
   <head>
     <title>Tourism App - Show Results</title>
@@ -19,6 +22,12 @@
     </style>
   </head>
   <body>
+
+    <div id="sidenav" class="sidenav">
+      
+    </div>
+
+
     <div id="map"></div>
     <script>
       var venues_json = '{{ venues_json }}';
@@ -28,6 +37,16 @@
       var markers = [];
       var marker;
       var map;
+      var open_marker;
+
+      function myclick(i) {
+	if (typeof open_marker !== 'undefined'){
+            open_marker.infoWindow.close();
+        }
+        google.maps.event.trigger(markers[i], "click");
+        open_marker = markers[i];
+      }
+
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: j_loc["lat"], lng: j_loc["long"]},
@@ -52,15 +71,44 @@
            icon: icon
         });
            
+
+        var side_bar_html = "";
         Object.keys(j).forEach(function(key) {
+
+          venue_name = key
+    
+          contentString = '<div id="content">'+
+            '<div id="siteNotice">'+
+            '</div>'+
+            '<h1 id="firstHeading" class="firstHeading">'+key+'</h1>'+
+            '<div id="bodyContent">'+
+            '<p><b>'+key+'</b></p>'+
+            '<p>Attribution: '+key+', <a href="https://www.google.es/#q='+key+'">'+
+            'Más información</a> '+
+            '</p>';
+
+           var infowindow = new google.maps.InfoWindow({
+             content: contentString
+           });
+
            marker = new google.maps.Marker({
-           position : new google.maps.LatLng(j[key]["lat"], j[key]["long"]),
-           map : map,
-           title: key
-        });
+             position : new google.maps.LatLng(j[key]["lat"], j[key]["long"]),
+             map : map,
+             infoWindow: infowindow,
+             title: key
+           });
+
+           google.maps.event.addListener(marker, 'click', function() {
+             this.infoWindow.open(map, this);
+           });
+
+           side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + key + '</a>';
 
            markers.push(marker);
         });
+
+        document.getElementById("sidenav").innerHTML = side_bar_html;
+
 
       }
     </script>
