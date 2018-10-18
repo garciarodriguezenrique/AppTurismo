@@ -29,6 +29,7 @@ class ExternalAPI_getvenues(APIView):
     
     def get(self, request, format=None):
         attempts = 0
+        total_results = []
         LatLng = self.request.query_params.get('LatLng', None)
         radius = self.request.query_params.get('radius', None)
         #category = self.request.query_params.get('category', None)
@@ -38,6 +39,16 @@ class ExternalAPI_getvenues(APIView):
                 r = requests.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type=restaurant&key=AIzaSyD5k4YFA5vGzVTaR0EvHRLEAVdhN0GV__s", timeout=10)
                 if r.status_code == 200:
                     data = r.json()
+                    # Pagination ------------------------------------------------------------------------------------------------------------------
+                    total_results.extend(data["results"])
+                    while "next_page_token" in data:
+                        while attempts < MAX_RETRIES:
+                            r = requests.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type=restaurant&key=AIzaSyD5k4YFA5vGzVTaR0EvHRLEAVdhN0GV__s&pagetoken"+data["next_page_token"], timeout=10)
+                            if r.status_code == 200:
+                                data = r.json()
+                                total_results.extend(data["results"])
+                    data["results"] = total_results
+                    # Pagination ------------------------------------------------------------------------------------------------------------------
                     return Response(data, status=status.HTTP_200_OK)
                 else:
                     attempt_num += 1
