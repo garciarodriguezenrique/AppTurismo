@@ -41,6 +41,16 @@
       var open_marker;
 
       function calculateAndDisplayRoute(destination_lat, destination_long) {
+
+        //Oculta el resto de marcadores y cierra la ventana del seleccionado antes de mostrar la ruta
+        for (e in markers) {
+          if (markers[e].getTitle() !== open_marker.getTitle()){
+            markers[e].setVisible(false);
+          } else {
+            markers[e].infoWindow.close()
+          }
+        }
+
         directionsService.route({
           origin: user_position,
           destination: {lat: destination_lat, lng: destination_long},
@@ -54,6 +64,7 @@
         });
       }
 
+      //Función para el evento click en los elementos del panel lateral. Si hay otra ventana abierta la cierra antes de mostrar la seleccionada.
       function myclick(i) {
 	if (typeof open_marker !== 'undefined'){
             open_marker.infoWindow.close();
@@ -72,13 +83,16 @@
         });
 
         directionsDisplay.setMap(map);
+        //Esto hace que Google Directions no coloque marcadores por defecto en los punto de inicio y origen de la ruta (para eso ya tenemos los nuestros)
+        directionsDisplay.setOptions( { suppressMarkers: true } );
 
       /*Object.keys(j).forEach(function(key) {
          console.log(key +': '+ j[key]["lat"]+","+j[key]["long"]);
       });*/
       //var url = https://cdn0.iconfinder.com/data/icons/maps-locations-5/24/map_location_user_location-512.png
 
-       
+  
+        //Marcador+icono para mostrar la ubicación del usuario     
         var icon = { 
            url: 'https://static.thenounproject.com/png/67172-200.png',
            scaledSize: new google.maps.Size(50, 50)
@@ -92,10 +106,9 @@
         });
            
 
+	//Se preparan y colocan los marcadores
         var side_bar_html = "";
         Object.keys(j).forEach(function(key) {
-
-          venue_name = key
     
           contentString = '<div id="content">'+
             '<div id="siteNotice">'+
@@ -121,9 +134,13 @@
            });
 
            google.maps.event.addListener(marker, 'click', function() {
+             if (typeof open_marker !== 'undefined'){
+               open_marker.infoWindow.close();
+             }
              this.infoWindow.open(map, this);
+             open_marker = this;
            });
-
+	   //Se añade el evento click a los elementos del panel lateral
            side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + key + '</a>';
 
            markers.push(marker);
