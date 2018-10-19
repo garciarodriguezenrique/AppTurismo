@@ -1,6 +1,7 @@
 import requests
 import json
 import geocoder
+import pandas as pd
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm
@@ -50,20 +51,39 @@ class Mapview(View):
 
         if response.ok:
             jData = json.loads(response.content.decode('utf-8'))
-            venue_dict = {}
-            dict_entry = {}
-            for venue in jData['results']:
-                name = venue['name']
-                dict_entry = {'lat': venue['geometry']['location']['lat'], 'long': venue['geometry']['location']['lng']}
-                venue_dict[name] = dict_entry
-            r = json.dumps(venue_dict)
-            loaded_r = json.loads(json.dumps(venue_dict))
+            #Campos de la respuesta que queremos integrar en el DataFrame
+            required_keys = ["name", "geometry"]
+            df = pd.DataFrame(jData['results'])[required_keys]
+
+            #Limpieza de caracteres conflictivos
+            df["name"] = df["name"].apply(lambda x: x.replace("'",""))
+            d = df.to_json(orient='records')
+            venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
-            context = {'venues':venue_dict, 'venues_json':loaded_r, 'user_location': user_coordinates_json}
+            context = {'venues':venues, 'user_location': user_coordinates_json}
             return render(request, self.template_name, context)
         else:
             error_msg = str(response.status_code)+":"+response.reason
             raise Exception(error_msg)
+
+#        if response.ok:
+#            jData = json.loads(response.content.decode('utf-8'))
+#            venue_dict = {}
+#            dict_entry = {}
+#            for venue in jData['results']:
+#                name = venue['name']
+#                if "'" in name:
+#                    name = name.replace("'","")
+#                dict_entry = {'lat': venue['geometry']['location']['lat'], 'long': venue['geometry']['location']['lng']}
+#                venue_dict[name] = dict_entry
+#            r = json.dumps(venue_dict)
+#            loaded_r = json.loads(json.dumps(venue_dict))
+#            user_coordinates_json = json.loads(json.dumps(user_coordinates))
+#            context = {'venues':venue_dict, 'venues_json':loaded_r, 'user_location': user_coordinates_json}
+#            return render(request, self.template_name, context)
+#        else:
+#            error_msg = str(response.status_code)+":"+response.reason
+#            raise Exception(error_msg)
 
         #context = {'travel_mode':travel_mode, 'radius':radius, 'category':category, 'request':request}
         #return render(request, self.template_name, context)

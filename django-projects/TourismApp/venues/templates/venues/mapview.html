@@ -30,11 +30,13 @@
 
     <div id="map"></div>
     <script>
-      var venues_json = '{{ venues_json }}';
+      var venues_json = '{{ venues }}';
       var user_location = '{{ user_location }}';
       var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
       var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
       var j = JSON.parse(venues_json.replace(/&#39;/g,'"'));
+      // new (pd) : venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+      // old (json) : venues_json.replace(/&#39;/g,'"')
       var markers = [];
       var marker;
       var map;
@@ -108,17 +110,20 @@
 
 	//Se preparan y colocan los marcadores
         var side_bar_html = "";
-        Object.keys(j).forEach(function(key) {
+        Object.keys(j).forEach(function(venue) {
+
+          venue_name = j[venue]['name']
+          venue_coordinates = j[venue]['geometry']['location']
     
           contentString = '<div id="content">'+
             '<div id="siteNotice">'+
             '</div>'+
-            '<h1 id="firstHeading" class="firstHeading">'+key+'</h1>'+
+            '<h1 id="firstHeading" class="firstHeading">'+venue_name+'</h1>'+
             '<div id="bodyContent">'+
-            '<p><b>'+key+'</b></p>'+
-            '<p>Attribution: '+key+', <a href="https://www.google.es/#q='+key+'">'+
+            '<p><b>'+venue_name+'</b></p>'+
+            '<p>Attribution: '+venue_name+', <a href="https://www.google.es/#q='+venue_name+'">'+
             'Más información</a><BR>'+
-            '<button onclick="calculateAndDisplayRoute('+ j[key]['lat'] +','+ j[key]['long'] +')">Ir!</button>'+
+            '<button onclick="calculateAndDisplayRoute('+ venue_coordinates["lat"] +','+ venue_coordinates["lng"] +')">Ir!</button>'+
             '</p>'+
             '</div>';
 
@@ -127,21 +132,23 @@
            });
 
            var marker = new google.maps.Marker({
-             position : new google.maps.LatLng(j[key]["lat"], j[key]["long"]),
+             position : new google.maps.LatLng(venue_coordinates["lat"], venue_coordinates["lng"]),
              map : map,
              infoWindow: infowindow,
-             title: key
+             title: venue_name
            });
 
+             
            google.maps.event.addListener(marker, 'click', function() {
              if (typeof open_marker !== 'undefined'){
                open_marker.infoWindow.close();
              }
+             map.setCenter(this.position);
              this.infoWindow.open(map, this);
              open_marker = this;
            });
 	   //Se añade el evento click a los elementos del panel lateral
-           side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + key + '</a>';
+           side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + venue_name + '</a>';
 
            markers.push(marker);
         });
