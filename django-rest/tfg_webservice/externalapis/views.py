@@ -66,5 +66,31 @@ class ExternalAPI_getmap(APIView):
         #map_source = 
         return Response("error : Request failed", status=r.status_code)
 
+class ExternalAPI_getdistance(APIView):
+
+    def get(self, request, format=None):
+        origin = self.request.query_params.get('origin', None)
+        destinations = self.request.query_params.get('destinations', None)
+        travel_mode = self.request.query_params.get('travel_mode', None)
+
+        finalString = ""
+        destination_list = destinations.split(";")
+        for destination in destination_list:
+            finalString+=destination+"|"
+        parsed_destinations = finalString.rstrip("|")
+
+        attempts = 0
+        while attempts < MAX_RETRIES:
+            r = requests.get("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+origin+"&destinations="+parsed_destinations+"&travel_mode="+travel_mode+"&units=metric&key=AIzaSyD5k4YFA5vGzVTaR0EvHRLEAVdhN0GV__s", timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                attempt_num += 1
+                # Should probably log this error using logger
+                time.sleep(5)  # Wait for 5 seconds before re-trying
+        return Response("error : Request failed", status=r.status_code)
+
+
 
 
