@@ -28,6 +28,7 @@
     </div>
 
 
+
     <div id="map"></div>
     <script>
       var venues_json = '{{ venues }}';
@@ -38,9 +39,116 @@
       // new (pd) : venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
       // old (json) : venues_json.replace(/&#39;/g,'"')
       var markers = [];
-      var marker;
+      var route = [];
       var map;
       var open_marker;
+      var side_bar_html;
+
+      function hideMarkersOutsideOfRoute(){
+          for (e in markers){
+              if (!Object.keys(route).includes(markers[e].getTitle())){
+                  markers[e].setVisible(false);
+              }
+          }
+      }
+
+      function calculateRouteControl(controlDiv, map) {
+        //Borde
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '50%';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlDiv.appendChild(controlUI);
+
+        //Interior
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '16px';
+        controlText.style.lineHeight = '38px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = 'Calcular ruta';
+        controlUI.appendChild(controlText);
+
+        //Evento
+        controlUI.addEventListener('click', function() {
+          
+          var destinations = [];
+          for (venue in route){
+              destinations.push(route[venue]);
+	  }
+          var service = new google.maps.DistanceMatrixService();
+          service.getDistanceMatrix(
+          {
+              origins: [user_position],
+              destinations: destinations,
+              travelMode: 'DRIVING',
+              unitSystem: google.maps.UnitSystem.METRIC,
+              }, distanceMatrixCallback);
+          });
+
+      }
+
+      function distanceMatrixCallback(response, status){
+          if (status == 'OK') {
+              var origins = response.originAddresses;
+              var destinations = response.destinationAddresses;
+              var max_distance = 0;
+              var waypoints = [];
+              var currentFarthestPoint;
+
+
+              var results = response.rows[0].elements;
+                  for (var j = 0; j < results.length; j++) {
+                      var element = results[j];
+                      var distance = element.distance.text;
+                      var duration = element.duration.text;
+                      var from = origins[0];
+                      var to = destinations[j];
+
+                      if (parseInt(distance.split(" ")[0])>max_distance){
+                          if (typeof(currentFarthestPoint)=="undefined"){
+                              currentFarthestPoint = {address: to, dist: distance};
+                              max_distance = parseInt(distance.split(" ")[0]);
+                          } else {
+                              waypoints.push({
+                                  location: currentFarthestPoint["address"],
+                                  stopover: true
+                              });
+                              currentFarthestPoint = {address: to, dist: distance};
+                              max_distance = parseInt(distance.split(" ")[0]);
+                          }
+                      } else {
+                           waypoints.push({
+                               location: currentFarthestPoint["address"],
+                               stopover: true
+                           });
+                      }
+                      console.log(to+" - "+distance);
+                  }
+              }
+              console.log("The single farthest point is: "+currentFarthestPoint["address"]+" which is "+currentFarthestPoint["dist"]);
+
+              directionsService.route({
+                  origin: user_position,
+                  destination: currentFarthestPoint["address"],
+                  waypoints: waypoints,
+                  travelMode: 'DRIVING'
+              }, function(response, status) {
+                  if (status === 'OK') {
+                      hideMarkersOutsideOfRoute();
+                      directionsDisplay.setDirections(response);
+                  } else {
+                      window.alert('Directions request failed due to ' + status);
+                  }
+              });
+          
+      }
 
       function calculateAndDisplayRoute(destination_lat, destination_long) {
 
@@ -66,6 +174,17 @@
         });
       }
 
+      function addToRoute(name, lat, lng) {
+        var checkBox = document.getElementById("check_"+name);
+        if (checkBox.checked == true){
+          console.log("true");
+          route[name] = new google.maps.LatLng(lat, lng) //{"lat":lat, "lng":lng};
+        } else {
+          console.log("false");
+          delete route[name];
+        }
+      }
+
       //Función para el evento click en los elementos del panel lateral. Si hay otra ventana abierta la cierra antes de mostrar la seleccionada.
       function myclick(i) {
 	if (typeof open_marker !== 'undefined'){
@@ -74,6 +193,55 @@
         google.maps.event.trigger(markers[i], "click");
         open_marker = markers[i];
       }
+
+      function placeMarkers(){
+          Object.keys(j).forEach(function(venue) {
+
+              venue_name = j[venue]['name']
+              venue_coordinates = j[venue]['geometry']['location']
+    
+              contentString = '<div id="content">'+
+                '<div id="siteNotice">'+
+                '</div>'+
+                '<h1 id="firstHeading" class="firstHeading">'+venue_name+'</h1>'+
+                '<div id="bodyContent">'+
+                '<p><b>'+venue_name+'</b></p>'+
+                '<p>Attribution: '+venue_name+', <a href="https://www.google.es/#q='+venue_name+'">'+
+                'Más información</a><BR>'+
+                '<button onclick="calculateAndDisplayRoute('+ venue_coordinates["lat"] +','+ venue_coordinates["lng"] +')">Ir!</button>'+
+                '</p>'+
+                '</div>';
+
+               var infowindow = new google.maps.InfoWindow({
+                 content: contentString
+               });
+
+               var marker = new google.maps.Marker({
+                 position : new google.maps.LatLng(venue_coordinates["lat"], venue_coordinates["lng"]),
+                 map : map,
+                 infoWindow: infowindow,
+                 title: venue_name
+               });
+
+             
+               google.maps.event.addListener(marker, 'click', function() {
+                 if (typeof open_marker !== 'undefined'){
+                   open_marker.infoWindow.close();
+                 }
+                 map.setCenter(this.position);
+                 this.infoWindow.open(map, this);
+                 open_marker = this;
+               });
+           
+	       //Se añade el evento click a los elementos del panel lateral
+               id = "myCheck"+venue_name
+               side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + venue_name + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+venue_coordinates["lat"]+','+venue_coordinates["lng"]+')"></a>';
+
+               markers.push(marker);
+             });
+
+      }
+
 
       function initMap() {
         directionsService = new google.maps.DirectionsService;
@@ -85,6 +253,11 @@
         });
 
         directionsDisplay.setMap(map);
+        var routeControlDiv = document.createElement('div');
+        var routeControl = new calculateRouteControl(routeControlDiv, map);
+
+        routeControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(routeControlDiv);
         //Esto hace que Google Directions no coloque marcadores por defecto en los punto de inicio y origen de la ruta (para eso ya tenemos los nuestros)
         directionsDisplay.setOptions( { suppressMarkers: true } );
 
@@ -109,56 +282,13 @@
            
 
 	//Se preparan y colocan los marcadores
-        var side_bar_html = "";
-        Object.keys(j).forEach(function(venue) {
-
-          venue_name = j[venue]['name']
-          venue_coordinates = j[venue]['geometry']['location']
-    
-          contentString = '<div id="content">'+
-            '<div id="siteNotice">'+
-            '</div>'+
-            '<h1 id="firstHeading" class="firstHeading">'+venue_name+'</h1>'+
-            '<div id="bodyContent">'+
-            '<p><b>'+venue_name+'</b></p>'+
-            '<p>Attribution: '+venue_name+', <a href="https://www.google.es/#q='+venue_name+'">'+
-            'Más información</a><BR>'+
-            '<button onclick="calculateAndDisplayRoute('+ venue_coordinates["lat"] +','+ venue_coordinates["lng"] +')">Ir!</button>'+
-            '</p>'+
-            '</div>';
-
-           var infowindow = new google.maps.InfoWindow({
-             content: contentString
-           });
-
-           var marker = new google.maps.Marker({
-             position : new google.maps.LatLng(venue_coordinates["lat"], venue_coordinates["lng"]),
-             map : map,
-             infoWindow: infowindow,
-             title: venue_name
-           });
-
-             
-           google.maps.event.addListener(marker, 'click', function() {
-             if (typeof open_marker !== 'undefined'){
-               open_marker.infoWindow.close();
-             }
-             map.setCenter(this.position);
-             this.infoWindow.open(map, this);
-             open_marker = this;
-           });
-	   //Se añade el evento click a los elementos del panel lateral
-           side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + venue_name + '</a>';
-
-           markers.push(marker);
-        });
-
+        placeMarkers();
         document.getElementById("sidenav").innerHTML = side_bar_html;
 
 
       }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5k4YFA5vGzVTaR0EvHRLEAVdhN0GV__s&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs&callback=initMap"
     async defer></script>
   </body>
 </html>

@@ -38,18 +38,18 @@ class Mapview(View):
         travel_mode = request.POST['travel_mode']
         radius = request.POST['radius']
         category = request.POST['category']
-
         client_ip = get_client_ip(request)
         myloc = geocoder.ip("me") #Necesario durante las pruebas (recupera mi dirección ip pública), cuando la aplicación se despliegue hay que cambiarlo por client_ip, si no obtendrá la ubicación de la máquina en la que corre la aplicación.
+        
         if myloc is not None:
             user_coordinates = {'lat': myloc.lat, 'long': myloc.lng}
-
             url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
             response = requests.get(url)
         else:
             raise Exception("Geolocation data for your current position could not be retrieved.")
 
         if response.ok:
+            print("Response is ok")
             jData = json.loads(response.content.decode('utf-8'))
             #Campos de la respuesta que queremos integrar en el DataFrame
             required_keys = ["name", "geometry"]
