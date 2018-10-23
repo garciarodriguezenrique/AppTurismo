@@ -43,7 +43,7 @@ class Mapview(View):
         
         if myloc is not None:
             user_coordinates = {'lat': myloc.lat, 'long': myloc.lng}
-            url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
+            url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, category)
             response = requests.get(url)
         else:
             raise Exception("Geolocation data for your current position could not be retrieved.")
@@ -60,7 +60,7 @@ class Mapview(View):
             d = df.to_json(orient='records')
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
-            context = {'venues':venues, 'user_location': user_coordinates_json}
+            context = {'venues':venues, 'user_location': user_coordinates_json, 'travel_mode': travel_mode}
             return render(request, self.template_name, context)
         else:
             error_msg = str(response.status_code)+":"+response.reason

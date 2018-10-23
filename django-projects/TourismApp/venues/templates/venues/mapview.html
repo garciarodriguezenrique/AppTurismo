@@ -33,6 +33,7 @@
     <script>
       var venues_json = '{{ venues }}';
       var user_location = '{{ user_location }}';
+      var travel_mode = '{{ travel_mode }}'
       var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
       var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
       var j = JSON.parse(venues_json.replace(/&#39;/g,'"'));
@@ -87,7 +88,7 @@
           {
               origins: [user_position],
               destinations: destinations,
-              travelMode: 'DRIVING',
+              travelMode: travel_mode,
               unitSystem: google.maps.UnitSystem.METRIC,
               }, distanceMatrixCallback);
           });
@@ -106,39 +107,43 @@
               var results = response.rows[0].elements;
                   for (var j = 0; j < results.length; j++) {
                       var element = results[j];
-                      var distance = element.distance.text;
+                      var distance = element.distance.text.replace(",",".");
                       var duration = element.duration.text;
                       var from = origins[0];
                       var to = destinations[j];
-
-                      if (parseInt(distance.split(" ")[0])>max_distance){
+                      
+                      if (parseFloat(distance.split(" ")[0])>max_distance){
+                      console.log("Which is greater than "+max_distance);
                           if (typeof(currentFarthestPoint)=="undefined"){
                               currentFarthestPoint = {address: to, dist: distance};
-                              max_distance = parseInt(distance.split(" ")[0]);
+                              max_distance = parseFloat(distance.split(" ")[0]);
                           } else {
                               waypoints.push({
                                   location: currentFarthestPoint["address"],
                                   stopover: true
                               });
                               currentFarthestPoint = {address: to, dist: distance};
-                              max_distance = parseInt(distance.split(" ")[0]);
+                              max_distance = parseFloat(distance.split(" ")[0]);
                           }
                       } else {
                            waypoints.push({
-                               location: currentFarthestPoint["address"],
+                               location: to,
                                stopover: true
                            });
                       }
-                      console.log(to+" - "+distance);
+                      //console.log(to+" - "+distance);
                   }
               }
-              console.log("The single farthest point is: "+currentFarthestPoint["address"]+" which is "+currentFarthestPoint["dist"]);
+              for (e in waypoints) {
+                  console.log(waypoints[e]);
+              }
 
               directionsService.route({
                   origin: user_position,
                   destination: currentFarthestPoint["address"],
                   waypoints: waypoints,
-                  travelMode: 'DRIVING'
+                  optimizeWaypoints: true,
+                  travelMode: travel_mode
               }, function(response, status) {
                   if (status === 'OK') {
                       hideMarkersOutsideOfRoute();
@@ -164,7 +169,7 @@
         directionsService.route({
           origin: user_position,
           destination: {lat: destination_lat, lng: destination_long},
-          travelMode: 'DRIVING'
+          travelMode: travel_mode,
         }, function(response, status) {
           if (status === 'OK') {
             directionsDisplay.setDirections(response);
