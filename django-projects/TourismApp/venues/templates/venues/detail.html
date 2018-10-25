@@ -1,0 +1,41 @@
+<head>
+    {{ name }} 
+</head>
+
+<body>
+    <div>
+        <p>Teléfono: {{ phone_number }}</p>
+        <p>Dirección: {{ address }}</p>
+        <p><a href= "{{ website }}" >Sitio del restaurante</a></p>
+        <p>Categorías: {% for element in categories %} {{ element }} {% endfor %}</p>
+    </div>
+    <div>
+        HORARIO:<BR>
+        <ul>
+            {%for element in schedule %}
+            <li>{{ element }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+ 
+    {% if user.is_authenticated %}
+	<form id="detailCommentForm" action="{% url 'venues:postnewcomment' id %}" method="post">
+    	{% csrf_token %}
+		<label>Nuevo comentario</a> :
+		<input type="textfield" name="text"/><BR>
+		<input type="submit" value="Enviar" />
+	</form>
+
+        <form id="detailImageForm" action="{% url 'venues:postnewimage' id %}" method="post">
+    	{% csrf_token %}
+		<label>Nueva foto</a> :
+                <input type="file" name="image"/><BR>
+		<input type="textfield" name="caption"/><BR>
+		<input type="submit" value="Enviar" />
+	</form>
+    {% else %}
+	Sólo los usuarios registrados pueden dejar comentarios. Por favor, inicia sesión o regístrate.
+    {% endif %}
+
+
+</body>

@@ -5,20 +5,20 @@ from django.contrib.auth.models import User
 class CommentSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.username')
-    venue = serializers.CharField(required=True)
+    venue_id = serializers.CharField(required=True)
 
     class Meta:
         model = Comment
-        fields = ('text', 'venue', 'owner')
+        fields = ('text', 'venue_id', 'owner')
 
 class ImageSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.username')
-    venue = serializers.CharField(required=True)
+    venue_id = serializers.CharField(required=True)
 
     class Meta:
         model = Image
-        fields = ('image', 'caption', 'venue', 'owner')
+        fields = ('image', 'caption', 'venue_id', 'owner')
 
 class UserSerializer(serializers.ModelSerializer):
     comments = serializers.PrimaryKeyRelatedField(many=True, queryset=Comment.objects.all())

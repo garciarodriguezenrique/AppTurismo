@@ -1,5 +1,6 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'venues/mapview.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'venues/slidestyle.css' %}">
 
 <html>
   <head>
@@ -23,6 +24,7 @@
   </head>
   <body>
 
+
     <div id="sidenav" class="sidenav">
       
     </div>
@@ -44,6 +46,22 @@
       var map;
       var open_marker;
       var side_bar_html;
+     
+
+      function openPanel(){
+            var panel = document.getElementsByClassName('js-cd-panel-main');
+            console.log(panel);
+            console.log("addClass");
+            addClass(panel, 'cd-panel--is-visible');
+            console.log("add close panel event listener");
+            panel.addEventListener('click', function(event){
+		if( hasClass(event.target, 'js-cd-close') || hasClass(event.target, panelClass)) {
+			event.preventDefault();
+			removeClass(panel, 'cd-panel--is-visible');
+		}
+	    });
+            
+        }
 
       function hideMarkersOutsideOfRoute(){
           for (e in markers){
@@ -237,10 +255,18 @@
                  this.infoWindow.open(map, this);
                  open_marker = this;
                });
+               
            
 	       //Se añade el evento click a los elementos del panel lateral
-               id = "myCheck"+venue_name
-               side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">' + venue_name + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+venue_coordinates["lat"]+','+venue_coordinates["lng"]+')"></a>';
+               //href="javascript:myclick(' + (markers.length) + ')"
+               
+               side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">'
+               + venue_name + " | " 
+               + (j[venue]['opening_hours']  !== 0 ?  j[venue]['opening_hours'] + " | " : "" )
+               + (j[venue]['rating']  !== 0 ?  j[venue]['rating'] + " | " : "" )
+               + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+venue_coordinates["lat"]+','+venue_coordinates["lng"]+')"></a>'
+               + " | "
+               //Aquí iría el enlace para las vistas detalle con href
 
                markers.push(marker);
              });
@@ -285,10 +311,11 @@
            icon: icon
         });
            
-
+        
 	//Se preparan y colocan los marcadores
         placeMarkers();
         document.getElementById("sidenav").innerHTML = side_bar_html;
+       
 
 
       }

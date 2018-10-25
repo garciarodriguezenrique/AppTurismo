@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 import requests
 import time
 
-KEY = #KEY
+KEY = "AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs"
 MAX_RETRIES = 3 #Max number of attemps to retrieve whatever data from a given external API
 
 class ExternalAPI(APIView):
@@ -16,7 +16,7 @@ class ExternalAPI(APIView):
     def get(self, request, format=None):
         attempts = 0
         while attempts < MAX_RETRIES:
-            r = requests.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=43.4917400,-8.2006500&radius=1500&type=restaurant&key="+KEY, timeout=10)
+            r = requests.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=43.4917400,-8.2006500&radius=1500&type=restaurant&key=AIzaSyD5k4YFA5vGzVTaR0EvHRLEAVdhN0GV__s", timeout=10)
             if r.status_code == 200:
                 data = r.json()
                 return Response(data, status=status.HTTP_200_OK)
@@ -25,6 +25,22 @@ class ExternalAPI(APIView):
                 # Should probably log this error using logger
                 time.sleep(5)  # Wait for 5 seconds before re-trying
         return Response("error : Request failed", status=r.status_code)
+
+class ExternalAPI_getplacedetail(APIView):
+    
+    def get(self, request, place_id, format=None):
+        attempts = 0
+        while attempts < MAX_RETRIES:
+            r = requests.get("https://maps.googleapis.com/maps/api/place/details/json?placeid="+place_id+"&fields=name,rating,formatted_address,type,opening_hours,website,formatted_phone_number&key="+KEY, timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                attempt_num += 1
+                # Should probably log this error using logger
+                time.sleep(5)  # Wait for 5 seconds before re-trying
+        return Response("error : Request failed", status=r.status_code)
+
 
 class ExternalAPI_getvenues(APIView):
     
@@ -38,7 +54,7 @@ class ExternalAPI_getvenues(APIView):
         
         if LatLng and radius:
             while attempts < MAX_RETRIES:
-                url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type="+category+"&fields=id,name,geometry,permanently_closed,opening_hours,price_level,rating&key="+KEY
+                url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type="+category+"&key="+KEY
                 r = requests.get(url, timeout=10)
                 if r.status_code == 200:
                     data = r.json()

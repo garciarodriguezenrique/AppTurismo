@@ -22,12 +22,12 @@ class CommentList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Comment.objects.all()
-        venue = self.request.query_params.get('venue')
+        venue_id = self.request.query_params.get('venue_id')
         user = self.request.query_params.get('user')
         if user is not None:
             queryset = queryset.filter(owner=self.request.user)
         else:
-            queryset = queryset.filter(venue=venue)
+            queryset = queryset.filter(venue_id=venue_id)
         return queryset
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -46,12 +46,12 @@ class ImageList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Image.objects.all()
-        venue = self.request.query_params.get('venue')
+        venue_id = self.request.query_params.get('venue_id')
         user = self.request.query_params.get('user')
         if user is not None:
             queryset = queryset.filter(owner=self.request.user)
         else:
-            queryset = queryset.filter(venue=venue)
+            queryset = queryset.filter(venue_id=venue_id)
    
         return queryset
 
