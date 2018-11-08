@@ -50,11 +50,12 @@ class ExternalAPI_getvenues(APIView):
         total_results = []
         LatLng = self.request.query_params.get('LatLng', None)
         radius = self.request.query_params.get('radius', None)
-        category = self.request.query_params.get('category', None)
         
         if LatLng and radius:
             while attempts < MAX_RETRIES:
-                url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type="+category+"&key="+KEY
+                #url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type="+category+"&key="+KEY  url vieja con campo types
+                url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&key="+KEY
+                print(url)
                 r = requests.get(url, timeout=10)
                 if r.status_code == 200:
                     data = r.json()

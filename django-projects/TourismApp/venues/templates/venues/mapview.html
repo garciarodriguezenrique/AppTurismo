@@ -24,6 +24,58 @@
   </head>
   <body>
 
+    {% if messages %}
+        <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- Panel flotante para criterios de filtrado -->
+    <!-- <div id="floating-sorting-panel">
+    <b>Start: </b>
+    <select id="criteria">
+      <option value="---">---</option>
+      <option value="rating">Puntuación</option>
+      <option value="closest">Más cerca</option>
+    </select>
+    </div> -->
+
+<div id="filter-control">
+
+    <div id="floating-filtering-panel" class="filter-panel">
+    <b>Categoría: </b>
+    <select id="category">
+      <option value="food">Comida</option>
+      <option value="leisure">Ocio</option>
+      <option value="culture">Cultura</option>
+      <option value="services">Servicios</option>
+      <option value="shopping">Tiendas</option>
+      <option value="medical_services">Servicios sanitarios</option>
+      <option value="bar_and_clubs">Bares y clubs</option>
+      <option value="transport">Transporte</option>
+      <option value="other">Otros</option>
+    </select>
+    </div>
+    <div class="input-field col s12">
+    <div class="center">
+       <button id="filter-button" class="waves-effect waves-light btn">Buscar</button>
+   </div>
+   </div>
+
+</div>
+
+<div id="travel-mode-control" class="input-field col s12">
+    <select id="transport" required>
+          <option value="DRIVING">Driving</option>
+          <option value="WALKING">Walking</option>
+          <option value="BICYCLING">Bicycling</option>
+          <option value="TRANSIT">Transit</option>
+      </select>
+    <label>Método de transporte</label>
+</div>
+
 
     <div id="sidenav" class="sidenav">
       
@@ -35,7 +87,7 @@
     <script>
       var venues_json = '{{ venues }}';
       var user_location = '{{ user_location }}';
-      var travel_mode = '{{ travel_mode }}'
+      var travel_mode = '{{ travel_mode }}';
       var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
       var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
       var j = JSON.parse(venues_json.replace(/&#39;/g,'"'));
@@ -45,8 +97,27 @@
       var route = [];
       var map;
       var open_marker;
-      var side_bar_html;
-     
+
+      function removeDuplicatesByName(jsonArray){
+          var seenNames = {};
+          jsonArray = jsonArray.filter(function(currentObject) {
+              if (currentObject.name in seenNames) {
+                  return false;
+              } else {
+                  seenNames[currentObject.name] = true;
+                  return true;
+              }
+          });
+          return jsonArray;
+      }
+
+      function deleteMarkers(){
+          for(i=0; i<markers.length; i++){
+              markers[i].setMap(null);
+          }
+          markers = []
+          document.getElementById("sidenav").innerHTML = "";
+      }
 
       function openPanel(){
             var panel = document.getElementsByClassName('js-cd-panel-main');
@@ -62,6 +133,91 @@
 	    });
             
         }
+
+
+      //Como a raíz del problema con el filtro de distancia la puntuación sería el único criterio, eliminamos el filtrado por puntuación
+      //y hacemos que esa sea la ordenación por defecto. Se mantiene este código en caso de que posteriormente se añadan otras posibilidades de filtrado.
+
+      /*function sortResults(){
+          criteria = document.getElementById('criteria').value
+          side_bar_html = ""
+          if (criteria == "rating") {
+              var sorted = j.sort(function(a, b) {return b.rating - a.rating})
+              Object.keys(sorted).forEach(function(venue) {
+                  venue_coordinates = sorted[venue]['geometry']['location']
+                  side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">'
+                  + sorted[venue]['name'] + " | " 
+                  + (sorted[venue]['opening_hours']  !== 0 ?  sorted[venue]['opening_hours'] + " | " : "" )
+                  + (sorted[venue]['rating']  !== 0 ?  sorted[venue]['rating'] + " | " : "" )
+                  + '<input type="checkbox" id="check_'+sorted[venue]['name']+'" onclick="addToRoute('+"'"+sorted[venue]['name']+"'"+','+venue_coordinates["lat"] +','+venue_coordinates["lng"]+')"></a>'
+                  + " | ";
+              });
+              document.getElementById("sidenav").innerHTML = side_bar_html;
+          } else if (criteria == "closest"){
+              
+          } 
+      }*/
+
+
+      function filterResults(){
+          var category = document.getElementById('category').value;
+          if (category){
+              $.ajax({
+                 url : "{% url 'venues:filter' %}"+"?category="+category,  //"http://localhost:8005/venues/filter-results/"
+                 method : "GET",
+                 //dataType: "json",
+                 success : function (data) {
+                          console.log("It worked");
+                          console.log(data['results']);
+                          deleteMarkers();
+                          placeMarkers(data['results']);
+                 },
+                 error : function (data){
+                          alert("Ha habido un error, inténtalo más tarde.")
+                 }
+              });
+          } else {alert("Selecciona una categoría, por favor");}  
+      }
+
+      //Esta función se usaría para obtener la distancia entre la posición del usuario y cada uno de los resultados
+      //en el momento de cargar la página, a fin de luego aplicar un filtrado por distancia. Por desgracia, el plan
+      //gratuito del API de Google me limita a un máximo de 25 orígenes/destinos, lo que hace imposible la presencia
+      //de este criterio de filtrado en la aplicación.
+
+      function getDistanceFromUserPosition(){
+          destinations = []
+              Object.keys(j).forEach(function(venue) {
+                  venue_coordinates = j[venue]['geometry']['location']
+                  destinations.push(new google.maps.LatLng(venue_coordinates["lat"], venue_coordinates["lng"]));
+              });
+              distanceMatrixService.getDistanceMatrix({
+                  origins: [user_position],
+                  destinations: destinations,
+                  travelMode: travel_mode,
+                  unitSystem: google.maps.UnitSystem.METRIC,
+              }, distanceMatrixSortCallback);
+      }
+
+      function distanceMatrixSortCallback(response, status){
+          if (status == 'OK') {
+              var origins = response.originAddresses;
+              var destinations = response.destinationAddresses;
+              var max_distance = 0;
+              var waypoints = [];
+              var currentFarthestPoint;
+
+
+              var results = response.rows[0].elements;
+              for (var j = 0; j < results.length; j++) {
+                  var element = results[j];
+                  var distance = element.distance.text.replace(",",".");
+                  var duration = element.duration.text;
+                  var from = origins[0];
+                  var to = destinations[j];
+                  console.log(from+" - "+to+" = "+distance);
+              }
+          }      
+      }
 
       function hideMarkersOutsideOfRoute(){
           for (e in markers){
@@ -101,12 +257,12 @@
           for (venue in route){
               destinations.push(route[venue]);
 	  }
-          var service = new google.maps.DistanceMatrixService();
-          service.getDistanceMatrix(
+          //var service = new google.maps.DistanceMatrixService();
+          distanceMatrixService.getDistanceMatrix(
           {
               origins: [user_position],
               destinations: destinations,
-              travelMode: travel_mode,
+              travelMode: document.getElemetById('transport').value,
               unitSystem: google.maps.UnitSystem.METRIC,
               }, distanceMatrixCallback);
           });
@@ -131,7 +287,6 @@
                       var to = destinations[j];
                       
                       if (parseFloat(distance.split(" ")[0])>max_distance){
-                      console.log("Which is greater than "+max_distance);
                           if (typeof(currentFarthestPoint)=="undefined"){
                               currentFarthestPoint = {address: to, dist: distance};
                               max_distance = parseFloat(distance.split(" ")[0]);
@@ -151,9 +306,6 @@
                       }
                       //console.log(to+" - "+distance);
                   }
-              }
-              for (e in waypoints) {
-                  console.log(waypoints[e]);
               }
 
               directionsService.route({
@@ -217,11 +369,14 @@
         open_marker = markers[i];
       }
 
-      function placeMarkers(){
-          Object.keys(j).forEach(function(venue) {
+      function placeMarkers(venue_list){
+          var side_bar_html = "";
+          var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+          sorted = removeDuplicatesByName(sorted);
+          Object.keys(sorted).forEach(function(venue) {
 
-              venue_name = j[venue]['name']
-              venue_coordinates = j[venue]['geometry']['location']
+              venue_name = sorted[venue]['name']
+              venue_coordinates = sorted[venue]['geometry']['location']
     
               contentString = '<div id="content">'+
                 '<div id="siteNotice">'+
@@ -262,19 +417,22 @@
                
                side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">'
                + venue_name + " | " 
-               + (j[venue]['opening_hours']  !== 0 ?  j[venue]['opening_hours'] + " | " : "" )
-               + (j[venue]['rating']  !== 0 ?  j[venue]['rating'] + " | " : "" )
+               + (sorted[venue]['rating']  !== 0 ?  sorted[venue]['rating'] + " | " : "" )
                + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+venue_coordinates["lat"]+','+venue_coordinates["lng"]+')"></a>'
                + " | "
+               console.log("Se añade: "+venue_name);
                //Aquí iría el enlace para las vistas detalle con href
 
                markers.push(marker);
              });
+             console.log("Se añade el contenido del menu lateral")
+             document.getElementById("sidenav").innerHTML = side_bar_html;
 
       }
 
 
       function initMap() {
+        distanceMatrixService = new google.maps.DistanceMatrixService(); //Si al final sólo el cálculo de rutas precisa de este servicio, mover la declaración del mismo a dentro de la función, ya que en ese caso tiene poco sentido que sea global.
         directionsService = new google.maps.DirectionsService;
         directionsDisplay = new google.maps.DirectionsRenderer;
 
@@ -283,12 +441,32 @@
           zoom: 15
         });
 
+        var onChangeHandler = function() {
+          //DO SOMETHING
+        };
+
+        
+
         directionsDisplay.setMap(map);
         var routeControlDiv = document.createElement('div');
         var routeControl = new calculateRouteControl(routeControlDiv, map);
-
         routeControlDiv.index = 1;
         map.controls[google.maps.ControlPosition.TOP_CENTER].push(routeControlDiv);
+
+        //Las siguientes líneas hacen referencia al panel de filtrado. Descomentar en caso de recuperar dicho elemento.
+        //var sortControlDiv = document.getElementById('floating-sorting-panel');
+        //document.getElementById('floating-sorting-panel').addEventListener('change', onChangeHandler);
+        //map.controls[google.maps.ControlPosition.TOP_CENTER].push(sortControlDiv);
+
+        var filterControlDiv = document.getElementById('filter-control');
+        document.getElementById('filter-button').addEventListener('click', filterResults);
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(filterControlDiv);
+
+        var travelModeControlDiv = document.getElementById('travel-mode-control');
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(travelModeControlDiv);
+             
+        
+        
         //Esto hace que Google Directions no coloque marcadores por defecto en los punto de inicio y origen de la ruta (para eso ya tenemos los nuestros)
         directionsDisplay.setOptions( { suppressMarkers: true } );
 
@@ -313,14 +491,17 @@
            
         
 	//Se preparan y colocan los marcadores
-        placeMarkers();
-        document.getElementById("sidenav").innerHTML = side_bar_html;
-       
+        console.log("SE VA A LLAMAR A LA FUNCION DE CALCULO DE DISTANCIA");
+        //getDistanceFromUserPosition(); Problema: limitación impuesta por el plan gratuito del API de Google. Ver declaración de la función.
+        placeMarkers(j);
+        
+
 
 
       }
     </script>
+    <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs&callback=initMap"
-    async defer></script>
+    async defer></script>  
   </body>
 </html>

@@ -17,7 +17,7 @@
 {% endif %}
 
 <form action="{% url 'venues:mapview' %}" method="post">
-	{% csrf_token %}
+{% csrf_token %}
 
 
 <div class="row "> 
@@ -43,10 +43,22 @@
 
 <div class="input-field col s12">
     <select name="category" required>
-          <option value="restaurant">Restaurante</option>
+          <option value="food">Comida</option>
+          <option value="leisure">Ocio</option>
+          <option value="culture">Cultura</option>
+          <option value="services">Servicios</option>
+          <option value="shopping">Tiendas</option>
+          <option value="medical_services">Servicios sanitarios</option>
+          <option value="bar_and_clubs">Bares y clubs</option>
+          <option value="transport">Transporte</option>
+          <option value="other">Otros</option>
       </select>
     <label>Categoría</label>
-  </div>
+</div>
+
+<div>
+     <input id="position" type="hidden" name="position"/>
+<div>
 
 
 
@@ -58,3 +70,19 @@
   
 	
 </form>
+
+<script>
+    var x = document.getElementById("position");
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(setPositionValue);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function setPositionValue(position) {
+        x.value = position.coords.latitude + "," + position.coords.longitude; 
+    }
+    window.addEventListener('load', getLocation);
+</script>
