@@ -3,7 +3,6 @@ import json
 import geocoder
 import base64
 import pandas as pd
-from PIL import Image
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from django.http import HttpResponse
