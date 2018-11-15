@@ -1,3 +1,44 @@
+ 
+ #right-panel {
+     font-family: 'Roboto','sans-serif';
+     line-height: 30px;
+     padding-left: 10px;
+ }
+
+ #right-panel select, #right-panel input {
+     font-size: 15px;
+ }
+
+ #right-panel select {
+     width: 100%;
+ }
+
+ #right-panel i {
+     font-size: 12px;
+ }
+
+ #right-panel {
+     height: 100%;
+     float: right;
+     width: 390px;
+     overflow: auto;
+ }
+
+ #map {
+     margin-right: 400px;
+ }
+
+ @media print {
+     #map {
+         height: 500px;
+         margin: 0;
+     }
+     #right-panel {
+         float: none;
+         width: auto;
+     }
+ }
+
  .sidenav {
     height: 100%; /* Full-height: remove this if you want "auto" height */
     width: 360px; /* Set the width of the sidebar */
@@ -28,6 +69,7 @@
     margin-left: 160px; /* Same as the width of the sidebar */
     padding: 0px 10px;
  }
+
 
  #floating-sorting-panel {
         position: absolute;

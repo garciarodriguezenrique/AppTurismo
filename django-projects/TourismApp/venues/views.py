@@ -18,15 +18,15 @@ from requests.auth import HTTPBasicAuth
 PLACE_DETAIL_CACHE = {}
 
 #Tipos de punto de interés (wrapper de las categorías de Google Places)
-food="restaurant|meal_delivery|meal_takeaway"
-leisure="amusement_park|bowling_alley|casino|movie_rental|movie_theater|spa|stadium|zoo"
-culture="art_gallery|library|museum|church|city_hall|synagogue|mosque|hindu_temple"
-services="campground|car_rental|atm|parking|gas_station|police|rv_park"
-shopping="book_store|clothing_store|convenience_store|department_store|electronics_store|hardware_store|florist|jewelry_store|pet_store|shopping_mall|store|supermarket"
-medical_services="doctor|hospital|pharmacy"
-bar_and_clubs="bar|cafe|night_club"
-transport="airport|bus_station|train_station|subway_station|taxi_stand"
-other="park"
+food=["restaurant","meal_delivery","meal_takeaway"]
+leisure=["amusement_park","bowling_alley","casino","movie_rental","movie_theater","spa","stadium","zoo"]
+culture=["art_gallery","library","museum","church","city_hall","synagogue","mosque","hindu_temple"]
+services=["campground","car_rental","atm","parking","gas_station","police","rv_park"]
+shopping=["book_store","clothing_store","convenience_store","department_store","electronics_store","hardware_store","florist","jewelry_store","pet_store","shopping_mall","store","supermarket"]
+medical_services=["doctor","hospital","pharmacy"]
+bar_and_clubs=["bar","cafe","night_club"]
+transport=["airport","bus_station","train_station","subway_station","taxi_stand"]
+other=["park"]
 
 CATEGORIES = {'food':food,'leisure':leisure,'culture':culture,'services':services,'shopping':shopping,'medical_services':medical_services,'bar_and_clubs':bar_and_clubs,'transport':transport,'other':other}
 
@@ -128,6 +128,45 @@ class Index(View):
         context = {}
         return render(request, self.template_name, context)
 
+#Comprueba si los detalles del lugar existen en la caché, si no los solicita al servicio web
+def tryCachedDetails(place_id):
+
+    details = ""
+    if place_id in PLACE_DETAIL_CACHE:
+                details = PLACE_DETAIL_CACHE[place_id]
+    else:
+        url="http://127.0.0.1:8000/external-api/getvenues/"+place_id
+        response = requests.get(url)
+        if response.ok:
+            details = json.loads(response.content.decode('utf-8'))
+        else:#No se pudieron obtener los detalles (No debería pasar nunca)-Personalizar el mensaje de error según el código de respuesta
+            error_msg = str(response.status_code)+":"+response.reason
+            messages.error(request,error_msg)
+            context = {}
+            return render(request, self.template_name_on_error, context)
+    return details
+
+def prepareComments(comments):
+
+    comment_list = []
+    if comments:
+        for element in comments:
+            text = element['text']
+            owner = element['owner']
+            comment_list.append(owner+": "+text)
+    print(comment_list)
+    return comment_list 
+
+
+def prepareImages(images):
+
+    image_list = []
+    if images:
+        for element in images:
+            image_list.append(element['image'])
+    return image_list
+
+
 #-------------------------------------------------------------------------------------------#
 # Vista para postear nuevos comentarios. Almacena el comentario en el servicio web mediante #
 # una petición POST, y a continuación recupera la lista actualizada de comentarios y fotos. #
@@ -142,6 +181,7 @@ class PostNewComment(View):
 
     def post(self, request, place_id):
         image_list = []
+        comment_list = []
         comment = request.POST["text"];
         
         url = "http://127.0.0.1:8000/comments/"
@@ -154,37 +194,28 @@ class PostNewComment(View):
             else:
                 comments = ""
                 messages.error(request,"No se pudieron recuperar los comentarios")
+
+            comment_list = prepareComments(comments)
+
             images_url = "http://127.0.0.1:8000/images/?venue_id="+place_id
+
             r = requests.get(images_url)
             if r.ok:
                 images = json.loads(r.content.decode('utf-8'))['results']
             else:
                 images = ""
                 messages.error(request,"No se pudieron recuperar las imágenes")
-            if images:
-                for element in images:
-                    image_list.append(element['image'])
-            if place_id in PLACE_DETAIL_CACHE:
-                details = PLACE_DETAIL_CACHE[place_id]
-            else:
-                url="http://127.0.0.1:8000/external-api/getvenues/"+place_id
-                response = requests.get(url)
-                if response.ok:
-                    details = json.loads(response.content.decode('utf-8'))
-                else:#No se pudieron obtener los detalles (No debería pasar nunca)-Personalizar el mensaje de error según el código de respuesta
-                    error_msg = str(response.status_code)+":"+response.reason
-                    messages.error(request,error_msg)
-                    context = {}
-                    return render(request, self.template_name_on_error, context)
+
+            image_list = prepareImages(images)
                     
-                    
+            details = tryCachedDetails(place_id)        
             name = details['result']['name']
             phone_number = details['result']['formatted_phone_number']
             address = details['result']['formatted_address']
             website = details['result']['website']
             schedule = details['result']['opening_hours']['weekday_text']
             categories = details['result']['types']
-            context = {"comments":comments, 'images':image_list, 'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
+            context = {"comments":comment_list, 'images':image_list, 'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
             return render(request, self.template_name, context)
         else: #No se pudo añadir el comentario
             messages.error(request,"Debido a un error, no se ha podido añadir tu comentario. Inténtalo más tarde.")
@@ -205,6 +236,7 @@ class PostNewImage(View):
 
     def post(self, request, place_id):
         image_list = []
+        comment_list = []
         stream = request.FILES["image"].file
         image = base64.b64encode(stream.getvalue())
         caption = request.POST["caption"]
@@ -219,40 +251,33 @@ class PostNewImage(View):
             else:
                 images = ""
                 messages.error(request,"No se pudieron recuperar las imágenes")
-            if images:
-                for element in images:
-                    image_list.append(element['image'])
+
+            image_list = prepareImages(images)
+
             comments_url = "http://127.0.0.1:8000/comments/?venue_id="+place_id
             r = requests.get(comments_url)
             if r.ok:
                 comments = json.loads(r.content.decode('utf-8'))['results']
             else:
                 comments = ""
-                messages.error(request,"No se pudieron recuperar los comentarios") 
-            if place_id in PLACE_DETAIL_CACHE:
-                details = PLACE_DETAIL_CACHE[place_id]
-            else:
-                url="http://127.0.0.1:8000/external-api/getvenues/"+place_id
-                response = requests.get(url)
-                if response.ok:
-                    details = json.loads(response.content.decode('utf-8'))
-                else:#No se pudieron obtener los detalles (No debería pasar nunca)-Personalizar el mensaje de error según el código de respuesta
-                    error_msg = str(response.status_code)+":"+response.reason
-                    messages.error(request,error_msg)
-                    context = {}
-                    return render(request, self.template_name_on_error, context)
+                messages.error(request,"No se pudieron recuperar los comentarios")
+   
+            comment_list = prepareComments(comments)
+            
+            details = tryCachedDetails(place_id)
             name = details['result']['name']
             phone_number = details['result']['formatted_phone_number']
             address = details['result']['formatted_address']
             website = details['result']['website']
             schedule = details['result']['opening_hours']['weekday_text']
             categories = details['result']['types']
-            context = {'comments':comments, 'images':image_list, 'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
+            context = {'comments':comment_list, 'images':image_list, 'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
             return render(request, self.template_name, context)
         else: #No se pudo añadir la imagen
             messages.error(request,"Debido a un error, no se ha podido añadir tu foto. Inténtalo más tarde.")
             context = {}
             return render(request, self.template_name, context)
+
 
 #---------------------------------------------------------------------------------------------#
 # Vista detalle. Obtiene y presenta los detalles de un punto de interés a través del servicio #
@@ -265,6 +290,7 @@ class Detail(View):
 
     def get(self, request, place_id):
         image_list = []
+        comment_list = []
         url="http://127.0.0.1:8000/external-api/getvenues/"+place_id
         response = requests.get(url)
 
@@ -279,6 +305,9 @@ class Detail(View):
             else:
                 comments = ""
                 messages.error(request,"No se pudieron recuperar las imágenes")
+
+            comment_list = prepareComments(comments)
+
             #Retrieve user images
             images_url = "http://127.0.0.1:8000/images/?venue_id="+place_id
             r = requests.get(images_url)
@@ -287,9 +316,9 @@ class Detail(View):
             else:
                 images = ""
                 messages.error(request,"No se pudieron recuperar las imágenes")
-            if images:
-                for element in images:
-                    image_list.append(element['image'])
+            
+            image_list = prepareImages(images)
+
             PLACE_DETAIL_CACHE[place_id] = jData 
             name = jData['result']['name']
             phone_number = jData['result']['formatted_phone_number']
@@ -297,7 +326,7 @@ class Detail(View):
             website = jData['result']['website']
             schedule = jData['result']['opening_hours']['weekday_text']
             categories = jData['result']['types']
-            context = {'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id, 'comments':comments, 'images':image_list}
+            context = {'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id, 'comments':comment_list, 'images':image_list}
             return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
@@ -306,12 +335,17 @@ class Detail(View):
             return render(request, self.template_name_on_error, context)
 
 
-#Actualmente en desuso dados los problemas para parsear con jQuery el resultado de df.to_json()
-def cleanResponse(df): 
+#Función auxiliar para limpiar caracteres conflictivos de la respuesta y aplicar filtrado.
+def cleanResponse(jData, category): 
 
-    #Limpieza de caracteres conflictivos
+            required_keys = ["name", "geometry", "id","price_level", "rating", "types", "reference"]
+            df = pd.DataFrame(jData['results'])[required_keys] 
+            #----------------Filtrado----------------------------------
+            df['types'] = df['types'].apply(lambda x: any(e in CATEGORIES[category] for e in x))
+            df = df.loc[df['types'] == True]
+            #----------------Filtrado----------------------------------
+            #Limpieza de caracteres conflictivos
             df["name"] = df["name"].apply(lambda x: x.replace("'",""))
-            df['opening_hours'] = df['opening_hours'].apply(pd.Series)['open_now'] #Extrae el valor de la clave anidada 'open_now'. Posiblemente se quite de aquí y sea algo que se encargue de mostrar la vista detalle, porque es problematico parsearlo con JS en el caso de la respuesta filtrada.
             df = df.fillna(0) #Cambia los valores NaN por 0
             #Filtrado de valores booleanos para sustituirlos por String-----------------------
             mask = df.applymap(type) != bool
@@ -353,26 +387,10 @@ class Mapview(View):
             return render(request, self.template_name, context)
 
         if response.ok:
-            print("Response is ok")
-            jData = json.loads(response.content.decode('utf-8'))
-            request.session['initial-response'] = jData['results'] #Almacenado en la sesión para después poder filtrar.
-            #Campos de la respuesta que queremos integrar en el DataFrame
-            required_keys = ["name", "geometry", "id", "opening_hours", "price_level", "rating", "types"]
-            df = pd.DataFrame(jData['results'])[required_keys]
-            #----------------Filtrado----------------------------------
-            df['types'] = df['types'].apply(lambda x: any(e in CATEGORIES[category] for e in x))
-            df = df.loc[df['types'] == True]
-            #----------------Filtrado----------------------------------
-            #Limpieza de caracteres conflictivos
-            df["name"] = df["name"].apply(lambda x: x.replace("'",""))
-            df['opening_hours'] = df['opening_hours'].apply(pd.Series)['open_now'] #Extrae el valor de la clave anidada 'open_now'
-            df = df.fillna(0) #Cambia los valores NaN por 0
-            #Filtrado de valores booleanos para sustituirlos por String-----------------------
-            mask = df.applymap(type) != bool
-            replacement_dict = {True: 'Abierto', False: 'Cerrado'}
-            df = df.where(mask, df.replace(replacement_dict))
-            #---------------------------------------------------------------------------------
-            d = df.to_json(orient='records') 
+            #jData = json.loads(response.content.decode('utf-8'))
+            jData = response.json()
+            request.session['initial-response'] = jData #Almacenado en la sesión para después poder filtrar.
+            d = cleanResponse(jData, category)
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
             context = {'venues':venues, 'user_location': user_coordinates_json, 'travel_mode': travel_mode}
@@ -393,33 +411,12 @@ class Filter(View):
 
     def get(self, request):
         category = request.GET['category']
-        #url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, CATEGORIES[category]) url vieja con campo categoría
-        #url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (request.session['user_coordinates']['lat'],request.session['user_coordinates']['long'],request.session['radius'])
-        #response = requests.get(url)
-        #if response.ok:
-        #    data = response.json()
-        #else:
-        #    return HttpResponse(500)
 
         jData = request.session["initial-response"]
-        required_keys = ["name", "geometry", "id", "opening_hours", "price_level", "rating", "types"]
-        df = pd.DataFrame(jData)[required_keys]
-        #----------------Filtrado----------------------------------
-        df['types'] = df['types'].apply(lambda x: any(e in CATEGORIES[category] for e in x))
-        df = df.loc[df['types'] == True]
-        #----------------Filtrado----------------------------------
-        #Limpieza de caracteres conflictivos
-        df["name"] = df["name"].apply(lambda x: x.replace("'",""))
-        df['opening_hours'] = df['opening_hours'].apply(pd.Series)['open_now'] #Extrae el valor de la clave anidada 'open_now'
-        df = df.fillna(0) #Cambia los valores NaN por 0
-        #Filtrado de valores booleanos para sustituirlos por String-----------------------
-        mask = df.applymap(type) != bool
-        replacement_dict = {True: 'Abierto', False: 'Cerrado'}
-        df = df.where(mask, df.replace(replacement_dict))
-        #---------------------------------------------------------------------------------
-        d = df.to_json(orient='records') 
+        jData['results'] = cleanResponse(jData, category)
+        #j = json.loads(d) 
         #---------------------------------------------------
-        return HttpResponse(json.dumps(json.loads(d)), content_type="application/json")
+        return HttpResponse(json.dumps(jData), content_type="application/json")
 
 
         
