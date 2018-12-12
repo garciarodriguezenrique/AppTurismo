@@ -39,12 +39,13 @@ CATEGORIES = {'food':food,'leisure':leisure,'culture':culture,'services':service
 
 class SignUp(View):
     form_class = SignupForm
-    template_name_on_success = 'venues/index.html'
-    template_name_on_login_error = 'registration/login.html'
-    template_name_on_signup_error = 'registration/signup.html'
+    template_name_on_success = 'venues/wireframe-index.html'
+    template_name_on_login_error = 'registration/wireframe-login.html'
+    template_name_on_signup_error = 'registration/wireframe-signup.html'
+    template_name = 'registration/wireframe-signup.html'
 
     def get(self, request):
-        return render(request, self.template_name_on_signup_error, {'form':self.form_class})
+        return render(request, self.template_name, {'form':self.form_class})
     
 
     def post(self, request):
@@ -88,8 +89,12 @@ class SignUp(View):
 
 class Login(View):
     form_class = AuthenticationForm
-    template_name_on_success = 'venues/index.html'
-    template_name_on_error = 'registration/login.html'
+    template_name_on_success = 'venues/wireframe-index.html'
+    template_name_on_error = 'registration/wireframe-login.html'
+    template_name = 'registration/wireframe-login.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'form':self.form_class})
     
     def post(self, request):
         username = self.request.POST['username']
@@ -122,7 +127,7 @@ class Login(View):
 #--------------------------------------------------------------------------------------#
 
 class Index(View):
-    template_name = 'venues/index.html'
+    template_name = 'venues/wireframe-index.html'
     
     def get(self, request):
         context = {}
@@ -208,13 +213,23 @@ class PostNewComment(View):
 
             image_list = prepareImages(images)
                     
-            details = tryCachedDetails(place_id)        
+            details = tryCachedDetails(place_id)
+            phone_number = ""
+            address = ""
+            website = ""
+            schedule = ""
+            categories = ""        
             name = details['result']['name']
-            phone_number = details['result']['formatted_phone_number']
-            address = details['result']['formatted_address']
-            website = details['result']['website']
-            schedule = details['result']['opening_hours']['weekday_text']
-            categories = details['result']['types']
+            if 'formatted_phone_number' in details['result']: 
+                phone_number = details['result']['formatted_phone_number']
+            if 'formatted_address' in details['result']:
+                address = details['result']['formatted_address']
+            if 'website' in details['result']:
+                website = details['result']['website']
+            if 'opening_hours' in details['result'] and 'weekday_text' in details['result']['opening_hours']:
+                schedule = details['result']['opening_hours']['weekday_text']
+            if 'types' in details['result']:
+                categories = details['result']['types']
             context = {"comments":comment_list, 'images':image_list, 'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
             return render(request, self.template_name, context)
         else: #No se pudo añadir el comentario
@@ -265,12 +280,23 @@ class PostNewImage(View):
             comment_list = prepareComments(comments)
             
             details = tryCachedDetails(place_id)
+            phone_number = ""
+            address = ""
+            website = ""
+            schedule = ""
+            categories = ""
             name = details['result']['name']
-            phone_number = details['result']['formatted_phone_number']
-            address = details['result']['formatted_address']
-            website = details['result']['website']
-            schedule = details['result']['opening_hours']['weekday_text']
-            categories = details['result']['types']
+            if 'formatted_phone_number' in details['result']: 
+                phone_number = details['result']['formatted_phone_number']
+            if 'formatted_address' in details['result']:
+                address = details['result']['formatted_address']
+            if 'website' in details['result']:
+                website = details['result']['website']
+            if 'opening_hours' in details['result'] and 'weekday_text' in details['result']['opening_hours']:
+                schedule = details['result']['opening_hours']['weekday_text']
+            if 'types' in details['result']:
+                categories = details['result']['types']
+            
             context = {'comments':comment_list, 'images':image_list, 'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
             return render(request, self.template_name, context)
         else: #No se pudo añadir la imagen
@@ -319,14 +345,26 @@ class Detail(View):
             
             image_list = prepareImages(images)
 
-            PLACE_DETAIL_CACHE[place_id] = jData 
+            PLACE_DETAIL_CACHE[place_id] = jData #Detail Cache (puede que no sea necesaria, desde luego no debe ser un mapa de memoria. Necesaria una BD local)
+            phone_number = ""
+            address = ""
+            website = ""
+            schedule = ""
+            categories = ""
+ 
             name = jData['result']['name']
-            phone_number = jData['result']['formatted_phone_number']
-            address = jData['result']['formatted_address']
-            website = jData['result']['website']
-            schedule = jData['result']['opening_hours']['weekday_text']
-            categories = jData['result']['types']
-            context = {'name':name, 'phone_number':phone_number, 'addess':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id, 'comments':comment_list, 'images':image_list}
+            if 'formatted_phone_number' in jData['result']: 
+                phone_number = jData['result']['formatted_phone_number']
+            if 'formatted_address' in jData['result']:
+                address = jData['result']['formatted_address']
+            if 'website' in jData['result']:
+                website = jData['result']['website']
+            if 'opening_hours' in jData['result'] and 'weekday_text' in jData['result']['opening_hours']:
+                schedule = jData['result']['opening_hours']['weekday_text']
+            if 'types' in jData['result']:
+                categories = jData['result']['types']
+
+            context = {'name':name, 'phone_number':phone_number, 'address':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id, 'comments':comment_list, 'images':image_list}
             return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
@@ -334,26 +372,51 @@ class Detail(View):
             context = {}
             return render(request, self.template_name_on_error, context)
 
+def cacheInSession(jData, request):
+    
+    for item in jData['results']:
+        for category in CATEGORIES:
+            if any(t in CATEGORIES[category] for t in item['types']):
+                exists = False
+                if request.session[category]:
+                    for element in request.session[category]:
+                        if element['id'] == item['id']:
+                            exists = True
+                            break
+                    if not exists:
+                        request.session[category].append(item)
+                else:
+                    request.session[category].append(item) 
+
 
 #Función auxiliar para limpiar caracteres conflictivos de la respuesta y aplicar filtrado.
-def cleanResponse(jData, category): 
+def cleanResponse(jData): 
 
-            required_keys = ["name", "geometry", "id","price_level", "rating", "types", "reference"]
-            df = pd.DataFrame(jData['results'])[required_keys] 
+            required_keys = ["venue_name", "lat", "venue_id", "rating", "reference", "category", "icon", "lng"]
+
+            
+            #request.session[jData['results']['category']] = jData
+            df = pd.DataFrame(jData)[required_keys] 
             #----------------Filtrado----------------------------------
-            df['types'] = df['types'].apply(lambda x: any(e in CATEGORIES[category] for e in x))
-            df = df.loc[df['types'] == True]
+            #df['types'] = df['types'].apply(lambda x: any(e in CATEGORIES[category] for e in x))
+            #df = df.loc[df['types'] == True]
             #----------------Filtrado----------------------------------
             #Limpieza de caracteres conflictivos
-            df["name"] = df["name"].apply(lambda x: x.replace("'",""))
+            df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("'",""))
             df = df.fillna(0) #Cambia los valores NaN por 0
             #Filtrado de valores booleanos para sustituirlos por String-----------------------
-            mask = df.applymap(type) != bool
-            replacement_dict = {True: 'Abierto', False: 'Cerrado'}
-            df = df.where(mask, df.replace(replacement_dict))
+            #mask = df.applymap(type) != bool
+            #replacement_dict = {True: 'Abierto', False: 'Cerrado'}
+            #df = df.where(mask, df.replace(replacement_dict))
             #---------------------------------------------------------------------------------
             d = df.to_json(orient='records')
             return d
+
+def formatCategory(category):
+    finalString = ""
+    for element in category:
+        finalString+=element+"|"
+    return finalString[:-1]
 
 #-------------------------------------------------------------------------------------------#
 # Vista de mapa. Procesa los resultados de puntos de interés obtenidos del servicio web y   # 
@@ -367,7 +430,6 @@ class Mapview(View):
     template_name_on_error = 'venues/error.html'
 
     def post(self, request):
-        travel_mode = request.POST['travel_mode']
         position = request.POST['position']
         radius = request.POST['radius']
         request.session['radius'] = radius
@@ -377,8 +439,8 @@ class Mapview(View):
             user_coordinates = {'lat': float(position.split(",")[0]), 'long': float(position.split(",")[1])}
             request.session['user_coordinates'] = user_coordinates
             print(user_coordinates)
-            #url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, CATEGORIES[category]) url vieja con campo categoría
-            url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
+            url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, category) #url vieja con campo categoría
+            #url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
             print(url)
             response = requests.get(url)
         else:
@@ -389,11 +451,11 @@ class Mapview(View):
         if response.ok:
             #jData = json.loads(response.content.decode('utf-8'))
             jData = response.json()
-            request.session['initial-response'] = jData #Almacenado en la sesión para después poder filtrar.
-            d = cleanResponse(jData, category)
+            #cacheInSession(jData, request)
+            d = cleanResponse(jData)
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
-            context = {'venues':venues, 'user_location': user_coordinates_json, 'travel_mode': travel_mode}
+            context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
             return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
@@ -410,14 +472,42 @@ class Mapview(View):
 class Filter(View):
 
     def get(self, request):
-        category = request.GET['category']
+        categories = request.GET['category'].split("|")
+        user_coordinates = request.session['user_coordinates']
+        radius = request.session['radius']
+        formattedCategories = ",".join(categories)
+     
+        #for category in categories:
+        #    if request.session[category]:
+        #        print("Existe en caché la categoría: "+category)
+        #        content.extend(request.session[category])
+        #    else:
+        #        print("No existe en caché la categoría: "+category)
+        #        formattedCategories += formatCategory(CATEGORIES[category])
+        #        print("Se añade a la petición. Estado actual: "+formattedCategories)
 
-        jData = request.session["initial-response"]
-        jData['results'] = cleanResponse(jData, category)
-        #j = json.loads(d) 
-        #---------------------------------------------------
-        return HttpResponse(json.dumps(jData), content_type="application/json")
+        #if content:
+        #    print("Se prepara el contenido de la caché")
+        #    content = cleanResponse(content)
+        #    finalResult.extend(content)
 
+        url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, formattedCategories)
+        response = requests.get(url)
+
+        if response.ok:
+            print("Se prepara el nuevo contenido recuperado")
+            jData = response.json()
+            d = cleanResponse(jData)
+            return HttpResponse(d, content_type="application/json")
+        #else if zero_results devolver un codigo de error que salte un mensaje no hay resultados en el mapa
+        #else devolver un codigo que haga saltar lo de ha habido un error, intentalo mas tarde
+            
+        #if finalResult:
+        #    return HttpResponse(finalResult, content_type="application/json")
+            # o json.dumps(jData)
+        else:
+            return HttpResponse(500)
+     
 
         
 

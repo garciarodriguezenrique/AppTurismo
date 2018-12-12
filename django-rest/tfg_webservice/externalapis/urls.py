@@ -4,7 +4,7 @@ from externalapis import views
 
 urlpatterns = [
     url(r'^external-api/$', views.ExternalAPI.as_view()), 
-    url(r'^external-api/getvenues/$', views.ExternalAPI_getvenues.as_view()), 
+    url(r'^external-api/getvenues/$', views.ExternalAPI_getvenues_async.as_view()), 
     url(r'^external-api/getvenues/(?P<place_id>[\w\-]+)$', views.ExternalAPI_getplacedetail.as_view()), 
 ]
 

@@ -4,19 +4,29 @@
 
 <body>
     <div>
-        <p>Teléfono: {{ phone_number }}</p>
-        <p>Dirección: {{ address }}</p>
-        <p><a href= "{{ website }}" >Sitio del restaurante</a></p>
-        <p>Categorías: {% for element in categories %} {{ element }} {% endfor %}</p>
+        {% if phone_number %}
+            <p>Teléfono: {{ phone_number }}</p>
+        {% endif %}
+        {% if address %}
+            <p>Dirección: {{ address }}</p>
+        {% endif %}
+        {% if website %}
+            <p><a href= "{{ website }}" >Sitio del restaurante</a></p>
+        {% endif %}
+        {% if categories %}
+            <p>Categorías: {% for element in categories %} {{ element }} {% endfor %}</p>
+        {% endif %}
     </div>
-    <div>
-        HORARIO:<BR>
-        <ul>
-            {%for element in schedule %}
-            <li>{{ element }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+    {% if schedule %}
+        <div>
+            HORARIO:<BR>
+            <ul>
+                {%for element in schedule %}
+                <li>{{ element }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {%endif%}
 
     {% if messages %}
         <ul class="messages">
@@ -45,23 +55,26 @@
 	Sólo los usuarios registrados pueden dejar comentarios. Por favor, inicia sesión o regístrate.
     {% endif %}
 
-    <div>
-        COMENTARIOS: <BR>
-        <ul>
-            {% for comment in comments %}
-            <li>{{ comment }}</li>
-            {% endfor %}
-        </ul>
-    </div> 
+    {% if comments %}
+        <div>
+            COMENTARIOS: <BR>
+            <ul>
+                {% for comment in comments %}
+                <li>{{ comment }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %} 
 
-    <div>
-        IMÁGENES DE USUARIOS: <BR>
-        <ul>
-            {% for image in images %}
-            <li><img src="{{ image }}"></img></li>
-            {% endfor %}
-        <ul>
-    </div>
-
+    {% if images %}
+        <div>
+            IMÁGENES DE USUARIOS: <BR>
+            <ul>
+                {% for image in images %}
+                <li><img src="{{ image }}"></img></li>
+                {% endfor %}
+            <ul>
+        </div>
+    {% endif %}
 
 </body>

@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css?family=Lato");
+.search-button {
+	-moz-box-shadow:inset 0px 1px 0px 0px #fce2c1;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #fce2c1;
+	box-shadow:inset 0px 1px 0px 0px #fce2c1;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ffc477), color-stop(1, #ff910a));
+	background:-moz-linear-gradient(top, #ffc477 5%, #ff910a 100%);
+	background:-webkit-linear-gradient(top, #ffc477 5%, #ff910a 100%);
+	background:-o-linear-gradient(top, #ffc477 5%, #ff910a 100%);
+	background:-ms-linear-gradient(top, #ffc477 5%, #ff910a 100%);
+	background:linear-gradient(to bottom, #ffc477 5%, #ff910a 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffc477', endColorstr='#ff910a',GradientType=0);
+	background-color:#ffc477;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #eeb44f;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #cc9f52;
+}
+.search-button:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ff910a), color-stop(1, #ffc477));
+	background:-moz-linear-gradient(top, #ff910a 5%, #ffc477 100%);
+	background:-webkit-linear-gradient(top, #ff910a 5%, #ffc477 100%);
+	background:-o-linear-gradient(top, #ff910a 5%, #ffc477 100%);
+	background:-ms-linear-gradient(top, #ff910a 5%, #ffc477 100%);
+	background:linear-gradient(to bottom, #ff910a 5%, #ffc477 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff910a', endColorstr='#ffc477',GradientType=0);
+	background-color:#ff910a;
+}
+.search-button:active {
+	position:relative;
+	top:1px;
+}
+
+.navigation-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+li.navigation-list-element {
+    float: left;
+}
+
+a.navigation-link {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+a.navigation-link:hover {
+    background-color: #111;
+}
+
+.form-div {
+    text-align: center;
+    display: flex;
+    justify-content: center; /* center horizontally */
+    align-items: center; /* center vertically */
+    height: 100%;
+}
+
+.search-form {
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+body, html {
+  height: 100%;
+}
+

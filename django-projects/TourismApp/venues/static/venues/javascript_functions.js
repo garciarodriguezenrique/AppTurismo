@@ -12,10 +12,10 @@ function hideMarkersOutsideOfRoute(){
 function removeDuplicatesByName(jsonArray){
     var seenNames = {};
     jsonArray = jsonArray.filter(function(currentObject) {
-        if (currentObject.name in seenNames) {
+        if (currentObject.venue_name in seenNames) {
             return false;
         } else {
-            seenNames[currentObject.name] = true;
+            seenNames[currentObject.venue_name] = true;
             return true;
         }
     });
@@ -30,10 +30,96 @@ function deleteMarkers(){
     document.getElementById("sidenav").innerHTML = "";
 }
 
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad 
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function getDistanceFromUserPositionOptimized(){
+
+    stopsIndex = 0;
+    //Obtener aquí el valor de ordenacion o no, porque asi si el usuario lo cambia por el medio de la ruta no afecta, y pasarlo como param a display segment
+    routeSorting = document.getElementById("route-sorting").value;
+    if (routeSorting=="automatic-sorting"){
+        optimizeRoute=true;
+    } else if (routeSorting=="manual-sorting"){optimizeRoute=false;} 
+    userPosition = {'lat': user_position["lat"], 'long':user_position["lng"]}
+    stops.push(userPosition);
+    for (venue in route){
+        venuePosition = {'lat': route[venue]["lat"], 'long':route[venue]["lng"]}
+        stops.push(venuePosition);
+    }
+    displaySegmentOptimized(true);
+
+}
+
+
+function displaySegmentUnsorted(){
+
+    if (stopsIndex == stops.length-1){
+        stops = [];
+        stopsIndex = 0;
+        alert("Fin de trayecto");
+    } else {
+        console.log("Manual :"+stopsIndex);
+        currentSegment["from"]=new google.maps.LatLng(stops[stopsIndex]['lat'],stops[stopsIndex]['long']);
+        currentSegment["to"]=new google.maps.LatLng(stops[++stopsIndex]['lat'],stops[stopsIndex]['long']);
+        console.log("Manual :"+stopsIndex);
+        calculateAndDisplayRoute(currentSegment["from"], currentSegment["to"]);
+    }
+    
+
+}
+
+//Trata de optimizar la ruta de manera que el siguiente destino siempre es el más cercano desde la posición actual. Si se le indica lo contrario, calcula la ruta en el orden en el que el usuario ha introducido los elementos de la misma.
+function displaySegmentOptimized(firstTime){
+    var refDistance=9999.0;
+    var nextPosition;
+    //como stops no es un keyed array hay que llevar la cuenta con un indice, como en la actual displaySegment
+    if (stops.length>1){
+        if (!optimizeRoute){
+            console.log("Manual :"+stopsIndex);
+            displaySegmentUnsorted();
+        } else {
+            currentPosition = stops[stopsIndex];
+            stops.splice(stopsIndex, 1);
+            for (venue in stops){
+                distance = getDistanceFromLatLonInKm(currentPosition['lat'],currentPosition['long'],stops[venue]['lat'],stops[venue]['long']);
+                if (distance<refDistance){
+                    refDistance = distance;
+                    stopsIndex = venue;
+                    nextPosition = stops[stopsIndex];
+                }
+            }
+            currentSegment["from"]=new google.maps.LatLng(currentPosition['lat'],currentPosition['long']);
+            currentSegment["to"]=new google.maps.LatLng(nextPosition['lat'],nextPosition['long']);
+            calculateAndDisplayRoute(currentSegment["from"], currentSegment["to"]);
+            currentPosition = nextPosition;
+        }
+    } else {
+        alert("Fin de trayecto");
+        stops = [];
+        stopsIndex = 0; 
+    }
+    
+}
 
 function getDistanceFromUserPosition(){
     var transport;
-    transport = document.getElementById("transport").value;
+    transport = document.getElementById("transport").value; 
 
     destinations = []
     for (venue in route){
@@ -107,7 +193,7 @@ function distanceMatrixSortCallback(response, status){
             stops.push(element)
         }
         //hay que insertar user_position en la primera posicion de stops. Usar from/origins[0]
-        stops = stops.sort(function(a, b) {return a.distance - b.distance}); //Puntos de la ruta ordenados de más cercano a más lejano.
+        //stops = stops.sort(function(a, b) {return a.distance - b.distance}); //Puntos de la ruta ordenados de más cercano a más lejano.
 
         //bucle for: calcular las rutas entre todos los elementos tal que a-b, b-c, c-d
         //for (i=0; i<stops.length-1; i++) {console.log("route "+i+" - "+(i+1));}
@@ -188,7 +274,7 @@ function calculateRouteControl(controlDiv, map) {
 
     //Evento
     controlUI.addEventListener('click', function() {
-        getDistanceFromUserPosition();
+        getDistanceFromUserPositionOptimized();
     });
 
 }
@@ -260,11 +346,15 @@ function routeCallback(response, status) {
     }
 }
 
+function showFilters(){
+    document.getElementById("filterDropdown").classList.toggle("show");
+}
+
 function addToRoute(name, lat, lng) {
     var checkBox = document.getElementById("check_"+name);
     if (checkBox.checked == true){
         console.log("true");
-        route[name] = new google.maps.LatLng(lat, lng) //{"lat":lat, "lng":lng};
+        route[name] = {"lat":lat, "lng":lng};//new google.maps.LatLng(lat, lng) //{"lat":lat, "lng":lng};
     } else {
         console.log("false");
         delete route[name];
@@ -287,8 +377,7 @@ function placeMarkers(venue_list){
     sorted = removeDuplicatesByName(sorted);
     Object.keys(sorted).forEach(function(venue) {
 
-        venue_name = sorted[venue]['name']
-        venue_coordinates = sorted[venue]['geometry']['location']
+        venue_name = sorted[venue]['venue_name']
     
         contentString = '<div id="content">'+
             '<div id="siteNotice">'+
@@ -298,7 +387,7 @@ function placeMarkers(venue_list){
             '<p><b>'+venue_name+'</b></p>'+
             '<p>Attribution: '+venue_name+', <a href="https://www.google.es/#q='+venue_name+'">'+
             'Más información</a><BR>'+
-            '<button onclick="calculateAndDisplayRoute('+ venue_coordinates["lat"] +','+ venue_coordinates["lng"] +')">Ir!</button>'+
+            '<button onclick="calculateAndDisplayRoute('+ sorted[venue]["lat"] +','+ sorted[venue]["lng"] +')">Ir!</button>'+
             '</p>'+
             '</div>';
 
@@ -306,9 +395,17 @@ function placeMarkers(venue_list){
             content: contentString
         });
 
+
+        var marker_icon = { 
+           url: sorted[venue]['icon'],
+           scaledSize: new google.maps.Size(25, 25)
+        }; 
+
         var marker = new google.maps.Marker({
-            position : new google.maps.LatLng(venue_coordinates["lat"], venue_coordinates["lng"]),
+            position : new google.maps.LatLng(sorted[venue]["lat"], sorted[venue]["lng"]),
             map : map,
+            icon : marker_icon,
+            animation: google.maps.Animation.DROP,
             infoWindow: infowindow,
             title: venue_name
         });
@@ -332,7 +429,7 @@ function placeMarkers(venue_list){
         side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">'
             + venue_name + " | " 
             + (sorted[venue]['rating']  !== 0 ?  sorted[venue]['rating'] + " | " : "" )
-            + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+venue_coordinates["lat"]+','+venue_coordinates["lng"]+')"></a>'
+            + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+sorted[venue]["lat"]+','+sorted[venue]["lng"]+')"></a>'
             + " | "
             + detail_ref;
             //Aquí iría el enlace para las vistas detalle con href
@@ -371,6 +468,20 @@ function placeMarkers(venue_list){
               
           } 
       }*/
+
+/*window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn') || !event.target.matches('.filter-dropdown-content')) {
+
+    var dropdowns = document.getElementsByClassName("filter-dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}*/
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------

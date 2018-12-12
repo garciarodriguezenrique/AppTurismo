@@ -42,28 +42,24 @@
     </select>
     </div> -->
 
-<div id="filter-control">
-
-    <div id="floating-filtering-panel" class="filter-panel">
-    <b>Categoría: </b>
-    <select id="category">
-      <option value="food">Comida</option>
-      <option value="leisure">Ocio</option>
-      <option value="culture">Cultura</option>
-      <option value="services">Servicios</option>
-      <option value="shopping">Tiendas</option>
-      <option value="medical_services">Servicios sanitarios</option>
-      <option value="bar_and_clubs">Bares y clubs</option>
-      <option value="transport">Transporte</option>
-      <option value="other">Otros</option>
-    </select>
+<div id="filter-control-experimental" class="filter-dropdown">
+    <button onclick="showFilters()" class="dropbtn">Filtrar</button>
+    <div id="filterDropdown" class="filter-dropdown-content">
+        <a href="#"><input class="filter-checkbox" id="foodFilter" type="checkbox" onclick="evaluateFilters()" value="food">Comida</a>
+        <a href="#"><input class="filter-checkbox" id="leisureFilter" type="checkbox" onclick="evaluateFilters()" value="leisure">Ocio</a>
+        <a href="#"><input class="filter-checkbox" id="cultureFilter" type="checkbox" onclick="evaluateFilters()" value="culture">Cultura</a>
+        <a href="#"><input class="filter-checkbox" id="servicesFilter" type="checkbox" onclick="evaluateFilters()" value="services">Servicios</a>
+        <a href="#"><input class="filter-checkbox" id="shoppingFilter" type="checkbox" onclick="evaluateFilters()" value="shopping">Tiendas</a>
+        <a href="#"><input class="filter-checkbox" id="medicalFilter" type="checkbox" onclick="evaluateFilters()" value="medical_services">Servicios sanitarios</a>
+        <a href="#"><input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar_and_clubs">Bares y clubs</a>
+        <a href="#"><input class="filter-checkbox" id="transportFilter" type="checkbox" onclick="evaluateFilters()" value="transport">Transporte</a>
+        <a href="#"><input class="filter-checkbox" id="otherFilter" type="checkbox" onclick="evaluateFilters()" value="other">Otros</a>
     </div>
     <div class="input-field col s12">
     <div class="center">
        <button id="filter-button" class="waves-effect waves-light btn">Buscar</button>
    </div>
    </div>
-
 </div>
 
 <div id="travel-mode-control" class="input-field col s12">
@@ -77,10 +73,17 @@
     <label></label>
 </div>
 
+<div id="route-sorting-control">
+    <select id="route-sorting">
+        <option value="automatic-sorting">Ordenación automática</option> 
+        <option value="manual-sorting">Ordenación manual</option> 
+    </select>
+</div>
+
     <!-- Panel de indicaciones de ruta -->
     <div id="right-panel">
 
-    <button id="next-segment" onclick="displaySegment()">Siguiente destino</button>
+    <button id="next-segment" onclick="displaySegmentOptimized(false)">Siguiente destino</button>
     <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
     <button id="page-reload" onclick="pageReload()">Volver a marcadores</button>
     </div>
@@ -94,36 +97,62 @@
     <script>
       var venues_json = '{{ venues }}';
       var user_location = '{{ user_location }}';
-      var travel_mode = '{{ travel_mode }}';
+      var initial_category = '{{ initial_category }}'
+      //category
       var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
       var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
-      var j = JSON.parse(venues_json.replace(/&#39;/g,'"'));
+      var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
       var markers = [];
       var route = [];
       var stops = [];
+      var currentlyDisplayedCategories = []
       var stopsIndex = 0;
       var currentSegment = {'from':"", 'to':""};
       var map;
       var open_marker;
       var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       var labelIndex = 0;
+      var currentPosition = undefined;
+      var optimizeRoute = true;
 
 
+      function evaluateFilters(){
+          var checkboxes = document.getElementsByClassName("filter-checkbox");
+          for (i=0; i<checkboxes.length; i++){
+              if(checkboxes[i].checked == true && !currentlyDisplayedCategories.includes(checkboxes[i].value)){
+                  currentlyDisplayedCategories.push(checkboxes[i].value);
+              }
+              if (checkboxes[i].checked == false && currentlyDisplayedCategories.includes(checkboxes[i].value)){
+                  currentlyDisplayedCategories = currentlyDisplayedCategories.filter(e=>e!=checkboxes[i].value);
+              }
+          }
+      }
+
+      function formatCategories(category_list){
+          var finalString = "";
+          for (category in category_list){
+              finalString += category_list[category]+"|";
+          }
+          return finalString.substring(0, finalString.length - 1);
+      }
       
       function filterResults(){
-          var category = document.getElementById('category').value;
-          if (category){
+          //var category = document.getElementById('category').value;
+          console.log("Se van a solicitar las categorías: "+formatCategories(currentlyDisplayedCategories));
+          if (currentlyDisplayedCategories.length > 0){
               $.ajax({
-                  url : "{% url 'venues:filter' %}"+"?category="+category,  //"http://localhost:8005/venues/filter-results/"
+                  url : "{% url 'venues:filter' %}"+"?category="+formatCategories(currentlyDisplayedCategories),  //"http://localhost:8005/venues/filter-results/"
                   method : "GET",
                   //dataType: "json",
                   success : function (data) {
-                      var jqueryJson = $.parseJSON(data['results'])
+                      console.log(data)
+                      //var jqueryJson = $.parseJSON(data)
                       deleteMarkers();
-                      placeMarkers(jqueryJson);
+                      placeMarkers(data);
                   },
                       error : function (data){
-                      alert("Ha habido un error, inténtalo más tarde.")
+                      console.log(data);
+                      alert("Ha habido un error, inténtalo más tarde.");
                   }
               });
           } else {alert("Selecciona una categoría, por favor");}  
@@ -131,7 +160,7 @@
 
 
       function initMap() {
-        distanceMatrixService = new google.maps.DistanceMatrixService(); //Si al final sólo el cálculo de rutas precisa de este servicio, mover la declaración del mismo a dentro de la función, ya que en ese caso tiene poco sentido que sea global.
+        distanceMatrixService = new google.maps.DistanceMatrixService(); 
         directionsService = new google.maps.DirectionsService;
         directionsDisplay = new google.maps.DirectionsRenderer;
 
@@ -140,12 +169,7 @@
           zoom: 15
         });
 
-        var onChangeHandler = function() {
-          //DO SOMETHING
-        };
-
         
-
         directionsDisplay.setMap(map);
 
         //Las siguientes líneas hacen referencia al panel de filtrado. Descomentar en caso de recuperar dicho elemento.
@@ -158,12 +182,20 @@
         routeControlDiv.index = 1;
         map.controls[google.maps.ControlPosition.TOP_RIGHT].push(routeControlDiv);
 
-        var filterControlDiv = document.getElementById('filter-control');
+        //Control de filtrado viejo que no permite visualizar más de una categoría a la vez
+        /*var filterControlDiv = document.getElementById('filter-control');
+        document.getElementById('filter-button').addEventListener('click', filterResults);
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterControlDiv);*/
+
+        var filterControlDiv = document.getElementById('filter-control-experimental');
         document.getElementById('filter-button').addEventListener('click', filterResults);
         map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterControlDiv);
 
         var travelModeControlDiv = document.getElementById('travel-mode-control');
         map.controls[google.maps.ControlPosition.TOP_CENTER].push(travelModeControlDiv);
+
+        var routeSortingControlDiv = document.getElementById('route-sorting-control');
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(routeSortingControlDiv);
 
                      
         
@@ -176,7 +208,16 @@
       //var url = https://cdn0.iconfinder.com/data/icons/maps-locations-5/24/map_location_user_location-512.png
 
   
-        //Marcador+icono para mostrar la ubicación del usuario   
+        //Marcador+icono para mostrar la ubicación del usuario  
+
+        var checkboxes = document.getElementsByClassName("filter-checkbox");
+        for (i=0; i<checkboxes.length; i++){
+            if(checkboxes[i].value == initial_category){
+                checkboxes[i].checked = true;
+                currentlyDisplayedCategories.push(checkboxes[i].value);
+                break;
+            }
+        } 
 
         var user_icon = { 
            url: 'https://static.thenounproject.com/png/67172-200.png',
@@ -191,9 +232,6 @@
         });
            
         
-	//Se preparan y colocan los marcadores
-        console.log("SE VA A LLAMAR A LA FUNCION DE CALCULO DE DISTANCIA");
-        //getDistanceFromUserPosition(); Problema: limitación impuesta por el plan gratuito del API de Google. Ver declaración de la función.
         placeMarkers(j);
         
 

@@ -1,45 +1,36 @@
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'venues/style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'venues/index.css' %}">
 
 <title>Tourism App - Search</title>
 
+<div>
+<ul class="navigation-list">
+  <li class="navigation-list-element"><a class="navigation-link" href="#help">Ayuda</a></li>
+  <li class="navigation-list-element"><a class="navigation-link" href="#contact">Contacto</a></li>
+  <li class="navigation-list-element"><a class="navigation-link" href="#about">Acerca de</a></li>
+  {% if request.user.is_authenticated %}
+  <li class="navigation-list-element"><a class="navigation-link" href="{% url 'logout' %}">logout</a></li>
+  {% else %}
+  <li class="navigation-list-element"><a class="navigation-link" href="{% url 'login' %}">login</a></li>
+  {% endif %}
+</ul>
 {% if request.user.is_authenticated %}
-	<div class="user">
-            Hola {{ request.user.username}} <BR>
-            <a href="{% url 'logout' %}">logout</a>
-        </div>       
-{% else %}
-             
-        <div class="user">
-            <a href="{% url 'login' %}">login</a>
-        </div>
+  Hola {{ request.user.username}} <BR>
 {% endif %}
+</div>
 
-<form action="{% url 'venues:mapview' %}" method="post">
+<body style="background-image: url({% static 'venues/backgrounds/index-background1.jpg' %});
+             background-size: cover;
+             background-repeat: no-repeat;
+             background-position: center center;">
+
+<div class="form-div">
+<form class="search-form" action="{% url 'venues:mapview' %}" method="post">
 {% csrf_token %}
 
 
 <div class="row "> 
-
-  <div class="input-field col s12">
-    <select name="travel_mode" required>
-          <option value="DRIVING">Driving</option>
-          <option value="WALKING">Walking</option>
-          <option value="BICYCLING">Bicycling</option>
-          <option value="TRANSIT">Transit</option>
-      </select>
-    <label>Método de transporte</label>
-  </div>
-
-
-
-  <div class="input-field col s12">
-	<input id="radius" type="text" name="radius" required/>
-    <label for="radius" >Radio</label> 
-  </div>
-
-
 
 <div class="input-field col s12">
     <select name="category" required>
@@ -60,16 +51,22 @@
      <input id="position" type="hidden" name="position"/>
 <div>
 
+<div>
+     <input id="radius" type="hidden" name="radius" value="1500"/>
+<div>
+
 
 
 <div class="input-field col s12">
    <div class="center">
-       <button  class="waves-effect waves-light btn" type="submit">Buscar</button>
+       <button  class="search-button" type="submit">Buscar</button>
    </div>
 </div>
   
 	
 </form>
+</div>
+</body>
 
 <script>
     var x = document.getElementById("position");
