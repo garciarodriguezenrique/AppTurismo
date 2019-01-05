@@ -1,6 +1,6 @@
-from usercontent.models import Comment, Image
+from usercontent.models import Comment, Rating, Image
 from usercontent.permissions import IsOwnerOrReadOnly
-from usercontent.serializers import CommentSerializer, ImageSerializer, UserSerializer
+from usercontent.serializers import CommentSerializer, UserSerializer, RatingSerializer, ImageSerializer
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
@@ -9,10 +9,22 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.db.models import Avg
 import requests
 import time
 
+class RatingList(generics.ListAPIView):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
 
+    def get_queryset(self):
+        venue_id = self.request.query_params.get('venue_id')
+        if venue_id is not None:
+            queryset = Rating.objects.filter(venue_id=venue_id)
+        else:
+            queryset = Rating.objects.all()
+        return queryset
+        
 
 class CommentList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
@@ -21,6 +33,13 @@ class CommentList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+        #Retrieve comments, compute avg rating and create a new Rating object.
+        venue_id = self.request.data.get("venue_id")
+        avg = Comment.objects.filter(venue_id=venue_id).aggregate(Avg('rating'))['rating__avg']
+        num_reviews = Comment.objects.filter(venue_id=venue_id).count()
+        rating = Rating(avg_rating=avg, review_number=num_reviews, venue_id=venue_id)
+        rating.save()
+             
 
     def get_queryset(self):
         queryset = Comment.objects.all()
@@ -73,10 +92,10 @@ class Login(APIView):
         return Response({'token': token.key},
                         status=status.HTTP_200_OK)
 
-class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
-    queryset = Image.objects.all()
-    serializer_class = ImageSerializer
+#class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
+#    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+#    queryset = Image.objects.all()
+#    serializer_class = ImageSerializer
 
         
 class UserList(generics.ListAPIView):

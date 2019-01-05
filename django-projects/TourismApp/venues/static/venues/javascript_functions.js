@@ -1,4 +1,23 @@
+function showMarkers(){
+    for (e in markers){
+        markers[e].setVisible(true);
+    }
+}
 
+function resetMap() {
+    stops = [];
+    stopsIndex = 0;
+    sidenav=document.getElementById("sidenav");
+    sidenav.style.display="block";
+    showMarkers();
+    instruction_panel=document.getElementById("right-panel");
+    instruction_panel.style.display="none";
+    //Reset directionsDisplay
+    directionsDisplay.setMap(null);
+    directionsDisplay = null;
+    directionsDisplay = new google.maps.DirectionsRenderer;
+    directionsDisplay.setMap(map);
+}
 
 function hideMarkersOutsideOfRoute(){
     for (e in markers){
@@ -72,6 +91,13 @@ function displaySegmentUnsorted(){
     if (stopsIndex == stops.length-1){
         stops = [];
         stopsIndex = 0;
+        sidenav=document.getElementById("sidenav");
+        console.log(sidenav);
+        console.log("About to redisplay");
+        sidenav.style.display="block";
+        console.log("Done");
+        instruction_panel=document.getElementById("right-panel");
+        instruction_panel.style.display="none";
         alert("Fin de trayecto");
     } else {
         console.log("Manual :"+stopsIndex);
@@ -111,8 +137,7 @@ function displaySegmentOptimized(firstTime){
         }
     } else {
         alert("Fin de trayecto");
-        stops = [];
-        stopsIndex = 0; 
+        resetMap();
     }
     
 }
@@ -340,6 +365,10 @@ function routeCallback(response, status) {
     if (status === 'OK') {
         console.log(response);
         hideMarkersOutsideOfRoute();
+        sidenav=document.getElementById("sidenav");
+        sidenav.style.display="none";
+        instruction_panel=document.getElementById("right-panel");
+        instruction_panel.style.display="block";
         directionsDisplay.setDirections(response);
     } else {
         window.alert('Directions request failed due to ' + status);
@@ -423,20 +452,62 @@ function placeMarkers(venue_list){
            
 	//Se añade el evento click a los elementos del panel lateral
         //href="javascript:myclick(' + (markers.length) + ')"
+
+        star_rating = ""
+        numeric_rating = Math.floor(parseFloat(sorted[venue]['rating']));
+
+        for (i=0; i<numeric_rating; i++){
+            star_rating += '<span class="fa fa-star checked"></span>'
+        }
+        for (i=0; i<MAX_STARS-numeric_rating; i++){
+            star_rating += '<span class="fa fa-star"></span>'
+        }
         
-        detail_ref = '<a href="'+sorted[venue]['reference']+'/">Más detalles</a>'
-               
-        side_bar_html += '<a href="javascript:myclick(' + (markers.length) + ')">'
+        detail_ref = '<a class=sidebar-element-detail-ref href="'+sorted[venue]['reference']+'/">Más detalles</a>'
+
+        /*sidenav_list = document.getElementById("sidenav-content");
+        new_element = document.createElement("a");
+        new_element.href="javascript:myclick(" + (markers.length) + ")";
+        new_element.innerText = venue_name;
+        checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = "check_"+venue_name;
+        checkbox.addEventListener('click', addToRoute(venue_name, sorted[venue]["lat"], sorted[venue]["lng"]));
+        detail_reference = document.createElement("a");
+        detail_reference.href = sorted[venue]['reference'];
+        detail_reference.innerText = "Más detalles";
+        new_element.appendChild(checkbox);
+        new_element.appendChild(detail_reference);
+        sidenav_list.appendChild(new_element);
+
+        markers.push(marker);
+        side_bar_html += '<li class=sidebar-element><a class=sidebar-element-header href="javascript:myclick(' + (markers.length) + ')">'
             + venue_name + " | " 
             + (sorted[venue]['rating']  !== 0 ?  sorted[venue]['rating'] + " | " : "" )
             + '<input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+sorted[venue]["lat"]+','+sorted[venue]["lng"]+')"></a>'
-            + " | "
-            + detail_ref;
+            + detail_ref
+            + "</li>"
+            //Aquí iría el enlace para las vistas detalle con href
+
+            markers.push(marker);
+        });
+
+        });*/
+        //onclick="javascript:myclick(' + (markers.length) + ')"
+               
+        side_bar_html += '<li class=sidebar-element><p class=sidebar-element-header><input type="checkbox" id="check_'+venue_name+'" onclick="addToRoute('+"'"+venue_name+"'"+','+sorted[venue]["lat"]+','+sorted[venue]["lng"]+')">'
+            + venue_name + "</p>" 
+            //+ (sorted[venue]['rating']  !== 0 ?  sorted[venue]['rating'] + " | " : "" )
+            + '<p>'+star_rating+'</p>'
+            + detail_ref
+            +'<a href="javascript:myclick(' + (markers.length) + ')">Ver en el mapa</a>'
+            + "</li>"
             //Aquí iría el enlace para las vistas detalle con href
 
             markers.push(marker);
         });
         console.log("Se añade el contenido del menu lateral")
+        //document.getElementById("sidenav").innerHTML = side_bar_html;
         document.getElementById("sidenav").innerHTML = side_bar_html;
 }
 

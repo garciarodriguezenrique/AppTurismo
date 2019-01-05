@@ -1,5 +1,6 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'venues/mapview.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <html>
   <head>
@@ -16,6 +17,7 @@
 
       /* Optional: Makes the sample page fill the window. */
       html, body {
+        text-align: left;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -81,19 +83,20 @@
 </div>
 
     <!-- Panel de indicaciones de ruta -->
-    <div id="right-panel">
+    <div id="right-panel" style="display:none">
 
-    <button id="next-segment" onclick="displaySegmentOptimized(false)">Siguiente destino</button>
-    <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
-    <button id="page-reload" onclick="pageReload()">Volver a marcadores</button>
+      <button id="next-segment" onclick="displaySegmentOptimized(false)">Siguiente destino</button>
+      <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
+      <button id="page-reload" onclick="resetMap()">Volver a marcadores</button>
     </div>
+ 
 
     <!-- Menú lateral de navegación -->
-    <div id="sidenav" class="sidenav"></div>
+    <div id="sidenav" class="sidenav" style="display:block">
+    </div>
 
+    <div id="map"> </div>
 
-
-    <div id="map"></div>
     <script>
       var venues_json = '{{ venues }}';
       var user_location = '{{ user_location }}';
@@ -114,6 +117,7 @@
       var labelIndex = 0;
       var currentPosition = undefined;
       var optimizeRoute = true;
+      var MAX_STARS = 5;
 
 
       function evaluateFilters(){

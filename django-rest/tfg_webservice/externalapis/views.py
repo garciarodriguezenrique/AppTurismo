@@ -13,7 +13,7 @@ import time
 import asyncio
 import copy
 
-KEY = "#"
+KEY = "AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs"
 MAX_RETRIES = 3 #Max number of attemps to retrieve whatever data from a given external API
 
 food=["restaurant","meal_delivery","meal_takeaway"]
@@ -43,17 +43,32 @@ class ExternalAPI(APIView):
                 time.sleep(5)  # Wait for 5 seconds before re-trying
         return Response("error : Request failed", status=r.status_code)
 
+class ExternalAPI_getaddress(APIView):
+
+    def get(self, request, format=None):
+        LatLng = self.request.query_params.get('LatLng', None)
+        attempts = 0
+        while attempts < MAX_RETRIES:
+            r = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&key="+KEY)
+            if r.ok:
+                data = r.json()
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                attempts += 1
+                time.sleep(2)
+        return Response("error : Request failed", status=r.status_code)
+
 class ExternalAPI_getplacedetail(APIView):
     
     def get(self, request, place_id, format=None):
         attempts = 0
         while attempts < MAX_RETRIES:
-            r = requests.get("https://maps.googleapis.com/maps/api/place/details/json?placeid="+place_id+"&fields=name,rating,formatted_address,type,opening_hours,website,formatted_phone_number&key="+KEY, timeout=10)
+            r = requests.get("https://maps.googleapis.com/maps/api/place/details/json?placeid="+place_id+"&fields=name,rating,formatted_address,type,opening_hours,geometry,website,formatted_phone_number&key="+KEY, timeout=10)
             if r.status_code == 200:
                 data = r.json()
                 return Response(data, status=status.HTTP_200_OK)
             else:
-                attempt_num += 1
+                attempts += 1
                 # Should probably log this error using logger
                 time.sleep(5)  # Wait for 5 seconds before re-trying
         return Response("error : Request failed", status=r.status_code)

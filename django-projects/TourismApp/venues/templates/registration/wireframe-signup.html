@@ -39,38 +39,8 @@
       <div class="row">
         <div class="col-md-12 order-md-1">
           <form class="needs-validation" novalidate="" method="post" action="{% url 'venues:signup' %}">
-            {% csrf_token %}
-            <div class="mb-3"> <label for="username">Username</label>
-              <div class="input-group">
-                <div class="input-group-prepend"> <span class="input-group-text">@</span> </div>
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required="true">
-                <div class="invalid-feedback" style="width: 100%;"> An username is required. </div>
-              </div>
-            </div>
-            <ul>
-              <li>Your password can't be too similar to your other personal information.</li>
-              <li>Your password must contain at least 8 characters.</li>
-              <li>Your password can't be a commonly used password.</li>
-              <li>Your password can't be entirely numeric.</li>
-            </ul>
-            <div class="mb-3"> <label for="username">Password</label>
-              <div class="input-group">
-                <input type="text" class="form-control" id="password1" name="password1" placeholder="Password" required="true">
-                <div class="invalid-feedback" style="width: 100%;"> A password is required. </div>
-              </div>
-            </div>
-            <div class="mb-3"> <label for="username">Enter the password again for confirmation</label>
-              <div class="input-group">
-                <input type="text" class="form-control" id="password2" name="password2" placeholder="Password" required="true">
-                <div class="invalid-feedback" style="width: 100%;"> Password confirmation is required. </div>
-              </div>
-            </div>
-            <div class="mb-3"> <label for="email">Email</label>
-              <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required="true">
-              <div class="invalid-feedback"> Please enter a valid email address. </div>
-            </div>
-            <hr class="mb-4">
-            <button class="btn btn-primary btn-lg btn-block" type="submit">Signup</button>
+            {% csrf_token %} {{ form.as_p }}
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Sign up</button>
           </form>
         </div>
       </div>

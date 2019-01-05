@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- PAGE settings -->
+  <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
+  <title>Album</title>
+  <meta name="description" content="Wireframe design of an album page by Pingendo">
+  <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
+  <meta name="author" content="Pingendo">
+  <!-- CSS dependencies -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" href="{% static 'venues/wireframe-detail.css' %}">
+  <link rel="stylesheet" href="{% static 'venues/scorecard.css' %}">
+</head>
+
+<body>
+  <div class="collapse bg-dark" id="navbarHeader">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-7 py-4">
+          <h4>About</h4>
+          <p class="text-info">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        </div>
+        <div class="col-md-3 offset-md-1 py-4">
+          <h4>Contact</h4>
+          <ul class="list-unstyled">
+            <li>
+              <a href="#" class="text-secondary">Follow on Twitter</a>
+            </li>
+            <li>
+              <a href="#" class="text-secondary">Like on Facebook</a>
+            </li>
+            <li>
+              <a href="#" class="text-secondary">Email me</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navbar navbar-dark bg-dark">
+    <div class="container d-flex justify-content-between">
+      <a href="#" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-camera mr-2"></i><strong>Album</strong> </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>
+    </div>
+  </div>
+  <div class="text-center py-5">
+    <div class="container">
+      <div class="row my-5 justify-content-center">
+        <div class="col-md-12">
+          <h1>{{ name }}</h1>
+          <div id="userstars">
+          <span class="heading">User Rating</span>
+          </div>
+          <p id="ratingtext"></p>
+          <hr style="border:3px solid #f1f1f1">
+
+<div class="row">
+  <div class="side">
+    <div>5 star</div>
+  </div>
+  <div class="middle">
+    <div class="bar-container">
+      <div class="bar-5" id="bar-5"></div>
+    </div>
+  </div>
+  <div class="side right">
+    <div id="amount5"></div>
+  </div>
+  <div class="side">
+    <div>4 star</div>
+  </div>
+  <div class="middle">
+    <div class="bar-container">
+      <div class="bar-4" id="bar-4"></div>
+    </div>
+  </div>
+  <div class="side right">
+    <div id="amount4"></div>
+  </div>
+  <div class="side">
+    <div>3 star</div>
+  </div>
+  <div class="middle">
+    <div class="bar-container">
+      <div class="bar-3" id="bar-3"></div>
+    </div>
+  </div>
+  <div class="side right">
+    <div id="amount3"></div>
+  </div>
+  <div class="side">
+    <div>2 star</div>
+  </div>
+  <div class="middle">
+    <div class="bar-container">
+      <div class="bar-2" id="bar-2"></div>
+    </div>
+  </div>
+  <div class="side right">
+    <div id="amount2"></div>
+  </div>
+  <div class="side">
+    <div>1 star</div>
+  </div>
+  <div class="middle">
+    <div class="bar-container">
+      <div class="bar-1" id="bar-1"></div>
+    </div>
+  </div>
+  <div class="side right">
+    <div id="amount1"></div>
+  </div>
+</div>
+<BR>
+          {% if phone_number %}
+            <p class="lead text-muted">Teléfono: {{ phone_number }}</p>
+          {% endif %}
+          {% if address %}
+            <p class="lead text-muted">Dirección: {{ address }}</p>
+          {% endif %}
+          {% if website %}
+            <p class="lead text-muted"><a href= "{{ website }}" >Sitio web</a></p>
+          {% endif %}
+          {% if schedule %}
+            <div>
+              <ul>
+                {%for element in schedule %}
+                  <li><p class="lead text-muted">{{ element }}</p></li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          {% if messages %}
+            <ul class="messages">
+            {% for message in messages %}
+              <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          {% if user.is_authenticated %}
+            <form enctype="multipart/form-data" id="comment-form">
+            {% csrf_token %}
+              <div class="form-group">
+                <label for="user-rating">Nivel de satisfacción (1-5): </label>
+                <select class="custom-select d-block w-100" id="rating" name="rating" required="">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>  
+                </select>
+                <textarea class="form-control" id="form26" name="text" rows="3" placeholder="Your comment"></textarea>
+                <input type="file" name="image"/>
+                <input class="btn btn-primary" id="comment-form-submit" type="button" onclick="submissionHandler()" value="Enviar" /> 
+              </div>
+              <!-- <button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
+            </form>
+          {% else %}
+	    Sólo los usuarios registrados pueden dejar comentarios y subir fotos. Por favor, inicia sesión o regístrate.
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="py-4 bg-light">
+    <div class="container">
+      <div class="row" id="main-comment-box">
+        <!--
+        <div class="col-md-4 p-3">
+          <div class="card box-shadow">
+            <img class="card-img-top" src="{{ comment.image }}">
+            <div class="card-body">
+              <p class="card-text">comentario</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                  <button type="button" href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
+                </div> 
+                <small class="text-muted">Date</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        -->
+      </div>
+    </div>
+    <ul class="pagination" id="pagination-bar">
+   
+    </ul>
+  </div>
+  <footer class="text-muted py-5">
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+      <p>Album template is based on Bootstrap © examples.&nbsp; <br>New to Bootstrap? <a href="#">Visit the homepage</a> or read our <a href="#">getting started guide</a>.</p>
+    </div>
+  </footer>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <script>
+      place_identifier = "{{ id }}";
+      user = "{{ request.user.username }}";
+      currentPage = 1;
+      commentCount = 0;
+      MAX_STARS=5;
+      
+      function setPaginationBar(numPages, place_id){
+          li = document.createElement("li");
+          a = document.createElement("a");
+          a.className = "page-link";
+          a.href = "#"
+          a.innerText = "«";
+          a.addEventListener('click', function(){getComments("1",place_id);});
+          li.appendChild(a);
+          bar.appendChild(li);
+          for (let i=currentPage; i<=currentPage+4; i++) {
+              li = document.createElement("li");
+              if (i==currentPage){
+                  li.className = "page-item-active";
+              } else {
+                  li.className = "page-item";
+              }
+
+              a = document.createElement("a");
+              a.className = "page-link";
+              a.innerText = i;
+              //var localIndex = i;
+              a.addEventListener('click', function(){
+                                              getComments(i,place_id);
+                                          });
+              li.appendChild(a);
+              bar.appendChild(li);
+              if (i==numPages){break;}
+          }
+          li = document.createElement("li");
+          a = document.createElement("a");
+          a.className = "page-link";
+          a.href = "#"
+          a.innerText = "»";
+          a.addEventListener('click', function(){getComments(String(numPages),place_id);});
+          li.appendChild(a);
+          bar.appendChild(li);
+          
+      }
+
+      function setComments(data, totalComments){
+          var stars = {"1":0, "2":0, "3":0, "4":0, "5":0}
+          comments = document.getElementsByClassName("comment-container");
+          /*comment_ids = [];
+          for (i=0; i<comments.length; i++){
+              comment_ids.push(comments[i].id);
+          }*/
+          cbox = document.getElementById("main-comment-box");
+          cbox.innerText = "";
+          /*while (cbox.fisrtChild){
+              console.log("Vaciando caja...");
+              cbox.removeChild(cbox.firstChild);
+          ;}*/ //Vaciar caja de comentarios
+
+          bar = document.getElementById("pagination-bar");
+          bar.innerText = "";
+          /*while (bar.fisrtChild){
+              console.log("Vaciando barra...");
+              bar.removeChild(bar.firstChild);
+          ;}*/ //Vaciar barra de paginas
+
+          Object.keys(data).forEach(function(comment){
+              if (data[comment]['rating'] == 1){stars["1"]++;}
+              else if (data[comment]['rating'] == 2){stars["2"]++;}
+              else if (data[comment]['rating'] == 3){stars["3"]++;}
+              else if (data[comment]['rating'] == 4){stars["4"]++;}
+              else if (data[comment]['rating'] == 5){stars["5"]++;}
+   
+              //if (!comment_ids.includes(String(data[comment]['id']))){
+              var outer_div = document.createElement("div");
+              outer_div.className = "col-md-4 p-3 comment-container";
+              outer_div.id = data[comment]['id'];
+              
+              var second_outer_div = document.createElement("div");
+              second_outer_div.className = "card box-shadow";
+
+              if (data[comment]['image']!=null){
+                  var image = document.createElement("img");
+                  image.className = "card-img-top";
+                  image.src = data[comment]['image']
+                  second_outer_div.appendChild(image);
+              }
+
+              var first_inner_div = document.createElement("div");
+              first_inner_div.className = "card-body";
+
+              var comment_text = document.createElement("p");
+              comment_text.className = "card-text";
+              comment_text.innerText = data[comment]['owner']+" :\n "+data[comment]['text'];
+              first_inner_div.appendChild(comment_text);
+              for (i=0; i<data[comment]['rating']; i++){
+                  s = document.createElement("span");
+                  s.className = "fa fa-star checked";
+                  first_inner_div.appendChild(s);
+                  //star_rating += '<span class="fa fa-star checked"></span>'
+              }
+              for (i=0; i<MAX_STARS-data[comment]['rating']; i++){
+                  s = document.createElement("span");
+                  s.className = "fa fa-star";
+                  first_inner_div.appendChild(s);
+                  //star_rating += '<span class="fa fa-star"></span>'
+              }
+
+              var second_inner_div = document.createElement("div");
+              second_inner_div.className = "d-flex justify-content-between align-items-center";
+
+              var innermost_div = document.createElement("div");
+              innermost_div.className = "btn-group";
+
+              var view_button = document.createElement("button");
+              view_button.type="button";
+              view_button.className = "btn btn-sm btn-outline-secondary";
+              view_button.innerText = "View";
+              innermost_div.appendChild(view_button);
+
+        
+              if (data[comment]['owner']==user){
+                  var delete_button = document.createElement("button");
+                  delete_button.type="button";
+                  delete_button.className="btn btn-sm btn-outline-secondary";
+                  var comment_id = data[comment]['id'];
+                  delete_button.addEventListener('click', function(){deleteComment(comment_id);});
+                  delete_button.innerText="Delete";
+                  innermost_div.appendChild(delete_button);
+              }
+
+              var date = document.createElement("small");
+              date.innerText = data[comment]['created'];
+              date.className = "text-muted";
+
+              second_inner_div.appendChild(innermost_div);
+              second_inner_div.appendChild(date);
+
+              first_inner_div.appendChild(second_inner_div);
+              second_outer_div.appendChild(first_inner_div);
+              outer_div.appendChild(second_outer_div);
+
+              document.getElementById("main-comment-box").appendChild(outer_div);
+              //}
+
+          });
+          bar5 = document.getElementById("bar-5");
+          bar4 = document.getElementById("bar-4");
+          bar3 = document.getElementById("bar-3");
+          bar2 = document.getElementById("bar-2");
+          bar1 = document.getElementById("bar-1");
+          /*console.log(stars);
+          console.log("Total comments: "+String(totalComments));
+          console.log("5: "+String(stars["5"]/totalComments * 100)+"%");
+          console.log("4: "+String(stars["4"]/totalComments * 100)+"%");
+          console.log("3: "+String(stars["3"]/totalComments * 100)+"%");
+          console.log("2: "+String(stars["2"]/totalComments * 100)+"%");
+          console.log("1: "+String(stars["1"]/totalComments * 100)+"%");*/
+          bar5.style.width = String(stars["5"]/totalComments * 100)+"%";
+          bar4.style.width = String(stars["4"]/totalComments * 100)+"%";
+          bar3.style.width = String(stars["3"]/totalComments * 100)+"%";
+          bar2.style.width = String(stars["2"]/totalComments * 100)+"%";
+          bar1.style.width = String(stars["1"]/totalComments * 100)+"%";
+          document.getElementById("amount5").innerText = stars["5"];
+          document.getElementById("amount4").innerText = stars["4"];
+          document.getElementById("amount3").innerText = stars["3"];
+          document.getElementById("amount2").innerText = stars["2"];
+          document.getElementById("amount1").innerText = stars["1"];          
+      }
+
+      function getComments(page, place_id){
+          console.log("Requested:\n");
+          console.log(page);
+          currentPage = page;
+          $.ajax({
+              url : "{% url 'venues:getcomments' %}"+"?venue_id="+place_id+"&page="+page,
+              dataType: "json",  
+              method : "GET",
+              success : function (data) {
+                  console.log(data);
+                  currentPage = parseInt(page);
+                  setComments(data['results'], data['count']);
+                  getAvgRating(place_id);
+                  commentCount = data['count']
+                  var num_pages = Math.ceil(data['count']/10);
+                  setPaginationBar(num_pages,place_id);
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
+      function getAvgRating(place_id){
+          $.ajax({
+              url : "{% url 'venues:getavgrating' %}"+"?venue_id="+place_id,
+              dataType: "json",  
+              method : "GET",
+              success : function (data) {
+                  console.log(data);
+                  updateRatingData(data['results'][0])
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
+      function updateRatingData(data){
+          var star_div = document.getElementById("userstars");
+          star_div.innerHTML = "";
+          var rating_text = document.getElementById("ratingtext");
+          rating_text.innerText = data["avg_rating"]+" average based on "+String(data['review_number'])+" reviews"
+
+          star_rating = "";
+          numeric_rating = Math.floor(parseFloat(data['avg_rating']));
+          s = document.createElement("span");
+          s.className = "heading";
+          s.innerText = "User Rating";
+          for (i=0; i<numeric_rating; i++){
+            s = document.createElement("span");
+            s.className = "fa fa-star checked";
+            star_div.appendChild(s);
+            //star_rating += '<span class="fa fa-star checked"></span>';
+          }
+          for (i=0; i<MAX_STARS-numeric_rating; i++){
+            s = document.createElement("span");
+            s.className = "fa fa-star";
+            star_div.appendChild(s);
+            //star_rating += '<span class="fa fa-star"></span>';
+          }
+      }
+
+      function submissionHandler(){
+          console.log("About to submit a new comment about "+place_identifier)
+          sendComment(place_identifier);
+      }
+
+      function sendComment(place_id){
+          $.ajax({
+              url : "{% url 'venues:newcomment' %}"+"?venue_id="+place_id,
+              dataType: "json",  
+              method : "POST",
+              data: $("#comment-form").serialize(),
+              success : function (data) {
+                  console.log(data)
+                  getComments(currentPage, place_identifier);
+                  $('#comment-form').each(function(){
+                      this.reset();
+                  });
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
+      function deleteComment(comment_id){
+          $.ajax({
+              url : "{% url 'venues:removecomment' %}"+"?comment_id="+comment_id,
+              dataType: "json",  
+              method : "GET",
+              success : function (data) {
+                  console.log(data)
+                  if ((commentCount-1) % 10 == 0){
+                      currentPage-=1;
+                  }
+                  getComments(currentPage, place_identifier);
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
+      $(document).ready(function(){
+          console.log("Loading 1st page of comments")
+          getComments("1",place_identifier);
+      });
+
+
+  </script>
+  <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
+  <pingendo onclick="window.open('https://pingendo.com/', '_blank')" style="cursor:pointer;position: fixed;bottom: 20px;right:20px;padding:4px;background-color: #00b0eb;border-radius: 8px; width:220px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:14px;color:white">Made with Pingendo Free&nbsp;&nbsp;<img src="https://pingendo.com/site-assets/Pingendo_logo_big.png" class="d-block" alt="Pingendo logo" height="16"></pingendo>
+</body>
+
+</html>

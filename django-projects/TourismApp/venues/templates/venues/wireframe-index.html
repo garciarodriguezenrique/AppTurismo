@@ -51,9 +51,10 @@
         <div class="col-md-8 mx-auto">
           <h1 class="cover-heading mt-5"><b>Find interesting places close to you!</b></h1>
           <p class="lead mb-5">TourismApp allows you to find points of interest of a given category sorted by relevance. Get the most efficient route to the places of your choice by selecting one of the transport methods at your disposal, see reviews and photos from other users and add yout own!</p>
-          <form class="needs-validation" novalidate="">
+          <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
+          {% csrf_token %}
             <div class="row ml-5 pl-5">
-              <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="country">Category</label> <select class="custom-select d-block w-100" id="country" required="">
+              <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="category">Category</label> <select class="custom-select d-block w-100" id="category" name="category" required="">
                   <option value="">Choose...</option>
                   <option value="food">Comida</option>
                   <option value="leisure">Ocio</option>
@@ -66,6 +67,8 @@
                   <option value="other">Otros</option>
                 </select>
                 <div class="invalid-feedback"> Please select a valid category. </div>
+                <div><input id="position" type="hidden" name="position"/></div>
+                <div><input id="radius" type="hidden" name="radius" value="1500"/></div>
                 <button class="btn btn-primary btn-lg btn-block mt-3" type="submit">Find places</button>
               </div>
             </div>
@@ -78,5 +81,20 @@
     </div>
   </div>
 </body>
+<script>
+    var x = document.getElementById("position");
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(setPositionValue);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function setPositionValue(position) {
+        x.value = position.coords.latitude + "," + position.coords.longitude; 
+    }
+    window.addEventListener('load', getLocation);
+</script>
 
 </html>
