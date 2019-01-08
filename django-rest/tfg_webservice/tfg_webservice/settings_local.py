@@ -80,11 +80,9 @@ WSGI_APPLICATION = 'tfg_webservice.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':'tfg_ws',
-        'USER':'django',
-        'PASSWORD':'django123',
-        'HOST':'db',
-        'PORT':3306,
+        'OPTIONS': {
+            'read_default_file': '/etc/mysql/my.cnf',
+        },
     }
 }
 
