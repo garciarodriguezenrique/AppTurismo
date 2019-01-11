@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PAGE settings -->
   <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>Opciones avanzadas</title>
+  <title>TourismApp</title>
   <meta name="description" content="Wireframe design of an album page by Pingendo">
   <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
   <meta name="author" content="Pingendo">
@@ -147,9 +147,16 @@ function fillList(venue_list){
         var div = document.createElement("div");
         div.className = "d-flex w-100 justify-content-between";
 
+        var icon = document.createElement("img");
+        icon.src = sorted[venue]["icon"];
+        icon.style.height = "25%"
+        var smallicon = document.createElement("small");
+        smallicon.appendChild(icon);
+
         var h5 = document.createElement("h5");
         h5.className = "mb-1";
-        h5.innerText = sorted[venue]['venue_name'];
+        h5.innerText = sorted[venue]['venue_name']+"  ";
+        //h5.appendChild(smallicon);
         div.appendChild(h5);
 
         var p = document.createElement("p");
@@ -167,13 +174,16 @@ function fillList(venue_list){
             p.appendChild(s);
             //star_rating += '<span class="fa fa-star"></span>'
         }
+        var icon = document.createElement("img");
+        icon.src = sorted[venue]["icon"];
+        icon.style.height = "10%"
 
         var small = document.createElement("small");
         var a_detail = document.createElement("a");
         a_detail.href = sorted[venue]['reference']+"/";
         a_detail.innerText = "Más detalles";
         small.appendChild(a_detail);
-
+        
         a.appendChild(div);
         a.appendChild(p);
         a.appendChild(small);

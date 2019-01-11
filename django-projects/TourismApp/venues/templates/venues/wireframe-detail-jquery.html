@@ -130,12 +130,14 @@
             <p class="lead text-muted"><a href= "{{ website }}" >Sitio web</a></p>
           {% endif %}
           {% if schedule %}
-            <div>
-              <ul>
-                {%for element in schedule %}
-                  <li><p class="lead text-muted">{{ element }}</p></li>
-                {% endfor %}
-              </ul>
+            <BR>
+            <div class="list-group">
+              {%for element in schedule %}
+                  <!-- <li><p class="lead text-muted">{{ element }}</p></li> -->
+                  <a class="list-group-item list-group-item-action flex-column align-items-start">
+                    <p class="mb-1">{{ element }}</p>
+                 </a>
+              {% endfor %}
             </div>
           {% endif %}
           {% if messages %}
@@ -153,7 +155,7 @@
   <div class="py-5">
     <div class="container">
       <div class="row">
-        <h3>Valoraciones de los usuarios</h3>
+        <h3>Valoraciones de los usuarios:</h3>
         <div class="col-md-12">
           {% if user.is_authenticated %}
             <form enctype="multipart/form-data" id="comment-form">
@@ -208,7 +210,7 @@
   <div class="py-5">
     <div class="container">
       <div class="row">
-      <h3>Imágenes de los usuarios</h3>
+        <h3>Imágenes de los usuarios:</h3>
         <div class="col-md-12">
           {% if user.is_authenticated %}
     <form enctype="multipart/form-data" id="image-form">
@@ -262,7 +264,7 @@
       <p class="float-right">
         <a href="#">Back to top</a>
       </p>
-      <p>Album template is based on Bootstrap © examples.&nbsp; <br>New to Bootstrap? <a href="#">Visit the homepage</a> or read our <a href="#">getting started guide</a>.</p>
+      <p>TourismApp 2019 (Universidade da Coruña).&nbsp; <br>Enrique García Rodríguez <a href="#">(enrique.garcia1@udc.es)</a> - <a href="#">(garciarodriguezenrique10@gmail.com)</a>.</p>
     </div>
   </footer>
   <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
@@ -331,6 +333,7 @@
           li.appendChild(a);
           bar.appendChild(li);
           for (let i=currentImgPage; i<=currentImgPage+4; i++) {
+              console.log(i);
               li = document.createElement("li");
               if (i==currentImgPage){
                   li.className = "page-item-active";
@@ -389,6 +392,8 @@
               else if (data[comment]['rating'] == 3){stars["3"]++;}
               else if (data[comment]['rating'] == 4){stars["4"]++;}
               else if (data[comment]['rating'] == 5){stars["5"]++;}
+
+              var ts = new Date(data[comment]['created']);
    
               //if (!comment_ids.includes(String(data[comment]['id']))){
               var outer_div = document.createElement("div");
@@ -431,11 +436,11 @@
               var innermost_div = document.createElement("div");
               innermost_div.className = "btn-group";
 
-              var view_button = document.createElement("button");
+              /*var view_button = document.createElement("button");
               view_button.type="button";
               view_button.className = "btn btn-sm btn-outline-secondary";
               view_button.innerText = "View";
-              innermost_div.appendChild(view_button);
+              innermost_div.appendChild(view_button);*/
 
         
               if (data[comment]['owner']==user){
@@ -449,7 +454,7 @@
               }
 
               var date = document.createElement("small");
-              date.innerText = data[comment]['created'];
+              date.innerText = ts.toLocaleDateString()+" - "+ts.toLocaleTimeString();
               date.className = "text-muted";
 
               second_inner_div.appendChild(innermost_div);
@@ -514,7 +519,8 @@
               caption = data[image]['caption'];
               full_caption = owner + ":\n" + caption;
               console.log(caption);
-              created = data[image]['created'];
+              ts = new Date(data[image]['created']);
+              created = ts.toLocaleDateString()+" - "+ts.toLocaleTimeString();
               id = data[image]['id'];
    
               //if (!comment_ids.includes(String(data[comment]['id']))){
@@ -547,11 +553,11 @@
               var innermost_div = document.createElement("div");
               innermost_div.className = "btn-group";
 
-              var view_button = document.createElement("button");
+              /*var view_button = document.createElement("button");
               view_button.type="button";
               view_button.className = "btn btn-sm btn-outline-secondary";
               view_button.innerText = "View";
-              innermost_div.appendChild(view_button);
+              innermost_div.appendChild(view_button);*/
 
         
               if (owner==user){
@@ -593,8 +599,10 @@
                   setComments(data['results'], data['count']);
                   getAvgRating(place_id);
                   commentCount = data['count']
-                  var num_pages = Math.ceil(data['count']/10);
-                  setPaginationBar(num_pages,place_id);
+                  if (commentCount>0){
+                      var num_pages = Math.ceil(data['count']/10);
+                      setPaginationBar(num_pages,place_id);
+                  }
               },
               error : function (data){
                   console.log(data);
@@ -610,11 +618,13 @@
               dataType: "json",  
               method : "GET",
               success : function (data) {
-                  currentPage = parseInt(page);
+                  currentImgPage = parseInt(page);
                   setImages(data['results'], data['count']);
                   imageCount = data['count'];
-                  var num_pages = Math.ceil(data['count']/10);
-                  setImgPaginationBar(num_pages,place_id);
+                  if (imageCount>0){
+                      var num_pages = Math.ceil(data['count']/10);
+                      setImgPaginationBar(num_pages,place_id);
+                  }
               },
               error : function (data){
                   console.log(data);

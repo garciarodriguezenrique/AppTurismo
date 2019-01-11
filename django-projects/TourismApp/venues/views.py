@@ -314,10 +314,11 @@ class Mapview(View):
                     else:
                         venue['rating'] = "0.00"
             context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
-            if request.user_agent.is_mobile:
-                return render(request, self.mobile_template, context)
-            else:
-                return render(request, self.template_name, context)
+            #if request.user_agent.is_mobile:
+            print("REDIRECT TO MOBILE TEMPLATE")
+            return render(request, self.mobile_template, context)
+            #else:
+                #return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
             error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación ("+error_msg+")"
