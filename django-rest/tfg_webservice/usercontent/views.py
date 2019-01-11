@@ -33,14 +33,21 @@ class CommentList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-        #Retrieve comments, compute avg rating and create a new Rating object.
+        #Retrieve comments, compute avg rating and create/update a new Rating object.
+        venue_id = self.request.data.get("venue_id")
+        avg = Comment.objects.filter(venue_id=venue_id).aggregate(Avg('rating'))['rating__avg']
+        num_reviews = Comment.objects.filter(venue_id=venue_id).count()
+        rating = Rating(avg_rating=avg, review_number=num_reviews, venue_id=venue_id)
+        rating.save()
+
+    def perform_destroy(self, serializer):
+        #Retrieve comments, compute avg rating and create/update a new Rating object.
         venue_id = self.request.data.get("venue_id")
         avg = Comment.objects.filter(venue_id=venue_id).aggregate(Avg('rating'))['rating__avg']
         num_reviews = Comment.objects.filter(venue_id=venue_id).count()
         rating = Rating(avg_rating=avg, review_number=num_reviews, venue_id=venue_id)
         rating.save()
              
-
     def get_queryset(self):
         queryset = Comment.objects.all()
         venue_id = self.request.query_params.get('venue_id')
@@ -92,10 +99,10 @@ class Login(APIView):
         return Response({'token': token.key},
                         status=status.HTTP_200_OK)
 
-#class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
-#    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
-#    queryset = Image.objects.all()
-#    serializer_class = ImageSerializer
+class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
 
         
 class UserList(generics.ListAPIView):

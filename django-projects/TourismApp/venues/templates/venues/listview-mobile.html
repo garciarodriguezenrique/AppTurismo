@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- PAGE settings -->
+  <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
+  <title>Opciones avanzadas</title>
+  <meta name="description" content="Wireframe design of an album page by Pingendo">
+  <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
+  <meta name="author" content="Pingendo">
+  <!-- CSS dependencies -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'venues/listview-mobile.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'venues/scorecard.css' %}">
+</head>
+
+<body>
+  <div class="collapse bg-dark" id="navbarHeader">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-7 py-4">
+          <h4>Búsqueda avanzada</h4>
+          <p class="text-info">Marca las categorías para las que deseas encontrar resultados.</p>
+          <a href="#"><input class="filter-checkbox" id="foodFilter" type="checkbox" onclick="evaluateFilters()" value="food">Comida</a><BR>
+          <a href="#"><input class="filter-checkbox" id="leisureFilter" type="checkbox" onclick="evaluateFilters()" value="leisure">Ocio</a><BR>
+          <a href="#"><input class="filter-checkbox" id="cultureFilter" type="checkbox" onclick="evaluateFilters()" value="culture">Cultura</a><BR>
+          <a href="#"><input class="filter-checkbox" id="servicesFilter" type="checkbox" onclick="evaluateFilters()" value="services">Servicios</a><BR>
+          <a href="#"><input class="filter-checkbox" id="shoppingFilter" type="checkbox" onclick="evaluateFilters()" value="shopping">Tiendas</a><BR>
+          <a href="#"><input class="filter-checkbox" id="medicalFilter" type="checkbox" onclick="evaluateFilters()" value="medical_services">Servicios sanitarios</a><BR>
+          <a href="#"><input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar_and_clubs">Bares y clubs</a><BR>
+          <a href="#"><input class="filter-checkbox" id="transportFilter" type="checkbox" onclick="evaluateFilters()" value="transport">Transporte</a><BR>
+          <a href="#"><input class="filter-checkbox" id="otherFilter" type="checkbox" onclick="evaluateFilters()" value="other">Otros</a><BR>
+        </div>
+        <div class="center">
+          <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3">Buscar</button>
+        </div>
+        <div class="col-md-3 offset-md-1 py-4">
+          <h4>Opciones de ruta</h4>
+          <p class="text-info">Escoge un método de transporte y el criterio de ordenación de la ruta. La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p>
+          <ul class="list-unstyled">
+            <li>
+              <select class="custom-select d-block w-100" id="transport" required="">
+                <option value="DRIVING">Coche</option>
+                <option value="WALKING">A pie</option>
+                <option value="BICYCLING">Bicicleta</option>
+                <option value="transit-bus">Transporte público (bus)</option>
+                <option value="transit-subway">Transporte público (metro)</option>
+              </select>
+            </li>
+            <li>
+              <select class="custom-select d-block w-100" id="route-sorting" required="">
+                <option value="automatic-sorting">Ordenación automática</option> 
+                <option value="manual-sorting">Ordenación manual</option> 
+              </select>
+            </li>  
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navbar navbar-dark bg-dark">
+    <div class="container d-flex justify-content-between">
+      <a href="#" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-camera mr-2"></i><strong>Opciones Avanzadas</strong> </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>
+    </div>
+  </div>
+  <div class="py-4 bg-light">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="list-group" id="venue-list">
+            <!--<a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">List group</h5> <small>3 days ago</small>
+              </div>
+              <p class="mb-1">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> <small>Donec id elit non mi porta.</small>
+            </a>-->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="text-muted py-5">
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+      <p>Album template is based on Bootstrap © examples.&nbsp; <br>New to Bootstrap? <a href="#">Visit the homepage</a> or read our <a href="#">getting started guide</a>.</p>
+    </div>
+  </footer>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <pingendo style="cursor:pointer;position: fixed;bottom: 10px;right:10px;padding:4px"><button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3">Calcular Ruta</button></pingendo>
+</body>
+<script>
+MAX_STARS = 5;
+var currentlyDisplayedCategories = []
+
+var venues_json = '{{ venues }}';
+var user_location = '{{ user_location }}';
+var initial_category = '{{ initial_category }}'
+
+var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
+var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
+var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
+
+function evaluateFilters(){
+    var checkboxes = document.getElementsByClassName("filter-checkbox");
+    for (i=0; i<checkboxes.length; i++){
+        if(checkboxes[i].checked == true && !currentlyDisplayedCategories.includes(checkboxes[i].value)){
+            currentlyDisplayedCategories.push(checkboxes[i].value);
+        }
+        if (checkboxes[i].checked == false && currentlyDisplayedCategories.includes(checkboxes[i].value)){
+            currentlyDisplayedCategories = currentlyDisplayedCategories.filter(e=>e!=checkboxes[i].value);
+        }
+    }
+}
+
+
+function removeDuplicatesByName(jsonArray){
+    var seenNames = {};
+    jsonArray = jsonArray.filter(function(currentObject) {
+        if (currentObject.venue_name in seenNames) {
+            return false;
+        } else {
+            seenNames[currentObject.venue_name] = true;
+            return true;
+        }
+    });
+    return jsonArray;
+}
+
+function fillList(venue_list){
+
+    var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+    sorted = removeDuplicatesByName(sorted);
+    var venue_list = document.getElementById("venue-list");
+    Object.keys(sorted).forEach(function(venue) {
+
+        var a = document.createElement("a");
+        a.href = "#";
+        a.className = "list-group-item list-group-item-action flex-column align-items-start";
+
+        var div = document.createElement("div");
+        div.className = "d-flex w-100 justify-content-between";
+
+        var h5 = document.createElement("h5");
+        h5.className = "mb-1";
+        h5.innerText = sorted[venue]['venue_name'];
+        div.appendChild(h5);
+
+        var p = document.createElement("p");
+        //p.className = "mb-1";
+
+        for (i=0; i<sorted[venue]['rating']; i++){
+            s = document.createElement("span");
+            s.className = "fa fa-star checked";
+            p.appendChild(s);
+            //star_rating += '<span class="fa fa-star checked"></span>'
+        }
+        for (i=0; i<MAX_STARS-sorted[venue]['rating']; i++){
+            s = document.createElement("span");
+            s.className = "fa fa-star";
+            p.appendChild(s);
+            //star_rating += '<span class="fa fa-star"></span>'
+        }
+
+        var small = document.createElement("small");
+        var a_detail = document.createElement("a");
+        a_detail.href = sorted[venue]['reference']+"/";
+        a_detail.innerText = "Más detalles";
+        small.appendChild(a_detail);
+
+        a.appendChild(div);
+        a.appendChild(p);
+        a.appendChild(small);
+        venue_list.appendChild(a);
+
+    });
+}
+
+function formatCategories(category_list){
+    var finalString = "";
+    for (category in category_list){
+        finalString += category_list[category]+"|";
+    }
+    return finalString.substring(0, finalString.length - 1);
+}
+
+function filterResults(){
+    
+    if (currentlyDisplayedCategories.length > 0){
+        $.ajax({
+            url : "{% url 'venues:filter' %}"+"?category="+formatCategories(currentlyDisplayedCategories),  
+            method : "GET",
+            //dataType: "json",
+            success : function (data) {
+                console.log(data)
+                //var jqueryJson = $.parseJSON(data)
+                document.getElementById("venue-list").innerText = "";
+                fillList(data);
+            },
+            error : function (data){
+                console.log(data);
+                alert("Ha habido un error, inténtalo más tarde.");
+            }
+        });
+    } else {alert("Selecciona una categoría, por favor");}  
+} 
+
+$(document).ready(function(){
+    fillList(j);
+    document.getElementById('filter-button').addEventListener('click', filterResults);
+    var checkboxes = document.getElementsByClassName("filter-checkbox");
+    for (i=0; i<checkboxes.length; i++){
+        if(checkboxes[i].value == initial_category){
+            checkboxes[i].checked = true;
+            currentlyDisplayedCategories.push(checkboxes[i].value);
+            break;
+        }
+    } 
+});
+
+</script>
+<script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
+
+</html>

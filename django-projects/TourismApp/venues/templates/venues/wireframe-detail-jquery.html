@@ -59,6 +59,7 @@
           <p id="ratingtext"></p>
           <hr style="border:3px solid #f1f1f1">
 
+
 <div class="row">
   <div class="side">
     <div>5 star</div>
@@ -116,6 +117,8 @@
     <div id="amount1"></div>
   </div>
 </div>
+
+
 <BR>
           {% if phone_number %}
             <p class="lead text-muted">Teléfono: {{ phone_number }}</p>
@@ -164,8 +167,7 @@
                   <option value="5">5</option>  
                 </select>
                 <textarea class="form-control" id="form26" name="text" rows="3" placeholder="Your comment"></textarea>
-                <input type="file" name="image"/>
-                <input class="btn btn-primary" id="comment-form-submit" type="button" onclick="submissionHandler()" value="Enviar" /> 
+                <input class="btn btn-primary" id="comment-form-submit" type="button" onclick="submissionHandler('comment')" value="Enviar" /> 
               </div>
               <!-- <button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
             </form>
@@ -202,6 +204,57 @@
    
     </ul>
   </div>
+  <div class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          {% if user.is_authenticated %}
+    <form enctype="multipart/form-data" id="image-form">
+            {% csrf_token %}
+              <div class="form-group">
+                <textarea class="form-control" id="form26" name="caption" rows="3" placeholder="Your comment"></textarea>
+                <input type="file" name="image"/>
+                <input class="btn btn-primary" id="image-form-submit" type="button" onclick="submissionHandler('image')" value="Enviar" /> 
+              </div>
+              <!--<button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
+            </form>
+          {% else %}
+	    Sólo los usuarios registrados pueden dejar comentarios y subir fotos. Por favor, inicia sesión o regístrate.
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+    <div class="py-4 bg-light">
+    <div class="container">
+      <div class="row" id="main-image-box">
+        <!--
+        <div class="col-md-4 p-3">
+          <div class="card box-shadow">
+            <img class="card-img-top" src="{{ comment.image }}">
+            <div class="card-body">
+              <p class="card-text">comentario</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                  <button type="button" href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
+                </div> 
+                <small class="text-muted">Date</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        -->
+      </div>
+    </div>
+    <ul class="pagination" id="image-pagination-bar">
+   
+    </ul>
+  </div>
+
   <footer class="text-muted py-5">
     <div class="container">
       <p class="float-right">
@@ -210,7 +263,8 @@
       <p>Album template is based on Bootstrap © examples.&nbsp; <br>New to Bootstrap? <a href="#">Visit the homepage</a> or read our <a href="#">getting started guide</a>.</p>
     </div>
   </footer>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   <script>
@@ -218,9 +272,13 @@
       user = "{{ request.user.username }}";
       currentPage = 1;
       commentCount = 0;
+      currentImgPage = 1;
+      imageCount = 0;
       MAX_STARS=5;
       
       function setPaginationBar(numPages, place_id){
+          var bar = document.getElementById("pagination-bar");
+          bar.innerText = "";
           li = document.createElement("li");
           a = document.createElement("a");
           a.className = "page-link";
@@ -259,6 +317,48 @@
           
       }
 
+      function setImgPaginationBar(numPages, place_id){
+          var bar = document.getElementById("image-pagination-bar");
+          bar.innerText = "";
+          li = document.createElement("li");
+          a = document.createElement("a");
+          a.className = "page-link";
+          a.href = "#"
+          a.innerText = "«";
+          a.addEventListener('click', function(){getImages("1",place_id);});
+          li.appendChild(a);
+          bar.appendChild(li);
+          for (let i=currentImgPage; i<=currentImgPage+4; i++) {
+              li = document.createElement("li");
+              if (i==currentImgPage){
+                  li.className = "page-item-active";
+              } else {
+                  li.className = "page-item";
+              }
+
+              a = document.createElement("a");
+              a.className = "page-link";
+              a.innerText = i;
+              //var localIndex = i;
+              a.addEventListener('click', function(){
+                                              getImages(i,place_id);
+                                          });
+              li.appendChild(a);
+              bar.appendChild(li);
+              if (i==numPages){break;}
+          }
+          li = document.createElement("li");
+          a = document.createElement("a");
+          a.className = "page-link";
+          a.href = "#"
+          a.innerText = "»";
+          a.addEventListener('click', function(){getImages(String(numPages),place_id);});
+          li.appendChild(a);
+          bar.appendChild(li);
+          
+      }
+
+
       function setComments(data, totalComments){
           var stars = {"1":0, "2":0, "3":0, "4":0, "5":0}
           comments = document.getElementsByClassName("comment-container");
@@ -273,8 +373,9 @@
               cbox.removeChild(cbox.firstChild);
           ;}*/ //Vaciar caja de comentarios
 
-          bar = document.getElementById("pagination-bar");
-          bar.innerText = "";
+          //bar = document.getElementById("pagination-bar");
+          //bar.innerText = "";
+
           /*while (bar.fisrtChild){
               console.log("Vaciando barra...");
               bar.removeChild(bar.firstChild);
@@ -384,22 +485,134 @@
           document.getElementById("amount1").innerText = stars["1"];          
       }
 
+      function setImages(data, totalImages){
+          comments = document.getElementsByClassName("comment-container");
+          /*comment_ids = [];
+          for (i=0; i<comments.length; i++){
+              comment_ids.push(comments[i].id);
+          }*/
+          cbox = document.getElementById("main-image-box");
+          cbox.innerText = "";
+          /*while (cbox.fisrtChild){
+              console.log("Vaciando caja...");
+              cbox.removeChild(cbox.firstChild);
+          ;}*/ //Vaciar caja de comentarios
+
+          //bar = document.getElementById("image-pagination-bar");
+          //bar.innerText = "";
+          /*while (bar.fisrtChild){
+              console.log("Vaciando barra...");
+              bar.removeChild(bar.firstChild);
+          ;}*/ //Vaciar barra de paginas
+          console.log(data);
+          Object.keys(data).forEach(function(image){
+              console.log(data[image]);
+              img_src = data[image]['image'];
+              owner = data[image]['owner'];
+              caption = data[image]['caption'];
+              full_caption = owner + ":\n" + caption;
+              console.log(caption);
+              created = data[image]['created'];
+              id = data[image]['id'];
+   
+              //if (!comment_ids.includes(String(data[comment]['id']))){
+              var outer_div = document.createElement("div");
+              outer_div.className = "col-md-4 p-3 comment-container";
+              outer_div.id = data[image]['id'];
+              
+              var second_outer_div = document.createElement("div");
+              second_outer_div.className = "card box-shadow";
+
+              if (img_src!=null){
+                  var image = document.createElement("img");
+                  image.className = "card-img-top";
+                  image.src = img_src;
+                  second_outer_div.appendChild(image);
+              }
+
+              var first_inner_div = document.createElement("div");
+              first_inner_div.className = "card-body";
+
+              var caption = document.createElement("p");
+              caption.className = "card-text";
+              
+              caption.innerText = full_caption;
+              first_inner_div.appendChild(caption);
+
+              var second_inner_div = document.createElement("div");
+              second_inner_div.className = "d-flex justify-content-between align-items-center";
+
+              var innermost_div = document.createElement("div");
+              innermost_div.className = "btn-group";
+
+              var view_button = document.createElement("button");
+              view_button.type="button";
+              view_button.className = "btn btn-sm btn-outline-secondary";
+              view_button.innerText = "View";
+              innermost_div.appendChild(view_button);
+
+        
+              if (owner==user){
+                  var delete_button = document.createElement("button");
+                  delete_button.type="button";
+                  delete_button.className="btn btn-sm btn-outline-secondary";
+                  var comment_id = id;
+                  let image_id = id;
+                  delete_button.addEventListener('click', function(){deleteImage(image_id);});
+                  delete_button.innerText="Delete";
+                  innermost_div.appendChild(delete_button);
+              }
+
+              var date = document.createElement("small");
+              date.innerText = created;
+              date.className = "text-muted";
+
+              second_inner_div.appendChild(innermost_div);
+              second_inner_div.appendChild(date);
+
+              first_inner_div.appendChild(second_inner_div);
+              second_outer_div.appendChild(first_inner_div);
+              outer_div.appendChild(second_outer_div);
+
+              document.getElementById("main-image-box").appendChild(outer_div);
+              //}
+
+          });
+      }
+
       function getComments(page, place_id){
-          console.log("Requested:\n");
-          console.log(page);
           currentPage = page;
           $.ajax({
               url : "{% url 'venues:getcomments' %}"+"?venue_id="+place_id+"&page="+page,
               dataType: "json",  
               method : "GET",
               success : function (data) {
-                  console.log(data);
                   currentPage = parseInt(page);
                   setComments(data['results'], data['count']);
                   getAvgRating(place_id);
                   commentCount = data['count']
                   var num_pages = Math.ceil(data['count']/10);
                   setPaginationBar(num_pages,place_id);
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
+      function getImages(page, place_id){
+          currentImgPage = page;
+          $.ajax({
+              url : "{% url 'venues:getimages' %}"+"?venue_id="+place_id+"&page="+page,
+              dataType: "json",  
+              method : "GET",
+              success : function (data) {
+                  currentPage = parseInt(page);
+                  setImages(data['results'], data['count']);
+                  imageCount = data['count'];
+                  var num_pages = Math.ceil(data['count']/10);
+                  setImgPaginationBar(num_pages,place_id);
               },
               error : function (data){
                   console.log(data);
@@ -449,9 +662,14 @@
           }
       }
 
-      function submissionHandler(){
-          console.log("About to submit a new comment about "+place_identifier)
-          sendComment(place_identifier);
+      function submissionHandler(type){ //Poner un param type para saber si se envia un comment o una foto
+          if (type=='comment'){
+              console.log("About to submit a new comment about "+place_identifier);
+              sendComment(place_identifier);
+          } else if (type == 'image') {
+              console.log("About to submit a new image about "+place_identifier);
+              sendImage(place_identifier);
+          }
       }
 
       function sendComment(place_id){
@@ -464,6 +682,31 @@
                   console.log(data)
                   getComments(currentPage, place_identifier);
                   $('#comment-form').each(function(){
+                      this.reset();
+                  });
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
+      function sendImage(place_id){
+          formData = new FormData($("#image-form")[0])
+          console.log(formData)
+          $.ajax({
+              url : "{% url 'venues:newimage' %}"+"?venue_id="+place_id,
+              dataType: "json",
+              processData: false,
+              contentType: false,
+              async: false,
+              method : "POST",
+              data: formData, 
+              success : function (data) {
+                  console.log(data)
+                  getImages(currentImgPage, place_identifier);
+                  $('#image-form').each(function(){
                       this.reset();
                   });
               },
@@ -493,14 +736,33 @@
           });
       }
 
+      function deleteImage(image_id){
+          $.ajax({
+              url : "{% url 'venues:removeimage' %}"+"?image_id="+image_id,
+              dataType: "json",  
+              method : "GET",
+              success : function (data) {
+                  console.log(data)
+                  if ((imageCount-1) % 10 == 0){
+                      currentImgPage-=1;
+                  }
+                  getImages(currentImgPage, place_identifier);
+              },
+              error : function (data){
+                  console.log(data);
+                  alert("Ha habido un error, inténtalo más tarde.");
+              }
+          });
+      }
+
       $(document).ready(function(){
           console.log("Loading 1st page of comments")
           getComments("1",place_identifier);
+          getImages("1",place_identifier);
       });
 
 
   </script>
-  <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
   <pingendo onclick="window.open('https://pingendo.com/', '_blank')" style="cursor:pointer;position: fixed;bottom: 20px;right:20px;padding:4px;background-color: #00b0eb;border-radius: 8px; width:220px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:14px;color:white">Made with Pingendo Free&nbsp;&nbsp;<img src="https://pingendo.com/site-assets/Pingendo_logo_big.png" class="d-block" alt="Pingendo logo" height="16"></pingendo>
 </body>
 

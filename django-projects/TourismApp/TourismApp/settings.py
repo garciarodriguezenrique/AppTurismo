@@ -25,7 +25,7 @@ SECRET_KEY = 'jm1&%131uju_8=xmzez9)u%6h4zngu8ss8v^)%#p^av@ip57)o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.115', '127.0.0.1', '192.168.1.104', '0.0.0.0']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'django_user_agents',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -139,6 +141,8 @@ STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = '/venues/'
 
 LOGOUT_REDIRECT_URL = '/venues/'
+
+SECURE_SSL_REDIRECT = False
 
 #Mainly for password reset requests
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"

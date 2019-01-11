@@ -74,7 +74,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ('image', 'caption', 'venue_id', 'owner', 'created')
+        fields = ('id','image', 'caption', 'venue_id', 'owner', 'created')
 
 class RatingSerializer(serializers.ModelSerializer):
 

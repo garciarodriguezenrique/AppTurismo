@@ -15,8 +15,13 @@ from django.views import generic, View
 from .forms import SignupForm, ImageUploadForm
 from requests.auth import HTTPBasicAuth
 
-#Solución temporal para no repetir la petición de detalle cuando se envían comentarios o fotos.
-PLACE_DETAIL_CACHE = {}
+comment_endpoint = "http://127.0.0.1:8000/comments/"
+image_endpoint = "http://127.0.0.1:8000/images/"
+rating_endpoint = "http://127.0.0.1:8000/ratings/"
+login_endpoint = "http://127.0.0.1:8000/users/login/"
+signup_endpoint = "http://127.0.0.1:8000/users/signup/"
+external_services_endpoint = "http://127.0.0.1:8000/external-api/"
+
 
 #Tipos de punto de interés (wrapper de las categorías de Google Places)
 food=["restaurant","meal_delivery","meal_takeaway"]
@@ -58,14 +63,10 @@ class SignUp(View):
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             data = {'username':username,'password':raw_password}
-            print("About to create user: \n")
-            print(data)
-            signup_url = "http://127.0.0.1:8000/users/signup/"
-            response = requests.post(signup_url, data)
-            print(response.json())
+            response = requests.post(signup_endpoint, data)
+            
             if response.ok:
-                login_url = "http://127.0.0.1:8000/users/login/"
-                response = requests.post(login_url, data = {'username':username,'password':raw_password})
+                response = requests.post(login_endpoint, data = {'username':username,'password':raw_password})
                 if response.ok:
                     token = response.json()['token']
                     request.session['auth_token'] = token
@@ -106,8 +107,7 @@ class Login(View):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            api_auth_url = 'http://127.0.0.1:8000/users/login/'
-            response = requests.post(api_auth_url, data={'username':username, 'password':password})
+            response = requests.post(login_endpoint, data={'username':username, 'password':password})
             if response.ok:
                 token = response.json()['token']
                 request.session['auth_token'] = token
@@ -132,188 +132,34 @@ class Login(View):
 
 class Index(View):
     template_name = 'venues/wireframe-index.html'
+    mobile_template = 'venues/index-global.html'
     
     def get(self, request):
         context = {}
-        return render(request, self.template_name, context)
+        
+        if request.user_agent.is_mobile:
+            return render(request, self.mobile_template, context)
+        else:
+            return render(request, self.template_name, context)
 
-#Comprueba si los detalles del lugar existen en la caché, si no los solicita al servicio web
-def tryCachedDetails(place_id):
-
-    details = ""
-    if place_id in PLACE_DETAIL_CACHE:
-                details = PLACE_DETAIL_CACHE[place_id]
-    else:
-        url="http://127.0.0.1:8000/external-api/getvenues/"+place_id
-        response = requests.get(url)
-        if response.ok:
-            details = json.loads(response.content.decode('utf-8'))
-        else:#No se pudieron obtener los detalles (No debería pasar nunca)-Personalizar el mensaje de error según el código de respuesta
-            error_msg = str(response.status_code)+":"+response.reason
-            messages.error(request,error_msg)
-            context = {}
-            return render(request, self.template_name_on_error, context)
-    return details
-
-def prepareComments(comments, user):
-
-    comment_list = []
-    if comments:
-        for element in comments:
-            item = {}
-            item['date'] = parser.parse(element['created']).strftime('%m/%d/%Y - %H:%M:%S')
-            item['text'] = element['text']
-            item['owner'] = element['owner']
-            item['id'] = element['id']
-            if element['owner'] == str(user):
-                item['editable'] = True
-            if element['image']:
-                item['image'] = element['image']
-            comment_list.append(item)
+class Listview(View):
+    template_name = 'venues/listview-mobile.html'
  
-    return comment_list 
+    def post(self, request):
+        position = request.POST['position']
+        radius = request.POST['radius']
+        request.session['radius'] = radius
+        category = request.POST['category']
+        print(position)
+        print(radius)
+        print(category)
 
-def getPageNumber(string):
+        context = {}
 
-    start = string.find("page=")
-    if start!=-1:
-        end = start + len("page=") + 2
-        substr = string[start:end]
-        if '&' not in substr[-2:]:
-            return substr[-2:]
-        else:
-            return substr[-2:-1]
-    else:
-        return None
-#-------------------------------------------------------------------------------------------#
-# Vista para postear nuevos comentarios. Almacena el comentario en el servicio web mediante #
-# una petición POST, y a continuación recupera la lista actualizada de comentarios y fotos. #
-# Existe por lo menos un comentario nuevo que debe ser mostrado (el enviado), pero en ese   #
-# tiempo otros usuarios podrían haber enviado nuevos comentarios o fotos.                   #
-#-------------------------------------------------------------------------------------------#
-
-
-class PostNewComment(View):
-    template_name = 'venues/wireframe-detail.html'
-    template_name_on_error = 'venues/error.html'
-
-    def post(self, request, place_id):
-        next = ""
-        previous = ""
-        image_list = []
-        comment_list = []
-        comment = request.POST["text"];
-        rating = request.POST["rating"]
-        image = None
-        if "image" in request.FILES:
-            stream = request.FILES["image"].file
-            image = base64.b64encode(stream.getvalue())
-        
-        url = "http://127.0.0.1:8000/comments/"
-
-        response = requests.post(url, data = {'text':comment, 'rating':rating, 'image':image, 'venue_id': place_id}, headers = {'Authorization':'token '+request.session['auth_token']}) 
-        if response.ok:
-            r = requests.get(url+"?venue_id="+place_id)
-            if r.ok:
-                data = json.loads(r.content.decode('utf-8'))
-                comments = data['results']
-                if 'next' in data and data['next'] is not None:
-                    page = getPageNumber(data['next'])
-                    if page:
-                        next = page
-                if 'previous' in data and data['previous'] is not None:
-                    if content_page == "2":
-                        previous = "0"
-                    else: 
-                        page = getPageNumber(data['previous'])
-                        if page:
-                            previous = page
-            else:
-                comments = ""
-                messages.error(request,"No se pudieron recuperar los comentarios")
-
-            comment_list = prepareComments(comments, self.request.user)
-                    
-            details = tryCachedDetails(place_id)
-            phone_number = ""
-            address = ""
-            website = ""
-            schedule = ""
-            categories = ""        
-            name = details['result']['name']
-            if 'formatted_phone_number' in details['result']: 
-                phone_number = details['result']['formatted_phone_number']
-            if 'formatted_address' in details['result']:
-                address = details['result']['formatted_address']
-            if 'website' in details['result']:
-                website = details['result']['website']
-            if 'opening_hours' in details['result'] and 'weekday_text' in details['result']['opening_hours']:
-                schedule = details['result']['opening_hours']['weekday_text']
-            if 'types' in details['result']:
-                categories = details['result']['types']
-            context = {"comments":comment_list, 'name':name, 'phone_number':phone_number, 'address':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id, 'next':next, 'previous':previous}
-            return render(request, self.template_name, context)
-        else: #No se pudo añadir el comentario
-            messages.error(request,"Debido a un error, no se ha podido añadir tu comentario. Inténtalo más tarde.")
-            context = {}
-            return render(request, self.template_name, context)
-
-class DeleteComment(View):
-    template_name = 'venues/wireframe-detail.html'
-
-    def get(self, request, place_id, comment_id):
-        next = ""
-        previous = ""
-
-        url = "http://127.0.0.1:8000/comments/"
-
-        requests.delete(url+comment_id, headers = {'Authorization':'token '+request.session['auth_token']})
-   
-        response = requests.get(url+"?venue_id="+place_id)
-        if response.ok:
-            data = json.loads(r.content.decode('utf-8'))
-            comments = data['results']
-            if 'next' in data and data['next'] is not None:
-                page = getPageNumber(data['next'])
-                if page:
-                    next = page
-            if 'previous' in data and data['previous'] is not None:
-                if content_page == "2":
-                    previous="0"
-                else: 
-                    page = getPageNumber(data['previous'])
-                    if page:
-                        previous = page
-        else:
-            comments = ""
-            messages.error(request,"No se pudieron recuperar los comentarios")
-
-        comment_list = prepareComments(comments, self.request.user)
-                    
-        details = tryCachedDetails(place_id)
-        phone_number = ""
-        address = ""
-        website = ""
-        schedule = ""
-        categories = ""        
-        name = details['result']['name']
-        if 'formatted_phone_number' in details['result']: 
-            phone_number = details['result']['formatted_phone_number']
-        if 'formatted_address' in details['result']:
-            address = details['result']['formatted_address']
-        if 'website' in details['result']:
-            website = details['result']['website']
-        if 'opening_hours' in details['result'] and 'weekday_text' in details['result']['opening_hours']:
-            schedule = details['result']['opening_hours']['weekday_text']
-        if 'types' in details['result']:
-            categories = details['result']['types']
-        context = {"comments":comment_list, 'name':name, 'phone_number':phone_number, 'address':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id, 'next':next, 'previous':previous}
         return render(request, self.template_name, context)
 
 
         
-
-
 #---------------------------------------------------------------------------------------------#
 # Vista detalle. Obtiene y presenta los detalles de un punto de interés a través del servicio #
 # web, junto con las fotos y comentarios asociados a este                                     #
@@ -321,14 +167,14 @@ class DeleteComment(View):
 
 class Detail(View):
     template_name = 'venues/wireframe-detail-jquery.html'
-    template_name_on_error = 'venues/error.html'
+    template_name_on_error = 'venues/error-template.html'
 
     def get(self, request, place_id, content_page=''):
         image_list = []
         comment_list = []
         next = ""
         previous = ""
-        url="http://127.0.0.1:8000/external-api/getvenues/"+place_id
+        url=external_services_endpoint+"getvenues/"+place_id
         response = requests.get(url)
 
         #Retrieve venue details
@@ -348,7 +194,7 @@ class Detail(View):
                 address = jData['result']['formatted_address']
             else:
                 #address = geocode(jData['result']['geometry']['location']['lat'],lng)
-                response = requests.get("http://127.0.0.1:8000/external-api/reverse-geocode/?LatLng="+jData['result']['geometry']['location']['lat']+","+jData['result']['geometry']['location']['lng'])
+                response = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+jData['result']['geometry']['location']['lat']+","+jData['result']['geometry']['location']['lng'])
                 if response.ok:
                     data=response.json();
                     for component in data['results'][0]['address_components']:
@@ -379,27 +225,11 @@ class Detail(View):
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
             messages.error(request,error_msg)
-            context = {}
+            error = "No pudieron recuperarse los detalles de este sitio ("+error_msg+")"
+            context = {'error':error}
             return render(request, self.template_name_on_error, context)
 
-def cacheInSession(jData, request):
-    
-    for item in jData['results']:
-        for category in CATEGORIES:
-            if any(t in CATEGORIES[category] for t in item['types']):
-                exists = False
-                if request.session[category]:
-                    for element in request.session[category]:
-                        if element['id'] == item['id']:
-                            exists = True
-                            break
-                    if not exists:
-                        request.session[category].append(item)
-                else:
-                    request.session[category].append(item) 
 
-
-#Función auxiliar para limpiar caracteres conflictivos de la respuesta y aplicar filtrado.
 def cleanResponse(jData): 
 
             required_keys = ["venue_name", "lat", "venue_id", "rating", "reference", "category", "icon", "lng"]
@@ -438,26 +268,32 @@ def formatCategory(category):
 
 class Mapview(View):
     template_name = 'venues/mapview.html'
-    template_name_on_error = 'venues/error.html'
+    mobile_template = 'venues/listview-mobile.html'
+    template_name_on_error = 'venues/error-template.html'
 
     def post(self, request):
+        print(request.POST)
         position = request.POST['position']
         radius = request.POST['radius']
         request.session['radius'] = radius
         category = request.POST['category']
+
+        #Workaround temporal para posición en dispositivos móviles (HTML geocode no funciona sin https)
+        if not position:
+            position = "43.3380112,-8.407468"
         
         if position:
             user_coordinates = {'lat': float(position.split(",")[0]), 'long': float(position.split(",")[1])}
             request.session['user_coordinates'] = user_coordinates
-            print(user_coordinates)
-            url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, category) #url vieja con campo categoría
+            url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, category) #url vieja con campo categoría
             #url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
             print(url)
             response = requests.get(url)
         else:
-            messages.error(request,"Error al tratar de obtener tu ubicación.")
-            context = {}
-            return render(request, self.template_name, context)
+            error = "Hubo un error al tratar de obtener tu ubicación."
+            context = {'error':error}
+            error = "Hubo un error al tratar de obtener tu ubicación."
+            return render(request, self.template_name_on_error, context)
 
         if response.ok:
             #jData = json.loads(response.content.decode('utf-8'))
@@ -466,8 +302,7 @@ class Mapview(View):
             d = cleanResponse(jData)
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
-            rating_url = "http://127.0.0.1:8000/ratings/"
-            r = requests.get(rating_url)
+            r = requests.get(rating_endpoint)
             if r.ok:
                 ratings = r.json()
                 aux_dict = {}
@@ -479,18 +314,29 @@ class Mapview(View):
                     else:
                         venue['rating'] = "0.00"
             context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
-            return render(request, self.template_name, context)
+            #if request.user_agent.is_mobile:
+            print("REDIRECT TO MOBILE TEMPLATE")
+            return render(request, self.mobile_template, context)
+            #else:
+                #return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
-            messages.error(request,"Error al tratar de obtener puntos de interés cerca de tu ubicación.")
-            context = {}
-            return render(request, self.template_name, context)
+            error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación ("+error_msg+")"
+            context = {'error':error}
+            return render(request, self.template_name_on_error, context)
+
+#---------------------------------------------------------------------------------------------#
+# Las siguientes funciones se usan para actualizar las cajas de comentarios e imágenes de     #
+# las páginas detalle, así como mantener actualizada la información relativa a la puntuación  #
+# según las valoraciones de los usuarios                                                      #
+#---------------------------------------------------------------------------------------------#
+
 
 class GetAvgRating(View):
 
     def get(self, request):
         place_id = request.GET['venue_id']
-        url = "http://127.0.0.1:8000/ratings/?venue_id="+place_id
+        url = rating_endpoint+"?venue_id="+place_id
         response = requests.get(url)
         if response.ok:
             data = response.json()
@@ -502,18 +348,32 @@ class NewComment(View):
 
     def post(self, request):
         place_id = request.GET['venue_id']
-        print("place_id:"+place_id)
         comment = request.POST["text"]
         rating = request.POST["rating"]
-        print("rating:"+rating)
         image = None
         if "image" in request.FILES:
             stream = request.FILES["image"].file
             image = base64.b64encode(stream.getvalue())
         
-        url = "http://127.0.0.1:8000/comments/"
-        response = requests.post(url, data = {'text':comment, 'rating':rating, 'venue_id': place_id}, headers = {'Authorization':'token '+request.session['auth_token']}) # se ha quitado 'image':image de data, ahora las fotos van separadas
+        response = requests.post(comment_endpoint, data = {'text':comment, 'rating':rating, 'venue_id': place_id}, headers = {'Authorization':'token '+request.session['auth_token']}) # se ha quitado 'image':image de data, ahora las fotos van separadas
         print(response.json())
+        if response.ok:
+            return HttpResponse(201)
+        else:
+            return HttpResponse(500)
+
+class NewImage(View):
+
+    def post(self, request):
+        place_id = request.GET['venue_id']
+        caption = request.POST["caption"]
+        image = None
+        if "image" in request.FILES:
+            stream = request.FILES["image"].file
+            image = base64.b64encode(stream.getvalue())
+        
+        response = requests.post(image_endpoint, data = {'caption':caption, 'image':image, 'venue_id': place_id}, headers = {'Authorization':'token '+request.session['auth_token']}) 
+        
         if response.ok:
             return HttpResponse(201)
         else:
@@ -524,14 +384,29 @@ class GetComments(View):
     def get(self, request):
         place_id = request.GET['venue_id']
         page = request.GET['page']
-        comments_url = "http://127.0.0.1:8000/comments/?venue_id="+place_id
+        comments_url = comment_endpoint+"?venue_id="+place_id
         if page and page!="1":
-            comments_url = "http://127.0.0.1:8000/comments/?page="+page+"&venue_id="+place_id
+            comments_url = comment_endpoint+"?page="+page+"&venue_id="+place_id
 
         r = requests.get(comments_url)
         if r.ok:
             data = r.json()
-            print(data)
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            return HttpResponse(500)
+
+class GetImages(View):
+
+    def get(self, request):
+        place_id = request.GET['venue_id']
+        page = request.GET['page']
+        images_url = image_endpoint+"?venue_id="+place_id
+        if page and page!="1":
+            images_url = image_endpoint+"?page="+page+"&venue_id="+place_id
+
+        r = requests.get(images_url)
+        if r.ok:
+            data = r.json()
             return HttpResponse(json.dumps(data), content_type="application/json")
         else:
             return HttpResponse(500)
@@ -541,8 +416,19 @@ class RemoveComment(View):
     def get(self, request):
         comment_id = request.GET['comment_id']
 
-        comments_url = "http://127.0.0.1:8000/comments/"
-        response = requests.delete(comments_url+comment_id, headers = {'Authorization':'token '+request.session['auth_token']})
+        response = requests.delete(comment_endpoint+comment_id, headers = {'Authorization':'token '+request.session['auth_token']})
+
+        if response.ok:
+            return HttpResponse(204)
+        else:
+            return HttpResponse(500)
+
+class RemoveImage(View):
+
+    def get(self, request):
+        image_id = request.GET['image_id']
+
+        response = requests.delete(image_endpoint+image_id, headers = {'Authorization':'token '+request.session['auth_token']})
 
         if response.ok:
             return HttpResponse(204)
@@ -562,29 +448,28 @@ class Filter(View):
         user_coordinates = request.session['user_coordinates']
         radius = request.session['radius']
         formattedCategories = ",".join(categories)
-     
-        #for category in categories:
-        #    if request.session[category]:
-        #        print("Existe en caché la categoría: "+category)
-        #        content.extend(request.session[category])
-        #    else:
-        #        print("No existe en caché la categoría: "+category)
-        #        formattedCategories += formatCategory(CATEGORIES[category])
-        #        print("Se añade a la petición. Estado actual: "+formattedCategories)
 
-        #if content:
-        #    print("Se prepara el contenido de la caché")
-        #    content = cleanResponse(content)
-        #    finalResult.extend(content)
-
-        url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, formattedCategories)
+        url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, formattedCategories)
         response = requests.get(url)
 
         if response.ok:
-            print("Se prepara el nuevo contenido recuperado")
             jData = response.json()
             d = cleanResponse(jData)
-            return HttpResponse(d, content_type="application/json")
+            #-----------------------------------------------------------------
+            venues = json.loads(d)
+            r = requests.get(rating_endpoint)
+            if r.ok:
+                ratings = r.json()
+                aux_dict = {}
+                for rating in ratings['results']:
+                    aux_dict[rating['venue_id']] = rating['avg_rating']
+                for venue in venues:
+                    if venue['reference'] in aux_dict:
+                        venue['rating'] = aux_dict[venue['reference']]
+                    else:
+                        venue['rating'] = "0.00"
+            #-----------------------------------------------------------------
+            return HttpResponse(json.dumps(venues), content_type="application/json")
         #else if zero_results devolver un codigo de error que salte un mensaje no hay resultados en el mapa
         #else devolver un codigo que haga saltar lo de ha habido un error, intentalo mas tarde
             

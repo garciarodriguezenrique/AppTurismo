@@ -56,14 +56,46 @@
         <a href="#"><input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar_and_clubs">Bares y clubs</a>
         <a href="#"><input class="filter-checkbox" id="transportFilter" type="checkbox" onclick="evaluateFilters()" value="transport">Transporte</a>
         <a href="#"><input class="filter-checkbox" id="otherFilter" type="checkbox" onclick="evaluateFilters()" value="other">Otros</a>
+        <div class="input-field col s12">
+        <div class="center">
+          <button id="filter-button" class="waves-effect waves-light btn">Buscar</button>
+        </div>
+        </div>
     </div>
-    <div class="input-field col s12">
+    <!--<div class="input-field col s12">
     <div class="center">
        <button id="filter-button" class="waves-effect waves-light btn">Buscar</button>
    </div>
-   </div>
+   </div>-->
 </div>
 
+<div id="calculateroute-control-experimental" class="filter-dropdown">
+    <button onclick="getDistanceFromUserPositionOptimized()" class="dropbtn">Calcular ruta</button>
+</div>
+
+<div id="routeoptions-control-experimental" class="filter-dropdown">
+    <button onclick="showOptions()" class="dropbtn">Opciones de ruta</button>
+    <div id="routeoptionsDropdown" class="filter-dropdown-content">
+      <div id="travel-mode-control" class="input-field col s12">
+        <select id="transport" required>
+          <option value="DRIVING">Coche</option>
+          <option value="WALKING">A pie</option>
+          <option value="BICYCLING">Bicicleta</option>
+          <option value="transit-bus">Transporte público (bus)</option>
+          <option value="transit-subway">Transporte público (metro)</option>
+        </select>
+        <label></label>
+      </div>
+      <div id="route-sorting-control">
+        <select id="route-sorting">
+          <option value="automatic-sorting">Ordenación automática</option> 
+          <option value="manual-sorting">Ordenación manual</option> 
+      </select>
+</div>
+</div>  
+    </div>
+</div>
+<!--
 <div id="travel-mode-control" class="input-field col s12">
     <select id="transport" required>
           <option value="DRIVING">Coche</option>
@@ -80,7 +112,7 @@
         <option value="automatic-sorting">Ordenación automática</option> 
         <option value="manual-sorting">Ordenación manual</option> 
     </select>
-</div>
+</div>-->
 
     <!-- Panel de indicaciones de ruta -->
     <div id="right-panel" style="display:none">
@@ -181,25 +213,32 @@
         //document.getElementById('floating-sorting-panel').addEventListener('change', onChangeHandler);
         //map.controls[google.maps.ControlPosition.TOP_CENTER].push(sortControlDiv);
 
-        var routeControlDiv = document.createElement('div');
+        /*var routeControlDiv = document.createElement('div');
         var routeControl = new calculateRouteControl(routeControlDiv, map);
         routeControlDiv.index = 1;
-        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(routeControlDiv);
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(routeControlDiv);*/
 
         //Control de filtrado viejo que no permite visualizar más de una categoría a la vez
         /*var filterControlDiv = document.getElementById('filter-control');
         document.getElementById('filter-button').addEventListener('click', filterResults);
         map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterControlDiv);*/
 
+        var calcRouteControlDiv = document.getElementById('calculateroute-control-experimental');
+        calcRouteControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(calcRouteControlDiv);
+
         var filterControlDiv = document.getElementById('filter-control-experimental');
         document.getElementById('filter-button').addEventListener('click', filterResults);
         map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterControlDiv);
 
-        var travelModeControlDiv = document.getElementById('travel-mode-control');
+        var routeoptionsControlDiv = document.getElementById('routeoptions-control-experimental');
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(routeoptionsControlDiv);
+
+        /*var travelModeControlDiv = document.getElementById('travel-mode-control');
         map.controls[google.maps.ControlPosition.TOP_CENTER].push(travelModeControlDiv);
 
         var routeSortingControlDiv = document.getElementById('route-sorting-control');
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(routeSortingControlDiv);
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(routeSortingControlDiv);*/
 
                      
         

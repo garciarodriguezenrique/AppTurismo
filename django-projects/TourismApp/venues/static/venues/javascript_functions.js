@@ -379,6 +379,10 @@ function showFilters(){
     document.getElementById("filterDropdown").classList.toggle("show");
 }
 
+function showOptions(){
+    document.getElementById("routeoptionsDropdown").classList.toggle("show");
+}
+
 function addToRoute(name, lat, lng) {
     var checkBox = document.getElementById("check_"+name);
     if (checkBox.checked == true){
@@ -463,7 +467,7 @@ function placeMarkers(venue_list){
             star_rating += '<span class="fa fa-star"></span>'
         }
         
-        detail_ref = '<a class=sidebar-element-detail-ref href="'+sorted[venue]['reference']+'/">Más detalles</a>'
+        detail_ref = '<a class="sidebar-element-detail-ref" href="'+sorted[venue]['reference']+'/" target="_blank">Más detalles</a>'
 
         /*sidenav_list = document.getElementById("sidenav-content");
         new_element = document.createElement("a");
