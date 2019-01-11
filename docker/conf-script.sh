@@ -7,7 +7,7 @@ echo "Restarting MySQL..."
 echo "Creating database..."
 mysql -u root < script.sql
 
-echo "Configuring Django user..."
+echo "Setting up Django user..."
 cat mycnf >> /etc/mysql/my.cnf
 
 echo "Launching Web Service on 0.0.0.0:8000..."
