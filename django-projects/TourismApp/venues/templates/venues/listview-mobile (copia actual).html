@@ -14,11 +14,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
   <link rel="stylesheet" type="text/css" href="{% static 'venues/listview-mobile.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'venues/scorecard.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'venues/map-sidenav.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'venues/adv-options-sidenav.css' %}"> 
 </head>
 
-<body id="main">
+<body>
   <div class="collapse bg-dark" id="navbarHeader">
     <div class="container">
       <div class="row">
@@ -38,10 +36,10 @@
         <div class="center">
           <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3">Buscar</button>
         </div>
-        <div class="col-md-7 py-4">
+        <div class="col-md-3 offset-md-1 py-4">
           <h4>Opciones de ruta</h4>
-           <p class="text-info">Escoge un método de transporte y el criterio de ordenación de la ruta. La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p> 
-          <!-- <ul class="list-unstyled">
+          <p class="text-info">Escoge un método de transporte y el criterio de ordenación de la ruta. La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p>
+          <ul class="list-unstyled">
             <li>
               <select class="custom-select d-block w-100" id="transport" required="">
                 <option value="DRIVING">Coche</option>
@@ -57,7 +55,7 @@
                 <option value="manual-sorting">Ordenación manual</option> 
               </select>
             </li>  
-          </ul> -->
+          </ul>
         </div>
       </div>
     </div>
@@ -70,21 +68,6 @@
   </div>
   <div class="py-4 bg-light">
     <div class="container">
-      <div id="adv-options-sidenav" class="adv-options-sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()">&times;</a>
-        <a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Clients</a>
-        <a href="#">Contact</a>
-      </div>
-      <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <!--<a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Clients</a>
-        <a href="#">Contact</a>-->
-        <div id="map"></div>
-      </div>
       <div class="row">
         <div class="col-md-12">
           <div class="list-group" id="venue-list">
@@ -110,13 +93,11 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-  <pingendo style="cursor:pointer;position: fixed;bottom: 10px;right:10px;padding:4px"><button id="filter-button" onclick="openOptionsNav()" class="btn btn-primary btn-lg btn-block mt-3">Calcular Ruta</button><button id="filter-button" onclick="openNav()" class="btn btn-primary btn-lg btn-block mt-3">Ver resultados en mapa</button></pingendo>
+  <pingendo style="cursor:pointer;position: fixed;bottom: 10px;right:10px;padding:4px"><button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3">Calcular Ruta</button></pingendo>
 </body>
 <script>
 MAX_STARS = 5;
 var currentlyDisplayedCategories = []
-
-var map;
 
 var venues_json = '{{ venues }}';
 var user_location = '{{ user_location }}';
@@ -238,52 +219,6 @@ function filterResults(){
             }
         });
     } else {alert("Selecciona una categoría, por favor");}  
-}
-
-function initMap() {
-  distanceMatrixService = new google.maps.DistanceMatrixService(); 
-  directionsService = new google.maps.DirectionsService;
-  directionsDisplay = new google.maps.DirectionsRenderer;
-
-  map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: j_loc["lat"], lng: j_loc["long"]},
-    zoom: 15
-  });
-
-  directionsDisplay.setMap(map);
-
-  var user_icon = { 
-    url: 'https://static.thenounproject.com/png/67172-200.png',
-    scaledSize: new google.maps.Size(50, 50)
-  };  
-
-  var user_marker = new google.maps.Marker({
-    position: new google.maps.LatLng(j_loc["lat"], j_loc["long"]),
-    map: map,
-    title: 'Usted está aquí',
-    icon: user_icon
-  });
-}
-
-function openOptionsNav() {
-  document.getElementById("adv-options-sidenav").style.width = "250px";
-  document.getElementById("main").style.marginLeft = "250px";
-  document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
-}
-
-function closeOptionsNav() {
-  document.getElementById("adv-options-sidenav").style.width = "0";
-  document.getElementById("main").style.marginLeft= "0";
-  document.body.style.backgroundColor = "white";
-}
-
-function openNav() {
-  document.getElementById("mySidenav").style.width = "100%";
-  //initMap();
-}
-
-function closeNav() {
-  document.getElementById("mySidenav").style.width = "0";
 } 
 
 $(document).ready(function(){
@@ -301,6 +236,5 @@ $(document).ready(function(){
 
 </script>
 <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs&callback=initMap" async defer></script>
 
 </html>
