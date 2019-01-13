@@ -41,7 +41,7 @@
         <div class="col-md-7 py-4">
           <h4>Opciones de ruta</h4>
            <p class="text-info">Escoge un método de transporte y el criterio de ordenación de la ruta. La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p> 
-          <!-- <ul class="list-unstyled">
+          <ul class="list-unstyled">
             <li>
               <select class="custom-select d-block w-100" id="transport" required="">
                 <option value="DRIVING">Coche</option>
@@ -57,7 +57,7 @@
                 <option value="manual-sorting">Ordenación manual</option> 
               </select>
             </li>  
-          </ul> -->
+          </ul> 
         </div>
       </div>
     </div>
@@ -72,10 +72,25 @@
     <div class="container">
       <div id="adv-options-sidenav" class="adv-options-sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()">&times;</a>
-        <a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Clients</a>
-        <a href="#">Contact</a>
+        <p class="text-info">Escoge un método de transporte y el criterio de ordenación de la ruta. La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p> 
+        <ul class="list-unstyled">
+          <li>
+            <select class="custom-select d-block w-100" id="transport" required="">
+              <option value="DRIVING">Coche</option>
+              <option value="WALKING">A pie</option>
+              <option value="BICYCLING">Bicicleta</option>
+              <option value="transit-bus">Transporte público (bus)</option>
+              <option value="transit-subway">Transporte público (metro)</option>
+            </select>
+          </li>
+          <li>
+            <select class="custom-select d-block w-100" id="route-sorting" required="">
+              <option value="automatic-sorting">Ordenación automática</option> 
+              <option value="manual-sorting">Ordenación manual</option> 
+            </select>
+          </li>  
+        </ul> 
+        <button id="filter-button" onclick="openNav()" class="btn btn-primary btn-lg btn-block mt-3">Confirmar</button>
       </div>
       <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -117,6 +132,7 @@ MAX_STARS = 5;
 var currentlyDisplayedCategories = []
 
 var map;
+var markers = [];
 
 var venues_json = '{{ venues }}';
 var user_location = '{{ user_location }}';
@@ -125,6 +141,24 @@ var initial_category = '{{ initial_category }}'
 var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
 var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
 var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad 
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+}
 
 function evaluateFilters(){
     var checkboxes = document.getElementsByClassName("filter-checkbox");
@@ -169,14 +203,17 @@ function fillList(venue_list){
         var icon = document.createElement("img");
         icon.src = sorted[venue]["icon"];
         icon.style.height = "25%"
-        var smallicon = document.createElement("small");
-        smallicon.appendChild(icon);
 
         var h5 = document.createElement("h5");
         h5.className = "mb-1";
         h5.innerText = sorted[venue]['venue_name']+"  ";
-        //h5.appendChild(smallicon);
+
+        var small_dist = document.createElement("small");
+        var distance = getDistanceFromLatLonInKm(user_position['lat'],user_position['lng'],sorted[venue]['lat'],sorted[venue]['lng']);
+        small_dist.innerText = "A "+distance.toFixed(2)+" km\n";
+        
         div.appendChild(h5);
+        div.appendChild(small_dist);
 
         var p = document.createElement("p");
         //p.className = "mb-1";
@@ -195,7 +232,7 @@ function fillList(venue_list){
         }
         var icon = document.createElement("img");
         icon.src = sorted[venue]["icon"];
-        icon.style.height = "10%"
+        icon.style.height = "10%";
 
         var small = document.createElement("small");
         var a_detail = document.createElement("a");
@@ -207,7 +244,6 @@ function fillList(venue_list){
         a.appendChild(p);
         a.appendChild(small);
         venue_list.appendChild(a);
-
     });
 }
 
@@ -263,6 +299,8 @@ function initMap() {
     title: 'Usted está aquí',
     icon: user_icon
   });
+
+  placeMarkers(j);
 }
 
 function openOptionsNav() {
@@ -284,7 +322,58 @@ function openNav() {
 
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
-} 
+}
+
+function placeMarkers(venue_list){
+  var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+  sorted = removeDuplicatesByName(sorted);
+  Object.keys(sorted).forEach(function(venue) {
+    //Marker placement------------------------------------------
+    contentString = '<div id="content">'+
+      '<div id="siteNotice">'+
+      '</div>'+
+      '<h1 id="firstHeading" class="firstHeading">'+sorted[venue]['venue_name']+'</h1>'+
+      '<div id="bodyContent">'+
+      '<p><b>'+sorted[venue]['venue_name']+'</b></p>'+
+      '<p>Attribution: '+sorted[venue]['venue_name']+', <a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'">'+
+      'Más información</a><BR>'+
+      '<button onclick="calculateAndDisplayRoute('+ sorted[venue]["lat"] +','+ sorted[venue]["lng"] +')">Ir!</button>'+
+      '</p>'+
+      '</div>';
+
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+
+
+    var marker_icon = { 
+      url: sorted[venue]['icon'],
+      scaledSize: new google.maps.Size(25, 25)
+    }; 
+
+    var marker = new google.maps.Marker({
+      position : new google.maps.LatLng(sorted[venue]["lat"], sorted[venue]["lng"]),
+      map : map,
+      //icon : marker_icon,
+      //animation: google.maps.Animation.DROP,
+      infoWindow: infowindow,
+      title: sorted[venue]['venue_name']
+    });
+
+             
+    google.maps.event.addListener(marker, 'click', function() {
+      if (typeof open_marker !== 'undefined'){
+        open_marker.infoWindow.close();
+      }
+      map.setCenter(this.position);
+      this.infoWindow.open(map, this);
+      open_marker = this;
+    });
+
+    markers.push(marker);
+
+  });
+}
 
 $(document).ready(function(){
     fillList(j);
