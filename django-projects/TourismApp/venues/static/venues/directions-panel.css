@@ -1,0 +1,40 @@
+#directions-panel {
+  font-family: 'Roboto','sans-serif';
+  line-height: 30px;
+  padding-left: 10px;
+}
+
+#directions-panel select, #directions-panel input {
+  font-size: 15px;
+}
+
+#map {
+  margin-right: 400px;
+}
+
+#directions-panel select {
+  width: 100%;
+}
+
+#directions-panel i {
+  font-size: 12px;
+}
+
+#directions-panel {
+  background-color: #8c8d8d;
+  height: 100%;
+  float: right;
+  width: 400px;
+  overflow: auto;
+}
+
+@media print {
+  #map {
+    height: 500px;
+    margin: 0;
+  }
+  #directions-panel {
+    float: none;
+    width: auto;
+  }
+}

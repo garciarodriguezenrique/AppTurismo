@@ -3,6 +3,7 @@ import json
 import geocoder
 import base64
 import pandas as pd
+from math import sin, cos, sqrt, atan2, radians
 from dateutil import parser
 from django.core.files.base import ContentFile
 from django.shortcuts import render
@@ -14,6 +15,8 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 from .forms import SignupForm, ImageUploadForm
 from requests.auth import HTTPBasicAuth
+
+R = 6371
 
 comment_endpoint = "http://127.0.0.1:8000/comments/"
 image_endpoint = "http://127.0.0.1:8000/images/"
@@ -309,6 +312,13 @@ class Mapview(View):
                 for rating in ratings['results']:
                     aux_dict[rating['venue_id']] = rating['avg_rating']
                 for venue in venues:
+                    lat2 = radians(float(venue['lat']))
+                    lon2 = radians(float(venue['lng']))
+                    dlat = lat2 - radians(user_coordinates['lat'])
+                    dlon = lon2 - radians(user_coordinates['long'])
+                    a = sin(dlat / 2)**2 + cos(radians(user_coordinates['lat'])) * cos(lat2) * sin(dlon / 2)**2
+                    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+                    venue['dist_from_user'] = R*c
                     if venue['reference'] in aux_dict:
                         venue['rating'] = aux_dict[venue['reference']]
                     else:
@@ -464,6 +474,13 @@ class Filter(View):
                 for rating in ratings['results']:
                     aux_dict[rating['venue_id']] = rating['avg_rating']
                 for venue in venues:
+                    lat2 = radians(float(venue['lat']))
+                    lon2 = radians(float(venue['lng']))
+                    dlat = lat2 - radians(request.session['user_coordinates']['lat'])
+                    dlon = lon2 - radians(request.session['user_coordinates']['long'])
+                    a = sin(dlat / 2)**2 + cos(radians(request.session['user_coordinates']['lat'])) * cos(lat2) * sin(dlon / 2)**2
+                    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+                    venue['dist_from_user'] = R*c
                     if venue['reference'] in aux_dict:
                         venue['rating'] = aux_dict[venue['reference']]
                     else:
