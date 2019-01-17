@@ -172,7 +172,7 @@ def make_asyncronous_request(category_list, LatLng, radius):
         if 'rating' in element:
             rating = element['rating']
         if not PointOfInterest.objects.filter(reference=element['reference']):
-            poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
+            poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['formatted_address'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
             poi.save()
     return data['results']
 

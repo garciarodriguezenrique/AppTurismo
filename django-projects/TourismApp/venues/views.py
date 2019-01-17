@@ -7,7 +7,7 @@ from math import sin, cos, sqrt, atan2, radians
 from dateutil import parser
 from django.core.files.base import ContentFile
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, authenticate
@@ -102,6 +102,8 @@ class Login(View):
     template_name = 'registration/wireframe-login.html'
 
     def get(self, request):
+        request.session['login_from'] = request.META.get('HTTP_REFERER', '/')
+        print(request.session['login_from'])
         return render(request, self.template_name, {'form':self.form_class})
     
     def post(self, request):
@@ -115,7 +117,10 @@ class Login(View):
                 token = response.json()['token']
                 request.session['auth_token'] = token
                 context = {}
-                return render(request, self.template_name_on_success, context)
+                if request.session['login_from']:
+                    return HttpResponseRedirect(request.session['login_from'])
+                else:
+                    return render(request, self.template_name_on_success, context)
             else:
                 messages.error(request,'Algo salió mal al intentar iniciar tu sesión. Inténtalo más tarde.')
                 context = {'form':self.form_class}
@@ -149,6 +154,7 @@ class Listview(View):
     template_name = 'venues/listview-mobile.html'
  
     def post(self, request):
+        print("HELLO LISTVIEW")
         position = request.POST['position']
         radius = request.POST['radius']
         request.session['radius'] = radius
@@ -170,6 +176,7 @@ class Listview(View):
 
 class Detail(View):
     template_name = 'venues/wireframe-detail-jquery.html'
+    mobile_template = 'venues/wireframe-detail-jquery-temp.html'
     template_name_on_error = 'venues/error-template.html'
 
     def get(self, request, place_id, content_page=''):
@@ -224,7 +231,10 @@ class Detail(View):
                 categories = jData['result']['types']
 
             context = {'name':name, 'phone_number':phone_number, 'address':address, 'website':website, 'schedule':schedule, 'categories':categories, 'id': place_id}
-            return render(request, self.template_name, context)
+            if request.user_agent.is_mobile:
+                return render(request, self.mobile_template, context)
+            else:
+                return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
             messages.error(request,error_msg)
@@ -235,7 +245,7 @@ class Detail(View):
 
 def cleanResponse(jData): 
 
-            required_keys = ["venue_name", "lat", "venue_id", "rating", "reference", "category", "icon", "lng"]
+            required_keys = ["venue_name", "lat", "venue_id", "rating", "reference", "category", "icon", "lng", "formatted_address"]
 
             
             #request.session[jData['results']['category']] = jData
@@ -270,8 +280,9 @@ def formatCategory(category):
 #-------------------------------------------------------------------------------------------#
 
 class Mapview(View):
-    template_name = 'venues/mapview.html'
-    mobile_template = 'venues/listview-mobile.html'
+    #template_name = 'venues/mapview.html'
+    template_name = 'venues/listview-mobile.html'
+    mobile_template = 'venues/listview-mobile-temp.html'
     template_name_on_error = 'venues/error-template.html'
 
     def post(self, request):
@@ -282,8 +293,8 @@ class Mapview(View):
         category = request.POST['category']
 
         #Workaround temporal para posición en dispositivos móviles (HTML geocode no funciona sin https)
-        if not position:
-            position = "43.3380112,-8.407468"
+        #if not position:
+        #    position = "43.3380112,-8.407468"
         
         if position:
             user_coordinates = {'lat': float(position.split(",")[0]), 'long': float(position.split(",")[1])}
@@ -324,11 +335,10 @@ class Mapview(View):
                     else:
                         venue['rating'] = "0.00"
             context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
-            #if request.user_agent.is_mobile:
-            print("REDIRECT TO MOBILE TEMPLATE")
-            return render(request, self.mobile_template, context)
-            #else:
-                #return render(request, self.template_name, context)
+            if request.user_agent.is_mobile:
+                return render(request, self.mobile_template, context)
+            else:
+                return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
             error_msg = str(response.status_code)+":"+response.reason
             error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación ("+error_msg+")"

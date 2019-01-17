@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PAGE settings -->
   <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>Album</title>
+  <title>Mobile - TourismApp</title>
   <meta name="description" content="Wireframe design of an album page by Pingendo">
   <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
   <meta name="author" content="Pingendo">
@@ -59,7 +59,7 @@
           <p id="ratingtext"></p>
           <hr style="border:3px solid #f1f1f1">
 
-
+<!--
 <div class="row">
   <div class="side">
     <div>5 star</div>
@@ -117,7 +117,7 @@
     <div id="amount1"></div>
   </div>
 </div>
-
+-->
 
 <BR>
           {% if phone_number %}
@@ -470,28 +470,6 @@
               //}
 
           });
-          bar5 = document.getElementById("bar-5");
-          bar4 = document.getElementById("bar-4");
-          bar3 = document.getElementById("bar-3");
-          bar2 = document.getElementById("bar-2");
-          bar1 = document.getElementById("bar-1");
-          /*console.log(stars);
-          console.log("Total comments: "+String(totalComments));
-          console.log("5: "+String(stars["5"]/totalComments * 100)+"%");
-          console.log("4: "+String(stars["4"]/totalComments * 100)+"%");
-          console.log("3: "+String(stars["3"]/totalComments * 100)+"%");
-          console.log("2: "+String(stars["2"]/totalComments * 100)+"%");
-          console.log("1: "+String(stars["1"]/totalComments * 100)+"%");*/
-          bar5.style.width = String(stars["5"]/totalComments * 100)+"%";
-          bar4.style.width = String(stars["4"]/totalComments * 100)+"%";
-          bar3.style.width = String(stars["3"]/totalComments * 100)+"%";
-          bar2.style.width = String(stars["2"]/totalComments * 100)+"%";
-          bar1.style.width = String(stars["1"]/totalComments * 100)+"%";
-          document.getElementById("amount5").innerText = stars["5"];
-          document.getElementById("amount4").innerText = stars["4"];
-          document.getElementById("amount3").innerText = stars["3"];
-          document.getElementById("amount2").innerText = stars["2"];
-          document.getElementById("amount1").innerText = stars["1"];          
       }
 
       function setImages(data, totalImages){

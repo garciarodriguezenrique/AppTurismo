@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PAGE settings -->
   <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>TourismApp</title>
+  <title>Mobile - TourismApp</title>
   <meta name="description" content="Wireframe design of an album page by Pingendo">
   <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
   <meta name="author" content="Pingendo">
@@ -15,8 +15,8 @@
   <link rel="stylesheet" type="text/css" href="{% static 'venues/listview-mobile.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'venues/scorecard.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'venues/map-sidenav.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'venues/adv-options-sidenav.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'venues/directions-panel.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'venues/adv-options-sidenav.css' %}"> 
+  <!--<link rel="stylesheet" type="text/css" href="{% static 'venues/directions-panel-mobile.css' %}">--> 
 </head>
 
 <body id="main">
@@ -68,20 +68,15 @@
             </select>
           </li>  
         </ul> 
-        <button id="confirm-route-button" onclick="getDistanceFromUserPositionOptimized()" class="btn btn-primary btn-lg btn-block mt-3">Confirmar</button>
+        <button id="confirm-route-button" onclick="startRoute()" class="btn btn-primary btn-lg btn-block mt-3">Confirmar</button>
       </div>
       <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="resetMap()">&times;</a>
-        <!--<a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Clients</a>
-        <a href="#">Contact</a>-->
-        <div id="directions-panel">
-          <button id="next-segment" onclick="displaySegmentOptimized(false)">Siguiente destino</button>
-          <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
-          <!--<button id="page-reload" onclick="resetMap()">Volver a marcadores</button>-->
-        </div>
         <div id="map"></div>
+        <div id="directions-panel">
+          <!-- <button id="next-segment" onclick="displaySegmentOptimized(false)">Siguiente destino</button> -->
+          <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
+        </div>
       </div>
       <div class="row">
         <div class="col-md-12">
@@ -117,14 +112,12 @@
 MAX_STARS = 5;
 var currentlyDisplayedCategories = []
 
+var onRoute = false;
+var nextDestination = {};
 var map;
 var markers = [];
 var route = [];
-var stops = [];
-var segments = {};
-var stopsIndex = 0;
 var currentSegment = {'from':"", 'to':""};
-var currentPosition = undefined;
 var optimizeRoute = true;
 
 var venues_json = '{{ venues }}';
@@ -162,14 +155,14 @@ function addToRoute(name, lat, lng) {
 }
 
 function resetMap() {
-    stops = [];
-    stopsIndex = 0;
     showMarkers();
+    nextDestination();
     instruction_panel=document.getElementById("directions-panel");
     instruction_panel.style.display="none";
     //Reset directionsDisplay
     closeNav();
     directionsDisplay.setMap(null);
+    onRoute = false;
     //directionsDisplay = null;
     //directionsDisplay = new google.maps.DirectionsRenderer;
     //directionsDisplay.setMap(map);
@@ -194,69 +187,55 @@ function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
   return d;
 }
 
-function getDistanceFromUserPositionOptimized(){
+function getNext(){
 
-    hideMarkersOutsideOfRoute();
-    openNav(); 
-    closeOptionsNav();
-    stopsIndex = 0;
-    //Obtener aquí el valor de ordenacion o no, porque asi si el usuario lo cambia por el medio de la ruta no afecta, y pasarlo como param a display segment
-    routeSorting = document.getElementById("route-sorting").value;
-    if (routeSorting=="automatic-sorting"){
-        optimizeRoute=true;
-    } else if (routeSorting=="manual-sorting"){optimizeRoute=false;} 
-    userPosition = {'lat': user_position["lat"], 'long':user_position["lng"]}
-    stops.push(userPosition);
+    next = {};
+    e = Object.keys(route)[0];
+    next['lat'] = route[e]['lat'];
+    next['long'] = route[e]['lng'];
+    delete route[e];
+    document.getElementById("check_"+e).checked = false;
+    return next;
+
+}
+
+function getClosest(start){
+    var refDistance = 9999.0
+    next = {};
     for (venue in route){
-        venuePosition = {'lat': route[venue]["lat"], 'long':route[venue]["lng"]}
-        stops.push(venuePosition);
-    }
-    displaySegmentOptimized(true);
-
-}
-
-function displaySegmentOptimized(firstTime){
-    var refDistance=9999.0;
-    var nextPosition;
-    //como stops no es un keyed array hay que llevar la cuenta con un indice, como en la actual displaySegment
-    if (stops.length>1){
-        if (!optimizeRoute){
-            console.log("Manual :"+stopsIndex);
-            displaySegmentUnsorted();
-        } else {
-            currentPosition = stops[stopsIndex];
-            stops.splice(stopsIndex, 1);
-            for (venue in stops){
-                distance = getDistanceFromLatLonInKm(currentPosition['lat'],currentPosition['long'],stops[venue]['lat'],stops[venue]['long']);
-                if (distance<refDistance){
-                    refDistance = distance;
-                    stopsIndex = venue;
-                    nextPosition = stops[stopsIndex];
-                }
-            }
-            currentSegment["from"]=new google.maps.LatLng(currentPosition['lat'],currentPosition['long']);
-            currentSegment["to"]=new google.maps.LatLng(nextPosition['lat'],nextPosition['long']);
-            calculateAndDisplayRoute(currentSegment["from"], currentSegment["to"]);
-            currentPosition = nextPosition;
+        distance = getDistanceFromLatLonInKm(start['lat'],start['lng'],route[venue]['lat'],route[venue]['lng']);
+        if (distance<refDistance){
+            refDistance = distance;
+            next['name'] = venue;
+            next['lat'] = route[venue]['lat'];
+            next['lng'] = route[venue]['lng'];
         }
-    } else {
-        resetMap();
     }
-    
+    delete route[next['name']];
+    document.getElementById("check_"+next['name']).checked = false;
+    return next;
 }
 
-function displaySegmentUnsorted(){
+function startRoute(){
 
-    if (stopsIndex == stops.length-1){
-        resetMap();
-    } else {
-        console.log("Manual :"+stopsIndex);
-        currentSegment["from"]=new google.maps.LatLng(stops[stopsIndex]['lat'],stops[stopsIndex]['long']);
-        currentSegment["to"]=new google.maps.LatLng(stops[++stopsIndex]['lat'],stops[stopsIndex]['long']);
-        console.log("Manual :"+stopsIndex);
-        calculateAndDisplayRoute(currentSegment["from"], currentSegment["to"]);
-    }
-    
+    if (Object.keys(route).length>0){
+        hideMarkersOutsideOfRoute();
+        openNav(); 
+        closeOptionsNav();
+        routeSorting = document.getElementById("route-sorting").value;
+        if (routeSorting=="automatic-sorting"){
+            nextDestination = getClosest(user_position);
+        } else if (routeSorting=="manual-sorting"){
+            nextDestination = getNext();
+        } 
+        //nextDestination = getClosest(user_position);
+        var from = new google.maps.LatLng(user_position['lat'],user_position['lng']);
+        var to = new google.maps.LatLng(nextDestination['lat'],nextDestination['lng']);
+        currentSegment["from"]=from;
+        currentSegment["to"]=to;
+        calculateAndDisplayRoute(from, to);
+        onRoute = true;
+    } else {alert("Selecciona por lo menos un punto de interés para ver la ruta");}
 
 }
 
@@ -389,6 +368,9 @@ function fillList(venue_list, sorting_criteria){
         h5.innerText = sorted[venue]['venue_name']+"  ";
 
         var small_dist = document.createElement("small");
+        small_dist.id = "distance-"+sorted[venue]['venue_name'];
+        console.log("ID IS: ");
+        console.log(small_dist.id);
         small_dist.innerText = "A "+sorted[venue]['dist_from_user'].toFixed(2)+" km\n";
         
         div.appendChild(h5);
@@ -481,21 +463,8 @@ function initMap() {
     zoom: 15
   });
 
-  //directionsDisplay.setMap(map);
-
-  var user_icon = { 
-    url: 'https://static.thenounproject.com/png/67172-200.png',
-    scaledSize: new google.maps.Size(50, 50)
-  };  
-
-  var user_marker = new google.maps.Marker({
-    position: new google.maps.LatLng(j_loc["lat"], j_loc["long"]),
-    map: map,
-    title: 'Usted está aquí',
-    icon: user_icon
-  });
-
   placeMarkers(j);
+  trackUser();
 }
 
 function openOptionsNav() {
@@ -527,13 +496,10 @@ function placeMarkers(venue_list){
     contentString = '<div id="content">'+
       '<div id="siteNotice">'+
       '</div>'+
-      '<h1 id="firstHeading" class="firstHeading">'+sorted[venue]['venue_name']+'</h1>'+
+      '<h4 id="firstHeading" class="firstHeading">'+sorted[venue]['venue_name']+'</h4>'+
       '<div id="bodyContent">'+
-      '<p><b>'+sorted[venue]['venue_name']+'</b></p>'+
-      '<p>Attribution: '+sorted[venue]['venue_name']+', <a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'">'+
-      'Más información</a><BR>'+
-      '<button onclick="calculateAndDisplayRoute('+ sorted[venue]["lat"] +','+ sorted[venue]["lng"] +')">Ir!</button>'+
-      '</p>'+
+      '<p><b>'+sorted[venue]['formatted_address']+'</b></p>'+
+      '<a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'" target="_blank" style="font-size:15px;">Buscar con Google</a><BR>'+
       '</div>';
 
     var infowindow = new google.maps.InfoWindow({
@@ -568,6 +534,73 @@ function placeMarkers(venue_list){
     markers.push(marker);
 
   });
+}
+
+function updateDistanceFromUser(){
+
+    Object.keys(j).forEach(function(venue){
+        d = getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
+        document.getElementById("distance-"+j[venue]['venue_name']).innerText = "A "+d.toFixed(2)+" km\n";
+    });
+
+}
+
+function showTrackingPosition(position) {
+    
+    this.currentLat = position.coords.latitude;
+    this.currentLong = position.coords.longitude;
+    user_position["lat"] = position.coords.latitude;
+    user_position["lng"] = position.coords.longitude;
+    updateDistanceFromUser();
+
+    if (onRoute){
+        if (getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],nextDestination["lat"],nextDestination["lng"]) <= 0.25){
+        //if (user_position["lat"] == nextDestination["lat"] && user_position["lng"] == nextDestination["lng"]){
+            if (Object.keys(route).length>0){
+                nextDestination = getClosest(user_position);
+                var from = new google.maps.LatLng(user_position['lat'],user_position['lng']);
+                var to = new google.maps.LatLng(nextDestination['lat'],nextDestination['lng']);
+                currentSegment["from"]=from;
+                currentSegment["to"]=to;
+                calculateAndDisplayRoute(from, to);
+            } else {
+                console.log("No more destinations on the list, resetting directionsDisplay...");
+                resetMap();
+            }
+        }
+    }
+
+    let location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    //map = document.getElementById("map");
+    this.map.panTo(location);
+
+    var user_icon = { 
+      url: 'https://static.thenounproject.com/png/67172-200.png',
+      scaledSize: new google.maps.Size(50, 50)
+    };  
+
+    if (!this.marker) {
+      this.marker = new google.maps.Marker({
+        position: location,
+        map: this.map,
+        title: 'Got you!',
+        icon: user_icon
+      });
+    }
+    else {
+      this.marker.setPosition(location);
+    }
+}
+
+function trackUser(){
+    if (navigator.geolocation) {
+      this.isTracking = true;
+      navigator.geolocation.watchPosition((position) => {
+        this.showTrackingPosition(position);
+      });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
 }
 
 $(document).ready(function(){

@@ -34,6 +34,7 @@ class PointOfInterest(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     venue_id = models.CharField(max_length=100, blank=True, default='')
     reference = models.CharField(max_length=100, blank=True, default='')
+    formatted_address = models.CharField(max_length=200, blank=True, default='')
     rating = models.CharField(max_length=20, blank=True, default='')
     venue_name = models.CharField(max_length=100, blank=True, default='')
     category = ListCharField(

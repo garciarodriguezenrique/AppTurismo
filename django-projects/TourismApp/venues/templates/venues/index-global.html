@@ -57,7 +57,7 @@
         <div class="col-md-8 mx-auto">
           <h1 class="cover-heading"><b>Encuentra puntos de interés cercanos!</b></h1>
           <p class="lead">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios y deja los tuyos!</p>
-          <form class="needs-validation" novalidate="" action="{% url 'venues:listview' %}" method="post">
+          <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
             <div class="col-md-12 w-100 px-5 mb-3 mt-3"> <select class="custom-select d-block w-100" id="category" name="category" required="">
                 <option value="">Escoge una categoría...</option>
