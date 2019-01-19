@@ -17,6 +17,7 @@ from .forms import SignupForm, ImageUploadForm
 from requests.auth import HTTPBasicAuth
 
 R = 6371
+request_radius = 1500
 
 comment_endpoint = "http://127.0.0.1:8000/comments/"
 image_endpoint = "http://127.0.0.1:8000/images/"
@@ -49,11 +50,13 @@ CATEGORIES = {'food':food,'leisure':leisure,'culture':culture,'services':service
 class SignUp(View):
     form_class = SignupForm
     template_name_on_success = 'venues/wireframe-index.html'
+    template_name_on_success_mobile = 'venues/index-global.html'
     template_name_on_login_error = 'registration/wireframe-login.html'
     template_name_on_signup_error = 'registration/wireframe-signup.html'
     template_name = 'registration/wireframe-signup.html'
 
     def get(self, request):
+        request.session['signup_from'] = request.META.get('HTTP_REFERER', '/')
         return render(request, self.template_name, {'form':self.form_class})
     
 
@@ -74,7 +77,13 @@ class SignUp(View):
                     token = response.json()['token']
                     request.session['auth_token'] = token
                     context = {}
-                    return render(request, self.template_name_on_success, context)
+                    #if request.session['signup_from']:
+                    #    return HttpResponseRedirect(request.session['signup_from'])
+                    #else:
+                    if request.user_agent.is_mobile:
+                        return render(request, self.mobile_template_on_success_mobile, context)
+                    else:
+                        return render(request, self.template_name_on_success, context)
                 else:
                     messages.error(request,'Algo salió mal durante el inicio de sesión. Inténtalo más tarde.')
                     context = {'form':AuthenticationForm}
@@ -98,12 +107,12 @@ class SignUp(View):
 class Login(View):
     form_class = AuthenticationForm
     template_name_on_success = 'venues/wireframe-index.html'
+    template_name_on_success_mobile = 'venues/index-global.html'
     template_name_on_error = 'registration/wireframe-login.html'
     template_name = 'registration/wireframe-login.html'
 
     def get(self, request):
         request.session['login_from'] = request.META.get('HTTP_REFERER', '/')
-        print(request.session['login_from'])
         return render(request, self.template_name, {'form':self.form_class})
     
     def post(self, request):
@@ -120,7 +129,10 @@ class Login(View):
                 if request.session['login_from']:
                     return HttpResponseRedirect(request.session['login_from'])
                 else:
-                    return render(request, self.template_name_on_success, context)
+                    if request.user_agent.is_mobile:
+                        return render(request, self.mobile_template_on_success_mobile, context)
+                    else:
+                        return render(request, self.template_name_on_success, context)
             else:
                 messages.error(request,'Algo salió mal al intentar iniciar tu sesión. Inténtalo más tarde.')
                 context = {'form':self.form_class}
@@ -150,24 +162,6 @@ class Index(View):
         else:
             return render(request, self.template_name, context)
 
-class Listview(View):
-    template_name = 'venues/listview-mobile.html'
- 
-    def post(self, request):
-        print("HELLO LISTVIEW")
-        position = request.POST['position']
-        radius = request.POST['radius']
-        request.session['radius'] = radius
-        category = request.POST['category']
-        print(position)
-        print(radius)
-        print(category)
-
-        context = {}
-
-        return render(request, self.template_name, context)
-
-
         
 #---------------------------------------------------------------------------------------------#
 # Vista detalle. Obtiene y presenta los detalles de un punto de interés a través del servicio #
@@ -186,6 +180,8 @@ class Detail(View):
         previous = ""
         url=external_services_endpoint+"getvenues/"+place_id
         response = requests.get(url)
+        print("Entered Detail Page from:\n")
+        print(request.META.get('HTTP_REFERER', '/'))
 
         #Retrieve venue details
         if response.ok:
@@ -281,9 +277,27 @@ def formatCategory(category):
 
 class Mapview(View):
     #template_name = 'venues/mapview.html'
-    template_name = 'venues/listview-mobile.html'
+    template_name = 'venues/listview-desktop.html'
     mobile_template = 'venues/listview-mobile-temp.html'
     template_name_on_error = 'venues/error-template.html'
+
+    def get(self, request):
+
+        if request.session['last_response'] and request.session['user_coordinates'] and request.session['last_category']:
+            venues = request.session['last_response']
+            user_coordinates_json = user_coordinates_json = json.loads(json.dumps(request.session['user_coordinates']))
+            category = request.session['last_category']
+        else:
+            error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación"
+            context = {'error':error}
+            return render(request, self.template_name_on_error, context)
+
+        
+        context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
+        if request.user_agent.is_mobile:
+            return render(request, self.mobile_template, context)
+        else:
+            return render(request, self.template_name, context)
 
     def post(self, request):
         print(request.POST)
@@ -291,6 +305,7 @@ class Mapview(View):
         radius = request.POST['radius']
         request.session['radius'] = radius
         category = request.POST['category']
+        request.session['last_category'] = category
 
         #Workaround temporal para posición en dispositivos móviles (HTML geocode no funciona sin https)
         #if not position:
@@ -334,6 +349,7 @@ class Mapview(View):
                         venue['rating'] = aux_dict[venue['reference']]
                     else:
                         venue['rating'] = "0.00"
+            request.session['last_response'] = venues
             context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
             if request.user_agent.is_mobile:
                 return render(request, self.mobile_template, context)
@@ -465,9 +481,12 @@ class Filter(View):
 
     def get(self, request):
         categories = request.GET['category'].split("|")
-        user_coordinates = request.session['user_coordinates']
+        up = request.GET['user_position']
+        user_coordinates = {'lat': float(up.split(",")[0]), 'long': float(up.split(",")[1])}
+        request.session['user_coordinates'] = user_coordinates
         radius = request.session['radius']
         formattedCategories = ",".join(categories)
+        request.session['last_category'] = formattedCategories
 
         url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, formattedCategories)
         response = requests.get(url)
@@ -496,6 +515,7 @@ class Filter(View):
                     else:
                         venue['rating'] = "0.00"
             #-----------------------------------------------------------------
+            request.session['last_response'] = venues
             return HttpResponse(json.dumps(venues), content_type="application/json")
         #else if zero_results devolver un codigo de error que salte un mensaje no hay resultados en el mapa
         #else devolver un codigo que haga saltar lo de ha habido un error, intentalo mas tarde

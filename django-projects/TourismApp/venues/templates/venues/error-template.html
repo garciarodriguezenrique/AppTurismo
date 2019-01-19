@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+{% load static %}
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -36,7 +36,7 @@
                                 <h2>Algo salió mal</h2>
                                 {% endif %}
 			</div>
-			<a href="#">Go TO Homepage</a>
+			<a href="{% url 'venues:index' %}">Volver a la página de inicio</a>
 		</div>
 	</div>
 

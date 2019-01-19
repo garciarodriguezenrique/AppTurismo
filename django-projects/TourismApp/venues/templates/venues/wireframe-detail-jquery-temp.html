@@ -13,6 +13,7 @@
   <meta name="author" content="Pingendo">
   <!-- CSS dependencies -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   <link rel="stylesheet" href="{% static 'venues/wireframe-detail.css' %}">
   <link rel="stylesheet" href="{% static 'venues/scorecard.css' %}">
 </head>
@@ -44,10 +45,22 @@
   </div>
   <div class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between">
-      <a href="#" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-camera mr-2"></i><strong>Album</strong> </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>
+      <a href="{% url 'venues:mapview' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-chevron-circle-left mr-2"></i><strong>Volver a resultados</strong> </a>
+      <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>-->
     </div>
   </div>
+  <BR>
+  <BR>
+  {% if request.user.is_authenticated %}
+    <div id="open-session-div" style="margin:auto;width:90%;">
+    <p><i class="fas fa-user-circle"></i> Hola, {{ request.user.username }}</p>
+    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Log out</a>
+    </div> 
+  {% else %}
+    <div id="closed-session-div" style="margin:auto;width:90%;"> 
+    <a href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> Log in</a>
+    </div>
+  {% endif %}
   <div class="text-center py-5">
     <div class="container">
       <div class="row my-5 justify-content-center">
@@ -204,7 +217,7 @@
         -->
       </div>
     </div>
-    <ul class="pagination" id="pagination-bar">
+    <ul class="pagination" id="pagination-bar" style="margin:auto;width:20%;">
    
     </ul>
   </div>
@@ -256,7 +269,7 @@
         -->
       </div>
     </div>
-    <ul class="pagination" id="image-pagination-bar">
+    <ul class="pagination" id="image-pagination-bar" style="margin:auto;width:20%;">
    
     </ul>
   </div>
@@ -755,7 +768,7 @@
 
 
   </script>
-  <pingendo onclick="window.open('https://pingendo.com/', '_blank')" style="cursor:pointer;position: fixed;bottom: 20px;right:20px;padding:4px;background-color: #00b0eb;border-radius: 8px; width:220px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:14px;color:white">Made with Pingendo Free&nbsp;&nbsp;<img src="https://pingendo.com/site-assets/Pingendo_logo_big.png" class="d-block" alt="Pingendo logo" height="16"></pingendo>
+  <!--<pingendo onclick="window.open('https://pingendo.com/', '_blank')" style="cursor:pointer;position: fixed;bottom: 20px;right:20px;padding:4px;background-color: #00b0eb;border-radius: 8px; width:220px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:14px;color:white">Made with Pingendo Free&nbsp;&nbsp;<img src="https://pingendo.com/site-assets/Pingendo_logo_big.png" class="d-block" alt="Pingendo logo" height="16"></pingendo>-->
 </body>
 
 </html>
