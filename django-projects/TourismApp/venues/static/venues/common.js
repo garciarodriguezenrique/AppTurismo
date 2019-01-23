@@ -143,13 +143,13 @@ function getClassName(category){
         return "fa d-inline fa-gas-pump mr-2";
     } else if (category.includes('police')){
         return "fa d-inline fa-shield-alt mr-2";
-    } else if (category.includes('book-store')){
+    } else if (category.includes('book_store')){
         return "fa d-inline fa-book mr-2";
     } else if (category.includes('clothing_store')){
         return "fa d-inline fa-tshirt mr-2";
     } else if (category.includes('convenience_store')){
         return "fa d-inline fa-shopping-cart mr-2";
-    } else if (category.includes('hardware-store')){
+    } else if (category.includes('hardware_store')){
         return "fa d-inline fa-laptop mr-2";
     } else if (category.includes('shopping_mall')){
         return "fa d-inline fa-shopping-bag mr-2";
@@ -165,9 +165,9 @@ function getClassName(category){
         return "fa d-inline fa-plane mr-2";
     } else if (category.includes('bus_station')){
         return "fa d-inline fa-bus-alt mr-2";
-    } else if (category.includes('train')){
+    } else if (category.includes('train_station')){
         return "fa d-inline fa-train mr-2";
-    } else if (category.includes('subway')){
+    } else if (category.includes('subway_station')){
         return "fa d-inline fa-subway mr-2";
     } else if (category.includes('taxi_stand')){
         return "fa d-inline fa-taxi mr-2";
