@@ -7,6 +7,7 @@ app_name = 'venues'
 urlpatterns = [
     path('', views.Index.as_view(), name='index'),
     path('show-results/', views.Mapview.as_view(), name='mapview'),
+    re_path('get_location_string/$', views.ReverseGeocode.as_view(), name='reverse-geocode'),
     re_path('filter-results/$', views.Filter.as_view(), name='filter'),
     re_path('get_comments/$', views.GetComments.as_view(), name='getcomments'),
     re_path('get_images/$', views.GetImages.as_view(), name='getimages'),

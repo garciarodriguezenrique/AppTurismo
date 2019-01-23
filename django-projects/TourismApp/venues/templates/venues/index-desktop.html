@@ -49,11 +49,18 @@
     <div class="container">
       <div class="row mb-5 pb-0">
         <div class="col-md-8 mx-auto">
-          <h1 class="cover-heading mt-5"><b>Find interesting places close to you!</b></h1>
-          <p class="lead mb-5">TourismApp allows you to find points of interest of a given category sorted by relevance. Get the most efficient route to the places of your choice by selecting one of the transport methods at your disposal, see reviews and photos from other users and add yout own!</p>
+          <h1 class="cover-heading mt-5"><b>Encuentra puntos de interés cercanos!</b></h1>
+          <p class="lead mb-5">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios y deja los tuyos!</p>
+          <label for="category">Introducir dirección</label>
+            <div class="" id="autoCompleteDiv">
+              <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">
+            </div>
+            <a href="#!" onclick="getLocation()">Usar mi ubicación</a>
           <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
+            <BR>
             <div class="row ml-5 pl-5">
+              <BR>
               <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="category">Categoría</label> <select class="custom-select d-block w-100" id="category" name="category" required="">
                   <option value="food">Comida</option>
                   <option value="leisure">Ocio</option>
@@ -68,6 +75,7 @@
                 <div class="invalid-feedback"> Please select a valid category. </div>
                 <div><input id="position" type="hidden" name="position"/></div>
                 <div><input id="radius" type="hidden" name="radius" value="1500"/></div>
+                <div><input id="gps" type="hidden" name="gps" value=true /></div>
                 <button class="btn btn-primary btn-lg btn-block mt-3" type="submit">Find places</button>
               </div>
             </div>
@@ -80,9 +88,12 @@
     </div>
   </div>
 </body>
+<script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
 <script>
     var x = document.getElementById("position");
+
     function getLocation() {
+        document.getElementById('gps').value = true;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(setPositionValue);
         } else {
@@ -92,8 +103,54 @@
 
     function setPositionValue(position) {
         x.value = position.coords.latitude + "," + position.coords.longitude; 
+        getLocationString();
     }
-    window.addEventListener('load', getLocation);
+
+    //window.addEventListener('load', getLocation);
+
+    function initAutoComplete(){
+        var input = document.getElementById('pac-input');
+        autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.setFields(
+            ['address_components', 'geometry', 'icon', 'name']);
+
+        autocomplete.addListener('place_changed', function() {
+          var place = autocomplete.getPlace();
+
+          if (!place.geometry) {
+            window.alert("No details available for input: '" + place.name + "'");
+            getLocation();
+            return;
+          }
+
+          if (place.geometry.viewport) {
+            console.log("FOUND");
+            console.log(place.geometry.location);
+            x.value = place.geometry.location.lat()+","+place.geometry.location.lng();
+            document.getElementById('gps').value=false;
+          }
+        });
+
+    }
+
+    function getLocationString(){
+            document.getElementById("pac-input").value = "Obteniendo dirección..."
+            $.ajax({
+                url : "{% url 'venues:reverse-geocode' %}"+"?LatLng="+x.value,
+                dataType: "json",  
+                method : "GET",
+                success : function (data) {
+                    console.log(data);
+                    document.getElementById("pac-input").value = data['results'][1]['formatted_address'];
+                },
+                error : function (data){
+                    console.log(data);
+                    alert("Ha habido un error, inténtalo más tarde.");
+                }
+            });
+    }
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs&libraries=places&callback=initAutoComplete"
+        async defer></script>
 
 </html>

@@ -8,25 +8,12 @@ from django.contrib.auth.models import User
 from aiohttp import ClientSession
 from externalapis.models import PointOfInterest, DistanceManager
 from externalapis.serializers import PointOfInterestSerializer
+from .categories import *
+from .variables import KEY, MAX_RETRIES
 import requests
 import time
 import asyncio
 import copy
-
-KEY = "AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs"
-MAX_RETRIES = 3 #Max number of attemps to retrieve whatever data from a given external API
-
-food=["restaurant","meal_delivery","meal_takeaway"]
-leisure=["amusement_park","bowling_alley","casino","movie_rental","movie_theater","spa","stadium","zoo"]
-culture=["art_gallery","library","museum","church","city_hall","synagogue","mosque","hindu_temple"]
-services=["campground","car_rental","atm","parking","gas_station","police","rv_park"]
-shopping=["book_store","clothing_store","convenience_store","department_store","electronics_store","hardware_store","florist","jewelry_store","pet_store","shopping_mall","store","supermarket"]
-medical_services=["doctor","hospital","pharmacy"]
-bar_and_clubs=["bar","cafe","night_club"]
-transport=["airport","bus_station","train_station","subway_station","taxi_stand"]
-other=["park"]
-
-CATEGORIES = {'food':food,'leisure':leisure,'culture':culture,'services':services,'shopping':shopping,'medical_services':medical_services,'bar_and_clubs':bar_and_clubs,'transport':transport,'other':other}
 
 class ExternalAPI(APIView):
     
@@ -128,10 +115,11 @@ class ExternalAPI_getvenues_async(APIView):
         if LatLng and radius:
             #Comprobar si existen resultados cacheados para el area de la consulta
             final_qs = check_cache(radius, category.split(","), LatLng)
-            print("Final qs len: "+str(len(final_qs)))
             if final_qs:
                 serializer = self.serializer_class(final_qs, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response("ZERO_RESULTS", status=status.HTTP_404_NOT_FOUND)
             #else:
             #    print("Not using cache")
                 #url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type="+category+"&key="+KEY  url vieja con campo types
@@ -160,21 +148,24 @@ def check_cache(radius, category_list, LatLng):
 
 def make_asyncronous_request(category_list, LatLng, radius):
     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type={}&key="+KEY
+    print(url)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     future = asyncio.ensure_future(run(url, category_list))
     data = loop.run_until_complete(future)
     #Cacheo de nuevos lugares
-    for element in data['results']:
-        rating = "0.0"
-        element['lat'] = element['geometry']['location']['lat']
-        element['lng'] = element['geometry']['location']['lng']
-        if 'rating' in element:
-            rating = element['rating']
-        if not PointOfInterest.objects.filter(reference=element['reference']):
-            poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['formatted_address'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
-            poi.save()
-    return data['results']
+    if 'results' in data:
+        for element in data['results']:
+            rating = "0.0"
+            element['lat'] = element['geometry']['location']['lat']
+            element['lng'] = element['geometry']['location']['lng']
+            if 'rating' in element:
+                rating = element['rating']
+            if not PointOfInterest.objects.filter(reference=element['reference']):
+     
+                poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['vicinity'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
+                poi.save()
+        return data['results']
 
 def evaluate_types(types):
     categories=[]
@@ -225,13 +216,19 @@ async def run(url, category_list):
 
         responses = await asyncio.gather(*tasks)
         responses_clean = [x for x in responses if x is not None]
-        # you now have all response bodies in this variable
-        data = responses_clean[0]
-        # for i in range(len(responses)):
-        #    print(len(responses[i]['results']))
-        for item in responses_clean[1:]:
+
+        print("THIS IS RESPONSES CLEAN: \n")
+        print(responses_clean)
+        if responses_clean:
+            # you now have all response bodies in this variable
+            data = responses_clean[0]
+            # for i in range(len(responses)):
+            #    print(len(responses[i]['results']))
+            for item in responses_clean[1:]:
                 data['results'].extend(item['results'])
-        return data
+            return data
+        else:
+            return responses_clean
 
 
 

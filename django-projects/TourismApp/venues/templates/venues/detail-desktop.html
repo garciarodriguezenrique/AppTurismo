@@ -48,15 +48,15 @@
       <a href="{% url 'venues:mapview' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-chevron-circle-left mr-2"></i><strong>Volver a resultados</strong> </a>
       <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>-->
     {% if request.user.is_authenticated %}
-      <ul class="navbar-nav">
-        <li class="nav-item">
+      <ul class="navbar-nav" style="list-style-type:none;">
+        <li class="nav-item" style="list-style:none;">
           <p><i class="fas fa-user-circle"></i> Hola, {{ request.user.username }}</p>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" style="list-style:none;">
           <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Log out</a>
         </li> 
       {% else %} 
-        <li class="nav-item">
+        <li class="nav-item" style="list-style:none;">
           <a class="nav-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> Log in</a>
         </li>
       </ul>

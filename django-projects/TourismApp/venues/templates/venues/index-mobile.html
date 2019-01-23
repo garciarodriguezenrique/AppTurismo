@@ -57,6 +57,11 @@
         <div class="col-md-8 mx-auto">
           <h1 class="cover-heading"><b>Encuentra puntos de interés cercanos!</b></h1>
           <p class="lead">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios y deja los tuyos!</p>
+          <label for="category">Introducir dirección</label>
+            <div class="" id="autoCompleteDiv">
+              <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">
+            </div>
+            <a href="#!" onclick="getLocation()">Usar mi ubicación</a>
           <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
             <div class="col-md-12 w-100 px-5 mb-3 mt-3"><label for="category">Escoge una categoría</label> <select class="custom-select d-block w-100" id="category" name="category" required="">
@@ -73,6 +78,7 @@
               <div class="invalid-feedback"> Please provide a valid state. </div>
               <div><input id="position" type="hidden" name="position" value="43.3380112,-8.407468"/></div>
               <div><input id="radius" type="hidden" name="radius" value="1500"/></div>
+              <div><input id="gps" type="hidden" name="gps" value=true /></div>
               <button class="btn btn-primary btn-lg btn-block mt-3" type="submit">Buscar</button>
         </div>
       </div>
@@ -89,9 +95,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
+<script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
 <script>
     var x = document.getElementById("position");
+
     function getLocation() {
+        document.getElementById('gps').value = true;
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(setPositionValue);
         } else {
@@ -101,8 +110,54 @@
 
     function setPositionValue(position) {
         x.value = position.coords.latitude + "," + position.coords.longitude; 
+        getLocationString();
     }
-    window.addEventListener('load', getLocation);
+
+    //window.addEventListener('load', getLocation);
+
+    function initAutoComplete(){
+        var input = document.getElementById('pac-input');
+        autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.setFields(
+            ['address_components', 'geometry', 'icon', 'name']);
+
+        autocomplete.addListener('place_changed', function() {
+          var place = autocomplete.getPlace();
+
+          if (!place.geometry) {
+            window.alert("No details available for input: '" + place.name + "'");
+            getLocation();
+            return;
+          }
+
+          if (place.geometry.viewport) {
+            console.log("FOUND");
+            console.log(place.geometry.location);
+            x.value = place.geometry.location.lat()+","+place.geometry.location.lng();
+            document.getElementById('gps').value=false;
+          }
+        });
+
+    }
+
+    function getLocationString(){
+            document.getElementById("pac-input").value = "Obteniendo dirección..."
+            $.ajax({
+                url : "{% url 'venues:reverse-geocode' %}"+"?LatLng="+x.value,
+                dataType: "json",  
+                method : "GET",
+                success : function (data) {
+                    console.log(data);
+                    document.getElementById("pac-input").value = data['results'][1]['formatted_address'];
+                },
+                error : function (data){
+                    console.log(data);
+                    alert("Ha habido un error, inténtalo más tarde.");
+                }
+            });
+    }
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEDOKsldYBl9NQ6Ml9uYVGOW2vosygeSs&libraries=places&callback=initAutoComplete"
+        async defer></script>
 
 </html>

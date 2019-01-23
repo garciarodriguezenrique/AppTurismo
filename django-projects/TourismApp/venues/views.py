@@ -15,30 +15,9 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 from .forms import SignupForm, ImageUploadForm
 from requests.auth import HTTPBasicAuth
-
-R = 6371
-request_radius = 1500
-
-comment_endpoint = "http://127.0.0.1:8000/comments/"
-image_endpoint = "http://127.0.0.1:8000/images/"
-rating_endpoint = "http://127.0.0.1:8000/ratings/"
-login_endpoint = "http://127.0.0.1:8000/users/login/"
-signup_endpoint = "http://127.0.0.1:8000/users/signup/"
-external_services_endpoint = "http://127.0.0.1:8000/external-api/"
-
-
-#Tipos de punto de interés (wrapper de las categorías de Google Places)
-food=["restaurant","meal_delivery","meal_takeaway"]
-leisure=["amusement_park","bowling_alley","casino","movie_rental","movie_theater","spa","stadium","zoo"]
-culture=["art_gallery","library","museum","church","city_hall","synagogue","mosque","hindu_temple"]
-services=["campground","car_rental","atm","parking","gas_station","police","rv_park"]
-shopping=["book_store","clothing_store","convenience_store","department_store","electronics_store","hardware_store","florist","jewelry_store","pet_store","shopping_mall","store","supermarket"]
-medical_services=["doctor","hospital","pharmacy"]
-bar_and_clubs=["bar","cafe","night_club"]
-transport=["airport","bus_station","train_station","subway_station","taxi_stand"]
-other=["park"]
-
-CATEGORIES = {'food':food,'leisure':leisure,'culture':culture,'services':services,'shopping':shopping,'medical_services':medical_services,'bar_and_clubs':bar_and_clubs,'transport':transport,'other':other}
+from .categories import *
+from .webservice_endpoints import *
+from .variables import R, request_radius
 
 #------------------------------------------------------------------------------------#
 # Vista de alta de usuario. Crea una entidad User tanto en la aplicación como en     #
@@ -49,11 +28,11 @@ CATEGORIES = {'food':food,'leisure':leisure,'culture':culture,'services':service
 
 class SignUp(View):
     form_class = SignupForm
-    template_name_on_success = 'venues/wireframe-index.html'
-    template_name_on_success_mobile = 'venues/index-global.html'
-    template_name_on_login_error = 'registration/wireframe-login.html'
-    template_name_on_signup_error = 'registration/wireframe-signup.html'
-    template_name = 'registration/wireframe-signup.html'
+    template_name_on_success = 'venues/index-desktop.html'
+    template_name_on_success_mobile = 'venues/index-mobile.html'
+    template_name_on_login_error = 'registration/login.html'
+    template_name_on_signup_error = 'registration/signup.html'
+    template_name = 'registration/signup.html'
 
     def get(self, request):
         request.session['signup_from'] = request.META.get('HTTP_REFERER', '/')
@@ -106,10 +85,10 @@ class SignUp(View):
 
 class Login(View):
     form_class = AuthenticationForm
-    template_name_on_success = 'venues/wireframe-index.html'
-    template_name_on_success_mobile = 'venues/index-global.html'
-    template_name_on_error = 'registration/wireframe-login.html'
-    template_name = 'registration/wireframe-login.html'
+    template_name_on_success = 'venues/index-desktop.html'
+    template_name_on_success_mobile = 'venues/index-mobile.html'
+    template_name_on_error = 'registration/login.html'
+    template_name = 'registration/login.html'
 
     def get(self, request):
         request.session['login_from'] = request.META.get('HTTP_REFERER', '/')
@@ -151,8 +130,8 @@ class Login(View):
 #--------------------------------------------------------------------------------------#
 
 class Index(View):
-    template_name = 'venues/wireframe-index.html'
-    mobile_template = 'venues/index-global.html'
+    template_name = 'venues/index-desktop.html'
+    mobile_template = 'venues/index-mobile.html'
     
     def get(self, request):
         context = {}
@@ -169,8 +148,8 @@ class Index(View):
 #---------------------------------------------------------------------------------------------#
 
 class Detail(View):
-    template_name = 'venues/wireframe-detail-jquery.html'
-    mobile_template = 'venues/wireframe-detail-jquery-temp.html'
+    template_name = 'venues/detail-desktop.html'
+    mobile_template = 'venues/detail-mobile.html'
     template_name_on_error = 'venues/error-template.html'
 
     def get(self, request, place_id, content_page=''):
@@ -253,6 +232,8 @@ def cleanResponse(jData):
             #Limpieza de caracteres conflictivos
             df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("'",""))
             df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("`",""))
+            df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("'",""))
+            df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("`",""))
             df = df.fillna(0) #Cambia los valores NaN por 0
             #Filtrado de valores booleanos para sustituirlos por String-----------------------
             #mask = df.applymap(type) != bool
@@ -278,7 +259,8 @@ def formatCategory(category):
 class Mapview(View):
     #template_name = 'venues/mapview.html'
     template_name = 'venues/listview-desktop.html'
-    mobile_template = 'venues/listview-mobile-temp.html'
+    template_name_alt = 'venues/listview-mobile-alt.html'
+    mobile_template = 'venues/listview-mobile.html'
     template_name_on_error = 'venues/error-template.html'
 
     def get(self, request):
@@ -302,9 +284,8 @@ class Mapview(View):
     def post(self, request):
         print(request.POST)
         position = request.POST['position']
-        radius = request.POST['radius']
-        request.session['radius'] = radius
         category = request.POST['category']
+        gps = request.POST['gps']
         request.session['last_category'] = category
 
         #Workaround temporal para posición en dispositivos móviles (HTML geocode no funciona sin https)
@@ -314,8 +295,7 @@ class Mapview(View):
         if position:
             user_coordinates = {'lat': float(position.split(",")[0]), 'long': float(position.split(",")[1])}
             request.session['user_coordinates'] = user_coordinates
-            url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, category) #url vieja con campo categoría
-            #url="http://127.0.0.1:8000/external-api/getvenues/?LatLng=%s,%s&radius=%s" % (user_coordinates['lat'],user_coordinates['long'],radius)
+            url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],request_radius, category) #url vieja con campo categoría
             print(url)
             response = requests.get(url)
         else:
@@ -351,8 +331,12 @@ class Mapview(View):
                         venue['rating'] = "0.00"
             request.session['last_response'] = venues
             context = {'venues':venues, 'user_location': user_coordinates_json, 'initial_category':category}
+           
             if request.user_agent.is_mobile:
-                return render(request, self.mobile_template, context)
+                if gps=='false':
+                    return render(request, self.template_name_alt, context)
+                else:
+                    return render(request, self.mobile_template, context)
             else:
                 return render(request, self.template_name, context)
         else: #Personalizar el mensaje de error según el código de respuesta
@@ -471,6 +455,19 @@ class RemoveImage(View):
         else:
             return HttpResponse(500)
 
+class ReverseGeocode(View):
+
+    def get(self, request):
+        LatLng = request.GET['LatLng']
+
+        response = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+LatLng.split(",")[0]+","+LatLng.split(",")[1])
+
+        if response.ok:
+            data = response.json()
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            return HttpResponse(500)
+
 #-------------------------------------------------------------------------------------------#
 # Vista de filtros por categoría. Vuelve a cargar la respuesta original del servicio en un  #
 # DataFrame y aplica el filtrado correspondiente. Vista invocada por llamada AJAX mediante  #   
@@ -484,12 +481,14 @@ class Filter(View):
         up = request.GET['user_position']
         user_coordinates = {'lat': float(up.split(",")[0]), 'long': float(up.split(",")[1])}
         request.session['user_coordinates'] = user_coordinates
-        radius = request.session['radius']
         formattedCategories = ",".join(categories)
         request.session['last_category'] = formattedCategories
 
-        url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],radius, formattedCategories)
+        url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],request_radius, formattedCategories)
         response = requests.get(url)
+
+        print("RESPONSE:\n")
+        print(response.status_code)
 
         if response.ok:
             jData = response.json()
@@ -523,8 +522,11 @@ class Filter(View):
         #if finalResult:
         #    return HttpResponse(finalResult, content_type="application/json")
             # o json.dumps(jData)
+        elif response.json() == 'ZERO_RESULTS':
+            return HttpResponse(status=404)
         else:
-            return HttpResponse(500)
+            return HttpResponse(status=500)
+            
      
 
         
