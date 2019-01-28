@@ -17,7 +17,7 @@ from .forms import SignupForm, ImageUploadForm
 from requests.auth import HTTPBasicAuth
 from .categories import *
 from .webservice_endpoints import *
-from .variables import R, request_radius
+from .variables import R, request_radius, days_es
 
 #------------------------------------------------------------------------------------#
 # Vista de alta de usuario. Crea una entidad User tanto en la aplicación como en     #
@@ -158,10 +158,9 @@ class Detail(View):
         next = ""
         previous = ""
         url=external_services_endpoint+"getvenues/"+place_id
+        print(url)
         response = requests.get(url)
-        print("Entered Detail Page from:\n")
-        print(request.META.get('HTTP_REFERER', '/'))
-
+        
         #Retrieve venue details
         if response.ok:
             jData = json.loads(response.content.decode('utf-8'))
@@ -201,7 +200,7 @@ class Detail(View):
             if 'website' in jData['result']:
                 website = jData['result']['website']
             if 'opening_hours' in jData['result'] and 'weekday_text' in jData['result']['opening_hours']:
-                schedule = jData['result']['opening_hours']['weekday_text']
+                schedule = [day.replace(day.split(':')[0],days_es.get(day.split(':')[0])) for day in jData['result']['opening_hours']['weekday_text']]
             if 'types' in jData['result']:
                 categories = jData['result']['types']
 
