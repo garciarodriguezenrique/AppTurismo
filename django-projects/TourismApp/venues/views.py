@@ -56,9 +56,6 @@ class SignUp(View):
                     token = response.json()['token']
                     request.session['auth_token'] = token
                     context = {}
-                    #if request.session['signup_from']:
-                    #    return HttpResponseRedirect(request.session['signup_from'])
-                    #else:
                     if request.user_agent.is_mobile:
                         return render(request, self.mobile_template_on_success_mobile, context)
                     else:
@@ -161,7 +158,6 @@ class Detail(View):
         print(url)
         response = requests.get(url)
         
-        #Retrieve venue details
         if response.ok:
             jData = json.loads(response.content.decode('utf-8'))
             
@@ -177,7 +173,6 @@ class Detail(View):
             if 'formatted_address' in jData['result']:
                 address = jData['result']['formatted_address']
             else:
-                #address = geocode(jData['result']['geometry']['location']['lat'],lng)
                 response = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+jData['result']['geometry']['location']['lat']+","+jData['result']['geometry']['location']['lng'])
                 if response.ok:
                     data=response.json();
@@ -209,7 +204,7 @@ class Detail(View):
                 return render(request, self.mobile_template, context)
             else:
                 return render(request, self.template_name, context)
-        else: #Personalizar el mensaje de error según el código de respuesta
+        else: 
             error_msg = str(response.status_code)+":"+response.reason
             messages.error(request,error_msg)
             error = "No pudieron recuperarse los detalles de este sitio ("+error_msg+")"
@@ -221,24 +216,12 @@ def cleanResponse(jData):
 
             required_keys = ["venue_name", "lat", "venue_id", "rating", "reference", "category", "icon", "lng", "formatted_address"]
 
-            
-            #request.session[jData['results']['category']] = jData
             df = pd.DataFrame(jData)[required_keys] 
-            #----------------Filtrado----------------------------------
-            #df['types'] = df['types'].apply(lambda x: any(e in CATEGORIES[category] for e in x))
-            #df = df.loc[df['types'] == True]
-            #----------------Filtrado----------------------------------
-            #Limpieza de caracteres conflictivos
             df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("'",""))
             df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("`",""))
             df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("'",""))
             df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("`",""))
-            df = df.fillna(0) #Cambia los valores NaN por 0
-            #Filtrado de valores booleanos para sustituirlos por String-----------------------
-            #mask = df.applymap(type) != bool
-            #replacement_dict = {True: 'Abierto', False: 'Cerrado'}
-            #df = df.where(mask, df.replace(replacement_dict))
-            #---------------------------------------------------------------------------------
+            df = df.fillna(0) 
             d = df.to_json(orient='records')
             return d
 
@@ -248,16 +231,13 @@ def formatCategory(category):
         finalString+=element+"|"
     return finalString[:-1]
 
-#-------------------------------------------------------------------------------------------#
-# Vista de mapa. Procesa los resultados de puntos de interés obtenidos del servicio web y   # 
-# realiza las preparaciones pertinentes (como eliminar caracteres extraños que puedan       #
-# provocar un error al parsear el texto JSON dentro del código JavaScript de la plantilla   #
-# mapview.html)                                                                             #
-#-------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------#
+# Vista de resultados. Procesa los resultados de puntos de interés obtenidos del servicio web y   # 
+# realiza las preparaciones pertinentes                                                           #
+#-------------------------------------------------------------------------------------------------#
 
 class Mapview(View):
-    #template_name = 'venues/mapview.html'
-    template_name = 'venues/listview-desktop.html'
+    template_name = 'venues/mapview_desktop.html'
     template_name_alt = 'venues/listview-mobile-alt.html'
     mobile_template = 'venues/listview-mobile.html'
     template_name_on_error = 'venues/error-template.html'
@@ -281,20 +261,16 @@ class Mapview(View):
             return render(request, self.template_name, context)
 
     def post(self, request):
-        print(request.POST)
+       
         position = request.POST['position']
         category = request.POST['category']
         gps = request.POST['gps']
         request.session['last_category'] = category
-
-        #Workaround temporal para posición en dispositivos móviles (HTML geocode no funciona sin https)
-        #if not position:
-        #    position = "43.3380112,-8.407468"
         
         if position:
             user_coordinates = {'lat': float(position.split(",")[0]), 'long': float(position.split(",")[1])}
             request.session['user_coordinates'] = user_coordinates
-            url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],request_radius, category) #url vieja con campo categoría
+            url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],request_radius, category) 
             print(url)
             response = requests.get(url)
         else:
@@ -304,9 +280,7 @@ class Mapview(View):
             return render(request, self.template_name_on_error, context)
 
         if response.ok:
-            #jData = json.loads(response.content.decode('utf-8'))
             jData = response.json()
-            #cacheInSession(jData, request)
             d = cleanResponse(jData)
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
@@ -317,13 +291,13 @@ class Mapview(View):
                 for rating in ratings['results']:
                     aux_dict[rating['venue_id']] = rating['avg_rating']
                 for venue in venues:
-                    lat2 = radians(float(venue['lat']))
-                    lon2 = radians(float(venue['lng']))
-                    dlat = lat2 - radians(user_coordinates['lat'])
-                    dlon = lon2 - radians(user_coordinates['long'])
-                    a = sin(dlat / 2)**2 + cos(radians(user_coordinates['lat'])) * cos(lat2) * sin(dlon / 2)**2
-                    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-                    venue['dist_from_user'] = R*c
+                    #lat2 = radians(float(venue['lat']))
+                    #lon2 = radians(float(venue['lng']))
+                    #dlat = lat2 - radians(user_coordinates['lat'])
+                    #dlon = lon2 - radians(user_coordinates['long'])
+                    #a = sin(dlat / 2)**2 + cos(radians(user_coordinates['lat'])) * cos(lat2) * sin(dlon / 2)**2
+                    #c = 2 * atan2(sqrt(a), sqrt(1 - a))
+                    venue['dist_from_user'] = calcDistance(venue['lat'], venue['lng'], request) #R*c
                     if venue['reference'] in aux_dict:
                         venue['rating'] = aux_dict[venue['reference']]
                     else:
@@ -338,7 +312,7 @@ class Mapview(View):
                     return render(request, self.mobile_template, context)
             else:
                 return render(request, self.template_name, context)
-        else: #Personalizar el mensaje de error según el código de respuesta
+        else: 
             error_msg = str(response.status_code)+":"+response.reason
             error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación ("+error_msg+")"
             context = {'error':error}
@@ -374,8 +348,7 @@ class NewComment(View):
             stream = request.FILES["image"].file
             image = base64.b64encode(stream.getvalue())
         
-        response = requests.post(comment_endpoint, data = {'text':comment, 'rating':rating, 'venue_id': place_id}, headers = {'Authorization':'token '+request.session['auth_token']}) # se ha quitado 'image':image de data, ahora las fotos van separadas
-        print(response.json())
+        response = requests.post(comment_endpoint, data = {'text':comment, 'rating':rating, 'venue_id': place_id}, headers = {'Authorization':'token '+request.session['auth_token']}) 
         if response.ok:
             return HttpResponse(201)
         else:
@@ -467,6 +440,17 @@ class ReverseGeocode(View):
         else:
             return HttpResponse(500)
 
+
+def calcDistance(venue_lat, venue_lng, request):
+    lat2 = radians(float(venue_lat))
+    lon2 = radians(float(venue_lng))
+    dlat = lat2 - radians(request.session['user_coordinates']['lat'])
+    dlon = lon2 - radians(request.session['user_coordinates']['long'])
+    a = sin(dlat / 2)**2 + cos(radians(request.session['user_coordinates']['lat'])) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R*c
+
 #-------------------------------------------------------------------------------------------#
 # Vista de filtros por categoría. Vuelve a cargar la respuesta original del servicio en un  #
 # DataFrame y aplica el filtrado correspondiente. Vista invocada por llamada AJAX mediante  #   
@@ -486,9 +470,6 @@ class Filter(View):
         url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (user_coordinates['lat'],user_coordinates['long'],request_radius, formattedCategories)
         response = requests.get(url)
 
-        print("RESPONSE:\n")
-        print(response.status_code)
-
         if response.ok:
             jData = response.json()
             d = cleanResponse(jData)
@@ -501,13 +482,13 @@ class Filter(View):
                 for rating in ratings['results']:
                     aux_dict[rating['venue_id']] = rating['avg_rating']
                 for venue in venues:
-                    lat2 = radians(float(venue['lat']))
-                    lon2 = radians(float(venue['lng']))
-                    dlat = lat2 - radians(request.session['user_coordinates']['lat'])
-                    dlon = lon2 - radians(request.session['user_coordinates']['long'])
-                    a = sin(dlat / 2)**2 + cos(radians(request.session['user_coordinates']['lat'])) * cos(lat2) * sin(dlon / 2)**2
-                    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-                    venue['dist_from_user'] = R*c
+                    #lat2 = radians(float(venue['lat']))
+                    #lon2 = radians(float(venue['lng']))
+                    #dlat = lat2 - radians(request.session['user_coordinates']['lat'])
+                    #dlon = lon2 - radians(request.session['user_coordinates']['long'])
+                    #a = sin(dlat / 2)**2 + cos(radians(request.session['user_coordinates']['lat'])) * cos(lat2) * sin(dlon / 2)**2
+                    #c = 2 * atan2(sqrt(a), sqrt(1 - a))
+                    venue['dist_from_user'] = calcDistance(venue['lat'], venue['lng'], request) #R*c
                     if venue['reference'] in aux_dict:
                         venue['rating'] = aux_dict[venue['reference']]
                     else:
@@ -515,12 +496,6 @@ class Filter(View):
             #-----------------------------------------------------------------
             request.session['last_response'] = venues
             return HttpResponse(json.dumps(venues), content_type="application/json")
-        #else if zero_results devolver un codigo de error que salte un mensaje no hay resultados en el mapa
-        #else devolver un codigo que haga saltar lo de ha habido un error, intentalo mas tarde
-            
-        #if finalResult:
-        #    return HttpResponse(finalResult, content_type="application/json")
-            # o json.dumps(jData)
         elif response.json() == 'ZERO_RESULTS':
             return HttpResponse(status=404)
         else:

@@ -232,6 +232,7 @@
               <div class="form-group">
                 <textarea class="form-control" id="form26" name="caption" rows="3" placeholder="Your comment"></textarea>
                 <input type="file" name="image"/>
+                <BR>
                 <input class="btn btn-primary" id="image-form-submit" type="button" onclick="submissionHandler('image')" value="Enviar" /> 
               </div>
               <!--<button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
@@ -317,7 +318,6 @@
               a = document.createElement("a");
               a.className = "page-link";
               a.innerText = i;
-              //var localIndex = i;
               a.addEventListener('click', function(){
                                               getComments(i,place_id);
                                           });
@@ -359,7 +359,6 @@
               a = document.createElement("a");
               a.className = "page-link";
               a.innerText = i;
-              //var localIndex = i;
               a.addEventListener('click', function(){
                                               getImages(i,place_id);
                                           });
@@ -382,24 +381,8 @@
       function setComments(data, totalComments){
           var stars = {"1":0, "2":0, "3":0, "4":0, "5":0}
           comments = document.getElementsByClassName("comment-container");
-          /*comment_ids = [];
-          for (i=0; i<comments.length; i++){
-              comment_ids.push(comments[i].id);
-          }*/
           cbox = document.getElementById("main-comment-box");
           cbox.innerText = "";
-          /*while (cbox.fisrtChild){
-              console.log("Vaciando caja...");
-              cbox.removeChild(cbox.firstChild);
-          ;}*/ //Vaciar caja de comentarios
-
-          //bar = document.getElementById("pagination-bar");
-          //bar.innerText = "";
-
-          /*while (bar.fisrtChild){
-              console.log("Vaciando barra...");
-              bar.removeChild(bar.firstChild);
-          ;}*/ //Vaciar barra de paginas
 
           Object.keys(data).forEach(function(comment){
               if (data[comment]['rating'] == 1){stars["1"]++;}
@@ -410,7 +393,6 @@
 
               var ts = new Date(data[comment]['created']);
    
-              //if (!comment_ids.includes(String(data[comment]['id']))){
               var outer_div = document.createElement("div");
               outer_div.className = "col-md-4 p-3 comment-container";
               outer_div.id = data[comment]['id'];
@@ -436,13 +418,11 @@
                   s = document.createElement("span");
                   s.className = "fa fa-star checked";
                   first_inner_div.appendChild(s);
-                  //star_rating += '<span class="fa fa-star checked"></span>'
               }
               for (i=0; i<MAX_STARS-data[comment]['rating']; i++){
                   s = document.createElement("span");
                   s.className = "fa fa-star";
                   first_inner_div.appendChild(s);
-                  //star_rating += '<span class="fa fa-star"></span>'
               }
 
               var second_inner_div = document.createElement("div");
@@ -450,13 +430,6 @@
 
               var innermost_div = document.createElement("div");
               innermost_div.className = "btn-group";
-
-              /*var view_button = document.createElement("button");
-              view_button.type="button";
-              view_button.className = "btn btn-sm btn-outline-secondary";
-              view_button.innerText = "View";
-              innermost_div.appendChild(view_button);*/
-
         
               if (data[comment]['owner']==user){
                   var delete_button = document.createElement("button");
@@ -480,31 +453,15 @@
               outer_div.appendChild(second_outer_div);
 
               document.getElementById("main-comment-box").appendChild(outer_div);
-              //}
 
           });
       }
 
       function setImages(data, totalImages){
           comments = document.getElementsByClassName("comment-container");
-          /*comment_ids = [];
-          for (i=0; i<comments.length; i++){
-              comment_ids.push(comments[i].id);
-          }*/
           cbox = document.getElementById("main-image-box");
           cbox.innerText = "";
-          /*while (cbox.fisrtChild){
-              console.log("Vaciando caja...");
-              cbox.removeChild(cbox.firstChild);
-          ;}*/ //Vaciar caja de comentarios
-
-          //bar = document.getElementById("image-pagination-bar");
-          //bar.innerText = "";
-          /*while (bar.fisrtChild){
-              console.log("Vaciando barra...");
-              bar.removeChild(bar.firstChild);
-          ;}*/ //Vaciar barra de paginas
-          console.log(data);
+          
           Object.keys(data).forEach(function(image){
               console.log(data[image]);
               img_src = data[image]['image'];
@@ -516,7 +473,6 @@
               created = ts.toLocaleDateString()+" - "+ts.toLocaleTimeString();
               id = data[image]['id'];
    
-              //if (!comment_ids.includes(String(data[comment]['id']))){
               var outer_div = document.createElement("div");
               outer_div.className = "col-md-4 p-3 comment-container";
               outer_div.id = data[image]['id'];
@@ -546,13 +502,6 @@
               var innermost_div = document.createElement("div");
               innermost_div.className = "btn-group";
 
-              /*var view_button = document.createElement("button");
-              view_button.type="button";
-              view_button.className = "btn btn-sm btn-outline-secondary";
-              view_button.innerText = "View";
-              innermost_div.appendChild(view_button);*/
-
-        
               if (owner==user){
                   var delete_button = document.createElement("button");
                   delete_button.type="button";
@@ -576,7 +525,6 @@
               outer_div.appendChild(second_outer_div);
 
               document.getElementById("main-image-box").appendChild(outer_div);
-              //}
 
           });
       }
@@ -657,17 +605,15 @@
             s = document.createElement("span");
             s.className = "fa fa-star checked";
             star_div.appendChild(s);
-            //star_rating += '<span class="fa fa-star checked"></span>';
           }
           for (i=0; i<MAX_STARS-numeric_rating; i++){
             s = document.createElement("span");
             s.className = "fa fa-star";
             star_div.appendChild(s);
-            //star_rating += '<span class="fa fa-star"></span>';
           }
       }
 
-      function submissionHandler(type){ //Poner un param type para saber si se envia un comment o una foto
+      function submissionHandler(type){ 
           if (type=='comment'){
               console.log("About to submit a new comment about "+place_identifier);
               sendComment(place_identifier);
@@ -768,7 +714,6 @@
 
 
   </script>
-  <!--<pingendo onclick="window.open('https://pingendo.com/', '_blank')" style="cursor:pointer;position: fixed;bottom: 20px;right:20px;padding:4px;background-color: #00b0eb;border-radius: 8px; width:220px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:14px;color:white">Made with Pingendo Free&nbsp;&nbsp;<img src="https://pingendo.com/site-assets/Pingendo_logo_big.png" class="d-block" alt="Pingendo logo" height="16"></pingendo>-->
 </body>
 
 </html>

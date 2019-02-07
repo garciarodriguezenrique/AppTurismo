@@ -21,8 +21,8 @@
     <div class="container">
       <div class="row">
         <div class="text-center col-md-7 mx-auto"> <i class="fa d-block fa-bullseye fa-5x mb-4 text-info"></i>
-          <h2><b>Sign up Form</b></h2>
-          <p class="lead">Fill the formulary below to create a new account.</p>
+          <h2><b>Registro</b></h2>
+          <p class="lead">Rellena los siguientes campos para crear una nueva cuenta.</p>
         </div>
       </div>
     </div>
@@ -40,12 +40,12 @@
         <div class="col-md-12 order-md-1">
           <form class="needs-validation" novalidate="" method="post" action="{% url 'venues:signup' %}">
             {% csrf_token %} {{ form.as_p }}
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Sign up</button>
+            <button type="submit" style="margin:auto;width:20%;" class="btn btn-primary btn-lg btn-block">Sign up</button>
           </form>
         </div>
       </div>
       <BR>
-      <p><a href="{% url 'venues:index' %}">Volver a la página de inicio</a></p>
+      <p><a style="color:black;" href="{% url 'venues:index' %}">Volver a la página de inicio</a></p>
     </div>
   </div>
   <div class="py-5 text-muted text-center">

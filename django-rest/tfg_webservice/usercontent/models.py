@@ -6,8 +6,6 @@ class Comment(models.Model):
     owner = models.ForeignKey('auth.User', related_name='comments', on_delete=models.CASCADE)
     text = models.TextField()
     rating = models.IntegerField(default=0)
-    #image = models.ForeignKey('Image', related_name='comments', on_delete=models.CASCADE, default=None)
-    #image = models.ImageField(upload_to='images/', max_length=254, blank=False)
     venue_id = models.CharField(max_length=100, blank=True, default='')
     
     class Meta:
@@ -31,23 +29,5 @@ class Rating(models.Model):
 
     class Meta:
         ordering = ('created',)
-
-#class Image(models.Model):
-#    created = models.DateTimeField(auto_now_add=True)
-#    owner = models.ForeignKey('auth.User', related_name='images', on_delete=models.CASCADE)
-#    image = models.ImageField(upload_to='images/', max_length=254, blank=False)
-
-#    class Meta:
-#        ordering = ('created',)
-
-#class Image(models.Model):
-#    created = models.DateTimeField(auto_now_add=True)
-#    owner = models.ForeignKey('auth.User', related_name='images', on_delete=models.CASCADE)
-#    image = models.ImageField(upload_to='images/', max_length=254, blank=False)
-#    caption = models.CharField(max_length=250, blank=True, default='')
-#    venue_id = models.CharField(max_length=100, blank=True, default='')
-    
-#    class Meta:
-#        ordering = ('created',)
 
 

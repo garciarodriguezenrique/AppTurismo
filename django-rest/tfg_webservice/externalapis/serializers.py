@@ -11,7 +11,6 @@ class PointOfInterestSerializer(serializers.ModelSerializer):
     venue_name = serializers.CharField(required=True)
     category = serializers.CharField(required=True)
     icon = serializers.CharField(required=True)
-    #coordinates = serializers.CharField(required=True)
     lat = serializers.DecimalField(required=True, max_digits=19, decimal_places=10)
     lng = serializers.DecimalField(required=True, max_digits=19, decimal_places=10)
 

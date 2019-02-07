@@ -26,7 +26,7 @@
       <div class="row">
         <div class="col-md-7 py-4">
           <h4>Búsqueda avanzada</h4>
-          <p class="text-info">Marca las categorías para las que deseas encontrar resultados.</p>
+          <p style="color:white;">Marca las categorías para las que deseas encontrar resultados.</p>
           <a href="#" data-toggle="collapse" data-target="#food_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="foodFilter" type="checkbox" onclick="evaluateFilters()" value="food">--><strong>Comida</strong></a><BR>
           <div id="food_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="restaurantFilter" type="checkbox" onclick="evaluateFilters()" value="restaurant food">  Restaurante</a><BR>
@@ -86,7 +86,6 @@
             <a href="#"><input class="filter-checkbox" id="subway_stationFilter" type="checkbox" onclick="evaluateFilters()" value="subway_station transport">  Estación / Parada de metro</a><BR>
             <a href="#"><input class="filter-checkbox" id="taxi_standFilter" type="checkbox" onclick="evaluateFilters()" value="taxi_stand transport">  Parada de taxis</a><BR>
           </div>
-          <a href="#" style="color:white;font-size:15px;"><input class="filter-checkbox" id="otherFilter" type="checkbox" onclick="evaluateFilters()" value="other"><strong>  Otros</strong></a><BR>
         </div>     
       </div>
       <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3" style="margin:auto;width:20%;">Buscar</button>
@@ -103,11 +102,11 @@
           <p><i class="fas fa-user-circle"></i> Hola, {{ request.user.username }}</p>
         </li>
         <li class="nav-item" style="list-style:none;">
-          <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Log out</a>
+          <a class="nav-link" style="color:white;" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
         </li> 
       {% else %} 
         <li class="nav-item" style="list-style:none;">
-          <a class="nav-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> Log in</a>
+          <a class="nav-link" style="color:white;" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</a>
         </li>
       </ul>
       {% endif %}
@@ -117,9 +116,9 @@
     <div class="container">
       <div id="adv-options-sidenav" class="adv-options-sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()">&times;</a>
-        <p class="text-info" style="text-align:justify;margin-left:10px;margin-right:20px;">Escoge un método de transporte y el criterio de ordenación de la ruta.</p> 
+        <p style="color:white;text-align:justify;margin-left:10px;margin-right:20px;color:white;">Escoge un método de transporte y el criterio de ordenación de la ruta.</p> 
         <BR>
-        <p class="text-info" style="text-align:justify;margin-left:10px;margin-right:20px;">La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p>
+        <p style="color:white;text-align:justify;margin-left:10px;margin-right:20px;">La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</p>
         <ul class="list-unstyled">
           <li>
             <p style="color:white;margin:auto;margin-left:40px;">Medio de transporte:</p>
@@ -212,7 +211,7 @@ var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
 var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
 var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
 
-function showMarkers(){
+/*function showMarkers(){
     for (e in markers){
         markers[e].setVisible(true);
     }
@@ -243,7 +242,7 @@ function addToRoute(name, lat, lng) {
         console.log("false");
         delete route[name];
     }
-}
+}*/
 
 function resetMap() {
     closeNav();
@@ -266,7 +265,7 @@ function resetMap() {
 }
 
 
-function deg2rad(deg) {
+/*function deg2rad(deg) {
   return deg * (Math.PI/180)
 }
 
@@ -282,7 +281,7 @@ function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
   var d = R * c; // Distance in km
   return d;
-}
+}*/
 
 function generateSegments(sorting_criteria){
 
@@ -551,12 +550,13 @@ function fillList(venue_list, sorting_criteria){
         var a_detail = document.createElement("a");
         a_detail.href = sorted[venue]['reference']+"/";
         a_detail.innerText = "Más detalles\n";
+        a_detail.style = "color:black;"
         small.appendChild(a_detail);
         var a_show_on_map = document.createElement("a");
-        a_show_on_map.href = "#!";
+        /*a_show_on_map.href = "#!";
         a_show_on_map.id = "display_"+sorted[venue]['venue_name'];
         a_show_on_map.innerText = "Ver en mapa\n";
-        small.appendChild(a_show_on_map);
+        small.appendChild(a_show_on_map);*/
         
         a.appendChild(div);
         a.appendChild(p);
@@ -564,22 +564,22 @@ function fillList(venue_list, sorting_criteria){
         a.appendChild(small_addToRoute)
         venue_list.appendChild(a);
         checkbox.addEventListener('click', function(){addToRoute(sorted[venue]['venue_name'],sorted[venue]['lat'],sorted[venue]["lng"]);});
-        a_show_on_map.addEventListener('click', function(){
+        /*a_show_on_map.addEventListener('click', function(){
                                 placeMarker(sorted[venue]['venue_name'],sorted[venue]['formatted_address'],sorted[venue]['lat'],sorted[venue]["lng"]);
                                 document.getElementById("directions-panel").style.display="none";
                                 document.getElementById("map").style.marginRight = "0px";
                                 openNav();
-                             });
+                             });*/
     });
 }
 
-function formatCategories(category_list){
+/*function formatCategories(category_list){
     var finalString = "";
     for (category in category_list){
         finalString += category_list[category].split(" ")[0]+"|";
     }
     return finalString.substring(0, finalString.length - 1);
-}
+}*/
 
 function filterResults(){
     

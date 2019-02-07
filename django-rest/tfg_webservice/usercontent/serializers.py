@@ -9,8 +9,6 @@ class Base64ImageField(serializers.ImageField):
 
     Heavily based on
     https://github.com/tomchristie/django-rest-framework/pull/1268
-
-    Updated for Django REST framework 3.
     """
 
     def to_internal_value(self, data):
@@ -56,10 +54,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.username')
     venue_id = serializers.CharField(required=True)
-    #image = serializers.PrimaryKeyRelatedField(many=False, queryset=Image.objects.all())
-    #image = Base64ImageField(
-    #    max_length=None, use_url=True, required=False,
-    #)
 
     class Meta:
         model = Comment
@@ -86,32 +80,9 @@ class RatingSerializer(serializers.ModelSerializer):
         model = Rating
         fields = ('avg_rating', 'review_number', 'venue_id')
 
-#class ImageSerializer(serializers.ModelSerializer):
-    
-#    owner = serializers.ReadOnlyField(source='owner.username')
-#    image = Base64ImageField(
-#        max_length=None, use_url=True,
-#    )
-
-#    class Meta:
-#        model = Image
-#        fields = ('image', 'owner')
-
-#class ImageSerializer(serializers.ModelSerializer):
-
-#    owner = serializers.ReadOnlyField(source='owner.username')
-#    venue_id = serializers.CharField(required=True)
-#    image = Base64ImageField(
-#        max_length=None, use_url=True,
-#    )
-
-#    class Meta:
-#        model = Image
-#        fields = ('image', 'caption', 'venue_id', 'owner')
 
 class UserSerializer(serializers.ModelSerializer):
     comments = serializers.PrimaryKeyRelatedField(many=True, queryset=Comment.objects.all())
-    #images = serializers.PrimaryKeyRelatedField(many=True, queryset=Image.objects.all())
     password = serializers.CharField(write_only=True)
 
     def create(self, validated_data):

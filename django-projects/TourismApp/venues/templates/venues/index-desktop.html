@@ -2,7 +2,22 @@
 <html>
 {% load static %}
 <head></head>
+<style>
+::-webkit-scrollbar {
+    width: 6px;
+    background-color: #F5F5F5;
+} 
 
+::-webkit-scrollbar-thumb {
+    background-color: #555555;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #555555;
+}
+
+</style>
 <body class="text-center bg-dark">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,10 +49,11 @@
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="#"><b>Contact</b></a>
-                  </li> {% if request.user.is_authenticated %} <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log out</a>
+                  </li> {% if request.user.is_authenticated %} 
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><strong>Cerrar sesión</strong></a>
                   </li> {% else %} <li class="nav-item">
-                    <a class="nav-link" href="{% url 'venues:login' %}">Log in</a>
+                    <a class="nav-link" href="{% url 'venues:login' %}"><strong>Iniciar sesión</strong></a>
                   </li> {% endif %}
                 </ul>
               </div>
@@ -51,17 +67,17 @@
         <div class="col-md-8 mx-auto">
           <h1 class="cover-heading mt-5"><b>Encuentra puntos de interés cercanos!</b></h1>
           <p class="lead mb-5">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios y deja los tuyos!</p>
-          <label for="category">Introducir dirección</label>
+          <label for="category"><strong>Introducir dirección</strong></label>
             <div class="" id="autoCompleteDiv">
               <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">
             </div>
-            <a href="#!" onclick="getLocation()">Usar mi ubicación</a>
+            <a href="#!" onclick="getLocation()"><strong>Usar mi ubicación</strong></a>
           <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
             <BR>
             <div class="row ml-5 pl-5">
               <BR>
-              <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="category">Categoría</label> <select class="custom-select d-block w-100" id="category" name="category" required="">
+              <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="category"><strong>Categoría</strong></label> <select class="custom-select d-block w-100" id="category" name="category" required="">
                   <option value="food">Comida</option>
                   <option value="leisure">Ocio</option>
                   <option value="culture">Cultura</option>
@@ -70,13 +86,12 @@
                   <option value="medical_services">Servicios sanitarios</option>
                   <option value="bar_and_clubs">Bares y clubs</option>
                   <option value="transport">Transporte</option>
-                  <option value="other">Otros</option>
                 </select>
                 <div class="invalid-feedback"> Please select a valid category. </div>
                 <div><input id="position" type="hidden" name="position"/></div>
                 <div><input id="radius" type="hidden" name="radius" value="1500"/></div>
                 <div><input id="gps" type="hidden" name="gps" value=true /></div>
-                <button class="btn btn-primary btn-lg btn-block mt-3" type="submit">Buscar</button>
+                <button class="btn btn-primary btn-lg btn-block mt-3" type="submit"><strong>Buscar</strong></button>
               </div>
             </div>
           </form>
@@ -141,7 +156,7 @@
                 method : "GET",
                 success : function (data) {
                     console.log(data);
-                    document.getElementById("pac-input").value = data['results'][1]['formatted_address'];
+                    document.getElementById("pac-input").value = data['results'][0]['formatted_address'];
                 },
                 error : function (data){
                     console.log(data);

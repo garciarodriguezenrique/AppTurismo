@@ -17,7 +17,22 @@
   <link rel="stylesheet" href="{% static 'venues/wireframe-detail.css' %}">
   <link rel="stylesheet" href="{% static 'venues/scorecard.css' %}">
 </head>
+<style>
+::-webkit-scrollbar {
+    width: 6px;
+    background-color: #F5F5F5;
+} 
 
+::-webkit-scrollbar-thumb {
+    background-color: #555555;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #F5F5F5;
+}
+
+</style>
 <body>
   <div class="collapse bg-dark" id="navbarHeader">
     <div class="container">
@@ -48,16 +63,17 @@
       <a href="{% url 'venues:mapview' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-chevron-circle-left mr-2"></i><strong>Volver a resultados</strong> </a>
       <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>-->
     {% if request.user.is_authenticated %}
-      <ul class="navbar-nav" style="list-style-type:none;">
+      <a class="navlink"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
+      <!--<ul class="navbar-nav" style="list-style-type:none;">
         <li class="nav-item" style="list-style:none;">
           <p><i class="fas fa-user-circle"></i> Hola, {{ request.user.username }}</p>
         </li>
         <li class="nav-item" style="list-style:none;">
           <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Log out</a>
-        </li> 
+        </li> -->
       {% else %} 
         <li class="nav-item" style="list-style:none;">
-          <a class="nav-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> Log in</a>
+          <a class="nav-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i><strong> Iniciar sesión</strong></a>
         </li>
       </ul>
       {% endif %}
@@ -234,6 +250,7 @@
               <div class="form-group">
                 <textarea class="form-control" id="form26" name="caption" rows="3" placeholder="Your comment"></textarea>
                 <input type="file" name="image"/>
+                <BR>
                 <input class="btn btn-primary" id="image-form-submit" type="button" onclick="submissionHandler('image')" value="Enviar" /> 
               </div>
               <!--<button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
@@ -384,24 +401,8 @@
       function setComments(data, totalComments){
           var stars = {"1":0, "2":0, "3":0, "4":0, "5":0}
           comments = document.getElementsByClassName("comment-container");
-          /*comment_ids = [];
-          for (i=0; i<comments.length; i++){
-              comment_ids.push(comments[i].id);
-          }*/
           cbox = document.getElementById("main-comment-box");
           cbox.innerText = "";
-          /*while (cbox.fisrtChild){
-              console.log("Vaciando caja...");
-              cbox.removeChild(cbox.firstChild);
-          ;}*/ //Vaciar caja de comentarios
-
-          //bar = document.getElementById("pagination-bar");
-          //bar.innerText = "";
-
-          /*while (bar.fisrtChild){
-              console.log("Vaciando barra...");
-              bar.removeChild(bar.firstChild);
-          ;}*/ //Vaciar barra de paginas
 
           Object.keys(data).forEach(function(comment){
               if (data[comment]['rating'] == 1){stars["1"]++;}
@@ -412,7 +413,6 @@
 
               var ts = new Date(data[comment]['created']);
    
-              //if (!comment_ids.includes(String(data[comment]['id']))){
               var outer_div = document.createElement("div");
               outer_div.className = "col-md-4 p-3 comment-container";
               outer_div.id = data[comment]['id'];
@@ -438,14 +438,14 @@
                   s = document.createElement("span");
                   s.className = "fa fa-star checked";
                   first_inner_div.appendChild(s);
-                  //star_rating += '<span class="fa fa-star checked"></span>'
               }
               for (i=0; i<MAX_STARS-data[comment]['rating']; i++){
                   s = document.createElement("span");
                   s.className = "fa fa-star";
                   first_inner_div.appendChild(s);
-                  //star_rating += '<span class="fa fa-star"></span>'
               }
+
+              first_inner_div.appendChild(document.createElement("BR"));
 
               var second_inner_div = document.createElement("div");
               second_inner_div.className = "d-flex justify-content-between align-items-center";
@@ -453,13 +453,6 @@
               var innermost_div = document.createElement("div");
               innermost_div.className = "btn-group";
 
-              /*var view_button = document.createElement("button");
-              view_button.type="button";
-              view_button.className = "btn btn-sm btn-outline-secondary";
-              view_button.innerText = "View";
-              innermost_div.appendChild(view_button);*/
-
-        
               if (data[comment]['owner']==user){
                   var delete_button = document.createElement("button");
                   delete_button.type="button";
@@ -482,7 +475,6 @@
               outer_div.appendChild(second_outer_div);
 
               document.getElementById("main-comment-box").appendChild(outer_div);
-              //}
 
           });
           bar5 = document.getElementById("bar-5");
@@ -490,13 +482,6 @@
           bar3 = document.getElementById("bar-3");
           bar2 = document.getElementById("bar-2");
           bar1 = document.getElementById("bar-1");
-          /*console.log(stars);
-          console.log("Total comments: "+String(totalComments));
-          console.log("5: "+String(stars["5"]/totalComments * 100)+"%");
-          console.log("4: "+String(stars["4"]/totalComments * 100)+"%");
-          console.log("3: "+String(stars["3"]/totalComments * 100)+"%");
-          console.log("2: "+String(stars["2"]/totalComments * 100)+"%");
-          console.log("1: "+String(stars["1"]/totalComments * 100)+"%");*/
           bar5.style.width = String(stars["5"]/totalComments * 100)+"%";
           bar4.style.width = String(stars["4"]/totalComments * 100)+"%";
           bar3.style.width = String(stars["3"]/totalComments * 100)+"%";
@@ -511,24 +496,9 @@
 
       function setImages(data, totalImages){
           comments = document.getElementsByClassName("comment-container");
-          /*comment_ids = [];
-          for (i=0; i<comments.length; i++){
-              comment_ids.push(comments[i].id);
-          }*/
           cbox = document.getElementById("main-image-box");
           cbox.innerText = "";
-          /*while (cbox.fisrtChild){
-              console.log("Vaciando caja...");
-              cbox.removeChild(cbox.firstChild);
-          ;}*/ //Vaciar caja de comentarios
-
-          //bar = document.getElementById("image-pagination-bar");
-          //bar.innerText = "";
-          /*while (bar.fisrtChild){
-              console.log("Vaciando barra...");
-              bar.removeChild(bar.firstChild);
-          ;}*/ //Vaciar barra de paginas
-          console.log(data);
+ 
           Object.keys(data).forEach(function(image){
               console.log(data[image]);
               img_src = data[image]['image'];
@@ -540,7 +510,6 @@
               created = ts.toLocaleDateString()+" - "+ts.toLocaleTimeString();
               id = data[image]['id'];
    
-              //if (!comment_ids.includes(String(data[comment]['id']))){
               var outer_div = document.createElement("div");
               outer_div.className = "col-md-4 p-3 comment-container";
               outer_div.id = data[image]['id'];
@@ -570,13 +539,6 @@
               var innermost_div = document.createElement("div");
               innermost_div.className = "btn-group";
 
-              /*var view_button = document.createElement("button");
-              view_button.type="button";
-              view_button.className = "btn btn-sm btn-outline-secondary";
-              view_button.innerText = "View";
-              innermost_div.appendChild(view_button);*/
-
-        
               if (owner==user){
                   var delete_button = document.createElement("button");
                   delete_button.type="button";
@@ -681,17 +643,15 @@
             s = document.createElement("span");
             s.className = "fa fa-star checked";
             star_div.appendChild(s);
-            //star_rating += '<span class="fa fa-star checked"></span>';
           }
           for (i=0; i<MAX_STARS-numeric_rating; i++){
             s = document.createElement("span");
             s.className = "fa fa-star";
             star_div.appendChild(s);
-            //star_rating += '<span class="fa fa-star"></span>';
           }
       }
 
-      function submissionHandler(type){ //Poner un param type para saber si se envia un comment o una foto
+      function submissionHandler(type){ 
           if (type=='comment'){
               console.log("About to submit a new comment about "+place_identifier);
               sendComment(place_identifier);
@@ -792,7 +752,6 @@
 
 
   </script>
-  <pingendo onclick="window.open('https://pingendo.com/', '_blank')" style="cursor:pointer;position: fixed;bottom: 20px;right:20px;padding:4px;background-color: #00b0eb;border-radius: 8px; width:220px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:14px;color:white">Made with Pingendo Free&nbsp;&nbsp;<img src="https://pingendo.com/site-assets/Pingendo_logo_big.png" class="d-block" alt="Pingendo logo" height="16"></pingendo>
 </body>
 
 </html>

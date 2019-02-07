@@ -21,8 +21,8 @@
     <div class="container">
       <div class="row">
         <div class="text-center col-md-7 mx-auto"> <i class="fa d-block fa-bullseye fa-5x mb-4 text-info"></i>
-          <h2><b>Log in</b></h2>
-          <p class="lead">Fill the formulary below to start a new session.</p>
+          <h2><b>Inicio de sesión</b></h2>
+          <p class="lead">Introduce tus credenciales de usuario para iniciar sesión.</p>
         </div>
       </div>
     </div>
@@ -40,30 +40,30 @@
         <div class="col-md-12 order-md-1">
           <form class="needs-validation" novalidate="" method="post" action="{% url 'venues:login' %}">
             {% csrf_token %}
-            <div class="mb-3"> <label for="username">Username</label>
+            <div class="mb-3"> <label for="username">Nombre de usuario</label>
               <div class="input-group">
                 <div class="input-group-prepend"> <span class="input-group-text">@</span> </div>
                 <input type="text" class="form-control" id="username" name="username" placeholder="Username" required="">
                 <div class="invalid-feedback" style="width: 100%;"> Your username is required. </div>
               </div>
             </div>
-            <div class="mb-3"> <label for="username">Password</label>
+            <div class="mb-3"> <label for="username">Contraseña</label>
               <div class="input-group">
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" required="">
                 <div class="invalid-feedback" style="width: 100%;"> Your password is required. </div>
               </div>
             </div>
             <hr class="mb-4">
-            <button class="btn btn-primary btn-lg btn-block" type="submit">Log in</button>
+            <button id="login-button" style="margin:auto;width:20%;" class="btn btn-primary btn-lg btn-block" type="submit">Iniciar sesión</button>
           </form>
           <BR>
           <div class="center">
-            <a class="white-text" href="{% url 'venues:signup' %}">No tienes una cuenta? Regístrate</a>
+            <a style="color:black" href="{% url 'venues:signup' %}">No tienes una cuenta? Regístrate</a>
           </div>
           <BR>
-          <p><a href="{% url 'password_reset' %}">He olvidado mi contraseña</a></p>
+          <!--<p><a style="color:black" href="{% url 'password_reset' %}">He olvidado mi contraseña</a></p>-->
           <BR>
-          <p><a href="{% url 'venues:index' %}">Volver a la página de inicio</a></p>
+          <p><a style="color:black" href="{% url 'venues:index' %}">Volver a la página de inicio</a></p>
         </div>
       </div>
     </div>

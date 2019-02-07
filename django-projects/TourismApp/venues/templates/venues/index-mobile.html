@@ -38,11 +38,11 @@
                   </li>
                   {% if request.user.is_authenticated %} 
                     <li class="nav-item">
-                      <a class="nav-link" href="{% url 'logout' %}">Log out</a>
+                      <a class="nav-link" href="{% url 'logout' %}"><strong>Cerrar sesión</strong></a>
                     </li> 
                  {% else %} 
                    <li class="nav-item">
-                     <a class="nav-link" href="{% url 'venues:login' %}">Log in</a>
+                     <a class="nav-link" href="{% url 'venues:login' %}"><strong>Iniciar sesión</strong></a>
                    </li> 
                  {% endif %}
                 </ul>
@@ -57,14 +57,14 @@
         <div class="col-md-8 mx-auto">
           <h1 class="cover-heading"><b>Encuentra puntos de interés cercanos!</b></h1>
           <p class="lead">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios y deja los tuyos!</p>
-          <label for="category">Introducir dirección</label>
+          <label for="category"><strong>Introducir dirección</strong></label>
             <div class="" id="autoCompleteDiv">
               <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">
             </div>
-            <a href="#!" onclick="getLocation()">Usar mi ubicación</a>
+            <a href="#!" onclick="getLocation()"><strong>Usar mi ubicación</strong></a>
           <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
-            <div class="col-md-12 w-100 px-5 mb-3 mt-3"><label for="category">Escoge una categoría</label> <select class="custom-select d-block w-100" id="category" name="category" required="">
+            <div class="col-md-12 w-100 px-5 mb-3 mt-3"><label for="category"><strong>Escoge una categoría</strong></label> <select class="custom-select d-block w-100" id="category" name="category" required="">
                 <option value="food">Comida</option>
                 <option value="leisure">Ocio</option>
                 <option value="culture">Cultura</option>
@@ -73,13 +73,12 @@
                 <option value="medical_services">Servicios sanitarios</option>
                 <option value="bar_and_clubs">Bares y clubs</option>
                 <option value="transport">Transporte</option>
-                <option value="other">Otros</option>
               </select>
               <div class="invalid-feedback"> Please provide a valid state. </div>
               <div><input id="position" type="hidden" name="position" value="43.3380112,-8.407468"/></div>
               <div><input id="radius" type="hidden" name="radius" value="1500"/></div>
               <div><input id="gps" type="hidden" name="gps" value=true /></div>
-              <button class="btn btn-primary btn-lg btn-block mt-3" type="submit">Buscar</button>
+              <button class="btn btn-primary btn-lg btn-block mt-3" type="submit"><strong>Buscar</strong></button>
         </div>
       </div>
     </div>
@@ -148,7 +147,7 @@
                 method : "GET",
                 success : function (data) {
                     console.log(data);
-                    document.getElementById("pac-input").value = data['results'][1]['formatted_address'];
+                    document.getElementById("pac-input").value = data['results'][0]['formatted_address'];
                 },
                 error : function (data){
                     console.log(data);
