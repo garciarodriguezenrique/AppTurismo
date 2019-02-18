@@ -116,6 +116,21 @@ class UserCreation(generics.CreateAPIView):
     ]
     serializer_class = UserSerializer
 
+class UserUpdate(generics.UpdateAPIView):
+    model = User
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserSerializer
+
+class UserDelete(generics.DestroyAPIView):
+    model = User
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def perform_destroy(self, request):
+        self.request.user.is_active = False
+        self.request.user.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

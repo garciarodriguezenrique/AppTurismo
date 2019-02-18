@@ -152,6 +152,9 @@
           <option value="distance">Más cercano</option>
       </select>
     <BR>
+    <p style="color:white;text-align:center;"><strong>Buscar en resultados:</strong></p>
+    <input class="form-control d-block w-50"  id="poi-search" style="margin:auto;" type="text" placeholder="Enter a location" onkeyup="resultSearch()">
+    <BR>
     <div class="row">
         <div class="col-md-12">
           <div class="list-group" id="venue-list">
@@ -231,6 +234,31 @@ var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
 
 var map;
 
+function resultSearch(){
+    var sorting_criteria = document.getElementById("sorting-criteria").value;
+    input = document.getElementById("poi-search");
+    if (input==""){
+        document.getElementById("venue-list").innerText = "";
+        fillList(j, sorting-criteria);
+    } else {
+        poi_search = j.filter(function(element){
+            return element.venue_name.toUpperCase().includes(input.value.toUpperCase());
+        });
+        document.getElementById("venue-list").innerText = "";
+        fillList(poi_search, sorting_criteria)
+    }
+}
+
+function updateDistanceFromUser(){
+
+    Object.keys(j).forEach(function(venue){
+        d = getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
+        document.getElementById("distance-"+j[venue]['venue_name']).innerText = "A "+d.toFixed(2)+" km\n";
+        j[venue]['dist_from_user']=getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
+    });
+
+}
+
 function resetMap() {
     document.getElementById("directions-panel").style.width="0px";
     showMarkers();
@@ -258,12 +286,21 @@ function initMap() {
         scaledSize: new google.maps.Size(50, 50)
     };  
 
-    var user_marker = new google.maps.Marker({
+    user_marker = new google.maps.Marker({
         position: new google.maps.LatLng(j_loc["lat"], j_loc["long"]),
         map: map,
         title: 'Usted está aquí',
-        icon: user_icon
+        icon: user_icon,
+        draggable: true
     });
+
+    google.maps.event.addListener(user_marker, 'dragend', function() {
+        //map.setCenter(this.position);
+        user_position["lat"] = this.position.lat();
+        user_position["lng"] = this.position.lng();
+        updateDistanceFromUser();
+      });
+
 
     placeMarkers(j);
 }

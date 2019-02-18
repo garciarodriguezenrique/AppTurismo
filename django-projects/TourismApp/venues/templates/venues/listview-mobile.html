@@ -167,6 +167,9 @@
           <option value="distance">Más cercano</option>
       </select>
       <BR>
+      <p style="color:white;text-align:center;"><strong>Buscar en resultados:</strong></p>
+      <input class="form-control d-block w-50"  id="poi-search" style="margin:auto;" type="text" placeholder="Enter a location" onkeyup="resultSearch()">
+      <BR>
       <div class="row">
         <div class="col-md-12">
           <div class="list-group" id="venue-list">
@@ -210,6 +213,21 @@ var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
 var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
 
 
+
+function resultSearch(){
+    var sorting_criteria = document.getElementById("sorting-criteria").value;
+    input = document.getElementById("poi-search");
+    if (input==""){
+        document.getElementById("venue-list").innerText = "";
+        fillList(j, sorting-criteria);
+    } else {
+        poi_search = j.filter(function(element){
+            return element.venue_name.toUpperCase().includes(input.value.toUpperCase());
+        });
+        document.getElementById("venue-list").innerText = "";
+        fillList(poi_search, sorting_criteria)
+    }
+}
 
 function resetMap() {
     closeNav();
@@ -390,8 +408,6 @@ function fillList(venue_list, sorting_criteria){
 
         var small_dist = document.createElement("small");
         small_dist.id = "distance-"+sorted[venue]['venue_name'];
-        console.log("ID IS: ");
-        console.log(small_dist.id);
         small_dist.innerText = "A "+sorted[venue]['dist_from_user'].toFixed(2)+" km\n";
         
         div.appendChild(h5);
@@ -559,6 +575,7 @@ function updateDistanceFromUser(){
     Object.keys(j).forEach(function(venue){
         d = getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
         document.getElementById("distance-"+j[venue]['venue_name']).innerText = "A "+d.toFixed(2)+" km\n";
+        j[venue]['dist_from_user']=getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
     });
 
 }
