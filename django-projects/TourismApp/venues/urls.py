@@ -19,7 +19,9 @@ urlpatterns = [
     path('show-results/<str:place_id>/', views.Detail.as_view(), name='detail'),
     path('show-results/<str:place_id>/<str:content_page>', views.Detail.as_view(), name='detail'),
     path('signup/', views.SignUp.as_view(), name='signup'),
-    path('login/', views.Login.as_view(), name='login')
+    path('login/', views.Login.as_view(), name='login'),
+    path('delete-account/', views.DeleteAccount.as_view(), name='del_account'),
+    path('change-password/', views.PasswordChange.as_view(), name='my-account')
 ]
 
 

@@ -154,7 +154,7 @@
         </div>
       </div>
       {% if request.user.is_authenticated %}
-        <p><i class="fas fa-user-circle"></i> <strong>Hola, {{ request.user.username }}</strong></p>
+        <a href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a><BR>
         <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <strong>Cerrar sesión</strong></a> 
       {% else %} 
         <a href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> <strong>Iniciar sesión</strong></a>
@@ -167,8 +167,8 @@
           <option value="distance">Más cercano</option>
       </select>
       <BR>
-      <p style="color:white;text-align:center;"><strong>Buscar en resultados:</strong></p>
-      <input class="form-control d-block w-50"  id="poi-search" style="margin:auto;" type="text" placeholder="Enter a location" onkeyup="resultSearch()">
+      Buscar en resultados:
+      <input class="form-control d-block w-50"  id="poi-search" type="text" placeholder="Enter a location" onkeyup="resultSearch()">
       <BR>
       <div class="row">
         <div class="col-md-12">

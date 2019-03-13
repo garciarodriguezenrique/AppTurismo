@@ -53,7 +53,7 @@
   <BR>
   {% if request.user.is_authenticated %}
     <div id="open-session-div" style="margin:auto;width:90%;">
-    <p><i class="fas fa-user-circle"></i> <strong>Hola, {{ request.user.username }}</strong></p>
+    <a href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a><BR>
     <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <strong>Cerrar sesión</strong></a>
     </div> 
   {% else %}

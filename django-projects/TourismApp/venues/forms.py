@@ -11,6 +11,14 @@ class SignupForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+class AccModForm(UserCreationForm):
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Introduce la nueva contaseña")
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Repite la nueva contraseña")
+
+    class Meta:
+        model = User
+        fields = ('password1', 'password2')
         
 
 class ImageUploadForm(forms.Form):

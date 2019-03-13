@@ -29,6 +29,10 @@
   color: white;
 }
 
+#passwd-change:hover{
+  color: white;
+}
+
 #login-link:hover{
   color: white;
 }
@@ -132,9 +136,9 @@
     <div class="container d-flex justify-content-between">
       <a href="{% url 'venues:index'%}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-home mr-2"></i><strong>Inicio</strong></a>
       <a href="#" data-toggle="collapse" data-target="#navbarHeader" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-filter mr-2"></i><strong>Búsqueda Avanzada</strong> </a>
-      <a href="javascript:void(0)" class="navbar-brand d-flex align-items-center" onclick="openNav()"><i class="fa d-inline fa-list-ul mr-2"></i><strong>Lista POI</strong> </a>
+      <a href="javascript:void(0)" class="navbar-brand d-flex align-items-center" onclick="openNav()"><i class="fa d-inline fa-list-ul mr-2"></i><strong>Lista PDI</strong> </a>
       {% if request.user.is_authenticated %}
-          <a class="navlink"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
+          <a class="navlink" id="passwd-change" href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
       {% else %} 
         <li class="nav-item" style="list-style:none;">
           <a class="nav-link" id="login-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i><strong> Iniciar sesión</strong></a>
@@ -153,7 +157,7 @@
       </select>
     <BR>
     <p style="color:white;text-align:center;"><strong>Buscar en resultados:</strong></p>
-    <input class="form-control d-block w-50"  id="poi-search" style="margin:auto;" type="text" placeholder="Enter a location" onkeyup="resultSearch()">
+    <input class="form-control d-block w-50"  id="poi-search" style="margin:auto;" type="text" placeholder="Introduce un nombre" onkeyup="resultSearch()">
     <BR>
     <div class="row">
         <div class="col-md-12">

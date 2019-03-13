@@ -40,6 +40,9 @@
                     <li class="nav-item">
                       <a class="nav-link" href="{% url 'logout' %}"><strong>Cerrar sesión</strong></a>
                     </li> 
+                    <li class="nav-item">
+                    <p><a class="nav-link" href="{% url 'venues:my-account' %}"><strong>Mi cuenta</strong></a></p>
+                  <li>
                  {% else %} 
                    <li class="nav-item">
                      <a class="nav-link" href="{% url 'venues:login' %}"><strong>Iniciar sesión</strong></a>
@@ -55,8 +58,8 @@
     <div class="container">
       <div class="row">
         <div class="col-md-8 mx-auto">
-          <h1 class="cover-heading"><b>Encuentra puntos de interés cercanos!</b></h1>
-          <p class="lead">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios y deja los tuyos!</p>
+          <h1 class="cover-heading"><b>Encuentra puntos de interés cerca de ti!</b></h1>
+          <p class="lead">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios.</p>
           <label for="category"><strong>Introducir dirección</strong></label>
             <div class="" id="autoCompleteDiv">
               <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">

@@ -10,14 +10,34 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.urls import reverse_lazy
 from django.views import generic, View
-from .forms import SignupForm, ImageUploadForm
+from .forms import SignupForm, ImageUploadForm, AccModForm
 from requests.auth import HTTPBasicAuth
 from .categories import *
 from .webservice_endpoints import *
 from .variables import R, request_radius, days_es
+
+class DeleteAccount(View):
+    template_name_on_success = 'venues/index-desktop.html'
+    template_name_on_success_mobile = 'venues/index-mobile.html'
+    template_name_on_error = 'venues/error-template.html'
+
+    def get(self, request):
+        print("deleting...")
+        url = "http://127.0.0.1:8000/users/my_account/"
+        response = requests.delete(url, headers = {'Authorization':'token '+request.session['auth_token']})
+
+        if response.ok:
+            context={}
+            if request.user_agent.is_mobile:
+                return render(request, self.mobile_template_on_success_mobile, context)
+            else:
+                return render(request, self.mobile_template_on_success, context)
+        else:
+            return render(request, self.template_name_on_error, {"No se ha podido eliminar la cuenta. Por favor, inténtalo más tarde."})
 
 #------------------------------------------------------------------------------------#
 # Vista de alta de usuario. Crea una entidad User tanto en la aplicación como en     #
@@ -57,7 +77,7 @@ class SignUp(View):
                     request.session['auth_token'] = token
                     context = {}
                     if request.user_agent.is_mobile:
-                        return render(request, self.mobile_template_on_success_mobile, context)
+                        return render(request, self.template_name_on_success_mobile, context)
                     else:
                         return render(request, self.template_name_on_success, context)
                 else:
@@ -79,6 +99,39 @@ class SignUp(View):
 # uso de la sentencia user.is_authenticaded                                          #
 #------------------------------------------------------------------------------------#
 
+class PasswordChange(View):
+    template_name = 'registration/password_change.html'
+    template_name_on_success = 'venues/index-desktop.html'
+    template_name_on_success_mobile = 'venues/index-mobile.html'
+    template_name_on_error = 'venues/error-template.html'
+    form_class = AccModForm
+
+    def get(self, request):
+        return render(request, self.template_name, {'form':self.form_class})
+
+    def post(self, request):
+        url = "http://127.0.0.1:8000/users/my_account/"
+        form = AccModForm(request.POST)
+        if form.is_valid():
+            user = User.objects.get(username=self.request.user)
+            #if user.get_password() == request.POST['old_password']:
+            response = requests.put(url, data={'password':request.POST['password2']}, headers = {'Authorization':'token '+request.session['auth_token']})
+            if response.ok:
+                data = {'password':request.POST['password2']}
+                #user.email = request.POST['email']
+                user.set_password(request.POST['password1'])
+                user.save()
+                if request.user_agent.is_mobile:
+                    return render(request, self.template_name_on_success_mobile, {})
+                else:
+                    return render(request, self.template_name_on_success, {})
+            else:
+                return render(request, self.template_name_on_error, {'error':"Ha habido un problema al intentar modificar la información de inicio de sesión. Por favor, inténtalo más tarde"})
+            #else:
+                #return render(request, self.template_name, {'messages':["La contraseña actual introducida no es correcta"]})
+        else:
+            return render(request, self.template_name, {'form':form})
+            
 
 class Login(View):
     form_class = AuthenticationForm
@@ -94,6 +147,7 @@ class Login(View):
     def post(self, request):
         username = self.request.POST['username']
         password = self.request.POST['password']
+        print(password)
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)

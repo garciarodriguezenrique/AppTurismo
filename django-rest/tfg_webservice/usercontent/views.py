@@ -116,24 +116,20 @@ class UserCreation(generics.CreateAPIView):
     ]
     serializer_class = UserSerializer
 
-class UserUpdate(generics.UpdateAPIView):
-    model = User
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = UserSerializer
-
-class UserDelete(generics.DestroyAPIView):
-    model = User
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def perform_destroy(self, request):
-        self.request.user.is_active = False
-        self.request.user.save()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class UserDetail(generics.RetrieveAPIView):
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request):
+        user = self.get_object()
+        password = request.data.get("password")
+        user.set_password(password)
+        user.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 

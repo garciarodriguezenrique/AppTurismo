@@ -137,7 +137,7 @@
         </div>
       </div>
       {% if request.user.is_authenticated %}
-        <p><i class="fas fa-user-circle"></i> <strong>Hola, {{ request.user.username }}</strong></p>
+        <a href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a>
         <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <strong>Cerrar sesión</strong></a> 
       {% else %} 
         <a href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> <strong>Iniciar sesión</strong></a>
@@ -149,6 +149,9 @@
           <option value="rating">Puntuación</option>
           <option value="distance">Más cercano</option>
       </select>
+      <BR>
+      Buscar en resultados:
+      <input class="form-control d-block w-50"  id="poi-search" type="text" placeholder="Enter a location" onkeyup="resultSearch()">
       <BR>
       <div class="row">
         <div class="col-md-12">
@@ -234,6 +237,21 @@ function addToRoute(name, lat, lng) {
         delete route[name];
     }
 }*/
+
+function resultSearch(){
+    var sorting_criteria = document.getElementById("sorting-criteria").value;
+    input = document.getElementById("poi-search");
+    if (input==""){
+        document.getElementById("venue-list").innerText = "";
+        fillList(j, sorting-criteria);
+    } else {
+        poi_search = j.filter(function(element){
+            return element.venue_name.toUpperCase().includes(input.value.toUpperCase());
+        });
+        document.getElementById("venue-list").innerText = "";
+        fillList(poi_search, sorting_criteria)
+    }
+}
 
 function resetMap() {
     closeNav();
