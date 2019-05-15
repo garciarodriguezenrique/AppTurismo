@@ -1,7 +1,19 @@
 <!DOCTYPE html>
 <html>
 {% load static %}
-<head></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- PAGE settings -->
+  <link rel="icon" href="{% static 'venues/backgrounds/applogo.png' %}">
+  <title>TourismApp - Home</title>
+  <meta name="description" content="Wireframe design of a cover page by Pingendo">
+  <meta name="keywords" content="Pingendo bootstrap example template wireframe cover">
+  <meta name="author" content="Pingendo">
+  <!-- CSS dependencies -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" type="text/css" href="{% static 'venues/wireframe-index.css' %}">
+</head>
 <style>
 ::-webkit-scrollbar {
     width: 6px;
@@ -18,18 +30,7 @@
 }
 
 </style>
-<body class="text-center bg-dark">
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- PAGE settings -->
-  <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>TourismApp - Home</title>
-  <meta name="description" content="Wireframe design of a cover page by Pingendo">
-  <meta name="keywords" content="Pingendo bootstrap example template wireframe cover">
-  <meta name="author" content="Pingendo">
-  <!-- CSS dependencies -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
-  <link rel="stylesheet" type="text/css" href="{% static 'venues/wireframe-index.css' %}">
+<body class="text-center bg-dark" style="height:100%; overflow:hidden;background-image:url({% static 'venues/backgrounds/background12.jpg' %});background-repeat:no-repeat;background-size: cover;">
   <div class="p-3 h-100 d-flex flex-column">
     <div class="container mb-auto">
       <div class="row">
@@ -42,13 +43,10 @@
               <div class="collapse navbar-collapse text-center justify-content-end" id="navbar2SupportedContent">
                 <ul class="navbar-nav">
                   <li class="nav-item">
-                    <a class="nav-link active" href="#"><b>Home</b></a>
+                    <a class="nav-link active" href="#"><b>Inicio</b></a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#"><b>Features</b></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#"><b>Contact</b></a>
+                    <a class="nav-link" href="#"><b>Contacto</b></a>
                   </li> {% if request.user.is_authenticated %} 
                   <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}"><strong>Cerrar sesión</strong></a>
@@ -73,12 +71,12 @@
       <div class="row mb-5 pb-0">
         <div class="col-md-8 mx-auto">
           <h1 class="cover-heading mt-5"><b>Encuentra puntos de interés cerca de ti!</b></h1>
-          <p class="lead mb-5">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hasta tus destinos seleccionados, visualiza fotos y valoraciones de otros usuarios.</p>
+          <p class="lead mb-5">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hacia los destinos seleccionados, visualiza fotos y valoraciones de otros usuarios o aporta los tuyos.</p>
           <label for="category"><strong>Introducir dirección</strong></label>
             <div class="" id="autoCompleteDiv">
               <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">
             </div>
-            <a href="#!" onclick="getLocation()"><strong>Usar mi ubicación</strong></a>
+            <a href="#!" onclick="getLocation()"><strong style="color:white;">Usar mi ubicación</strong></a>
           <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
             <BR>
@@ -102,6 +100,9 @@
                   <option value="3000">3 km</option>
                   <option value="4000">4 km</option>
                   <option value="5000">5 km</option>
+                  <option value="7000">7 km</option>
+                  <option value="10000">10 km</option>
+                  <option value="15000">15 km</option>
                 </select>
                 <div class="invalid-feedback"> Please select a valid category. </div>
                 <div><input id="position" type="hidden" name="position"/></div>

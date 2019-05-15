@@ -6,8 +6,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PAGE settings -->
-  <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>TourismApp</title>
+  <link rel="icon" href="{% static 'venues/backgrounds/applogo.png' %}">
+  <title>TourismApp - Detail Page</title>
   <meta name="description" content="Wireframe design of an album page by Pingendo">
   <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
   <meta name="author" content="Pingendo">
@@ -105,7 +105,7 @@
 
 <div class="row">
   <div class="side">
-    <div>5 star</div>
+    <div>5 estrellas</div>
   </div>
   <div class="middle">
     <div class="bar-container">
@@ -116,7 +116,7 @@
     <div id="amount5"></div>
   </div>
   <div class="side">
-    <div>4 star</div>
+    <div>4 estrellas</div>
   </div>
   <div class="middle">
     <div class="bar-container">
@@ -127,7 +127,7 @@
     <div id="amount4"></div>
   </div>
   <div class="side">
-    <div>3 star</div>
+    <div>3 estrellas</div>
   </div>
   <div class="middle">
     <div class="bar-container">
@@ -138,7 +138,7 @@
     <div id="amount3"></div>
   </div>
   <div class="side">
-    <div>2 star</div>
+    <div>2 estrellas</div>
   </div>
   <div class="middle">
     <div class="bar-container">
@@ -149,7 +149,7 @@
     <div id="amount2"></div>
   </div>
   <div class="side">
-    <div>1 star</div>
+    <div>1 estrellas</div>
   </div>
   <div class="middle">
     <div class="bar-container">
@@ -170,7 +170,7 @@
             <p class="lead text-muted">Dirección: {{ address }}</p>
           {% endif %}
           {% if website %}
-            <p class="lead text-muted"><a href= "{{ website }}" >Sitio web</a></p>
+            <p class="lead text-muted"><a href= "{{ website }}" ><b><i>Sitio web</i></b></a></p>
           {% endif %}
           {% if schedule %}
             <BR>
@@ -212,7 +212,7 @@
                   <option value="4">4</option>
                   <option value="5">5</option>  
                 </select>
-                <textarea class="form-control" id="form26" name="text" rows="3" placeholder="Your comment"></textarea>
+                <textarea class="form-control" id="form26" name="text" rows="3" placeholder="Escribe aquí tu comentario"></textarea>
                 <input class="btn btn-primary" id="comment-form-submit" type="button" onclick="submissionHandler('comment')" value="Enviar" /> 
               </div>
               <!-- <button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
@@ -260,7 +260,7 @@
     <form enctype="multipart/form-data" id="image-form">
             {% csrf_token %}
               <div class="form-group">
-                <textarea class="form-control" id="form26" name="caption" rows="3" placeholder="Your comment"></textarea>
+                <textarea class="form-control" id="form26" name="caption" rows="3" placeholder="Escribe aquí un comentario para acompañar a la imagen"></textarea>
                 <input type="file" name="image"/>
                 <BR>
                 <input class="btn btn-primary" id="image-form-submit" type="button" onclick="submissionHandler('image')" value="Enviar" /> 
@@ -308,7 +308,7 @@
   <footer class="text-muted py-5">
     <div class="container">
       <p class="float-right">
-        <a href="#">Back to top</a>
+        <a href="#"><b>Volver a la parte superior</b></a>
       </p>
       <p>TourismApp 2019 (Universidade da Coruña).&nbsp; <br>Enrique García Rodríguez <a href="#">(enrique.garcia1@udc.es)</a> - <a href="#">(garciarodriguezenrique10@gmail.com)</a>.</p>
     </div>
@@ -444,7 +444,8 @@
 
               var comment_text = document.createElement("p");
               comment_text.className = "card-text";
-              comment_text.innerText = data[comment]['owner']+" :\n "+data[comment]['text'];
+              //comment_text.innerText = data[comment]['owner']+" :\n "+data[comment]['text'];
+              comment_text.innerHTML = "<b><i>"+data[comment]['owner']+"</i>:</b><BR>"+data[comment]['text'];
               first_inner_div.appendChild(comment_text);
               for (i=0; i<data[comment]['rating']; i++){
                   s = document.createElement("span");
@@ -471,7 +472,7 @@
                   delete_button.className="btn btn-sm btn-outline-secondary";
                   var comment_id = data[comment]['id'];
                   delete_button.addEventListener('click', function(){deleteComment(comment_id);});
-                  delete_button.innerText="Delete";
+                  delete_button.innerText="Eliminar";
                   innermost_div.appendChild(delete_button);
               }
 
@@ -514,10 +515,10 @@
           Object.keys(data).forEach(function(image){
               console.log(data[image]);
               img_src = data[image]['image'];
+              var caption_e = document.createElement("p");
+              caption_e.className = "card-text";
+              caption_e.innerHTML = "<b><i>"+data[image]['owner']+"</i>:</b><BR>"+data[image]['caption'];
               owner = data[image]['owner'];
-              caption = data[image]['caption'];
-              full_caption = owner + ":\n" + caption;
-              console.log(caption);
               ts = new Date(data[image]['created']);
               created = ts.toLocaleDateString()+" - "+ts.toLocaleTimeString();
               id = data[image]['id'];
@@ -539,11 +540,7 @@
               var first_inner_div = document.createElement("div");
               first_inner_div.className = "card-body";
 
-              var caption = document.createElement("p");
-              caption.className = "card-text";
-              
-              caption.innerText = full_caption;
-              first_inner_div.appendChild(caption);
+              first_inner_div.appendChild(caption_e);
 
               var second_inner_div = document.createElement("div");
               second_inner_div.className = "d-flex justify-content-between align-items-center";
@@ -558,7 +555,7 @@
                   var comment_id = id;
                   let image_id = id;
                   delete_button.addEventListener('click', function(){deleteImage(image_id);});
-                  delete_button.innerText="Delete";
+                  delete_button.innerText="Eliminar";
                   innermost_div.appendChild(delete_button);
               }
 

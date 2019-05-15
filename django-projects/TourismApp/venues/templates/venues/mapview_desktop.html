@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PAGE settings -->
-  <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>TourismApp</title>
+  <link rel="icon" href="{% static 'venues/backgrounds/applogo.png' %}">
+  <title>TourismApp - Search Results</title>
   <meta name="description" content="Wireframe design of an album page by Pingendo">
   <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
   <meta name="author" content="Pingendo">
@@ -22,7 +22,8 @@
 </head>
 <style>
 #map {
-  height: 91%;
+  height: 92%;
+  overflow: hidden;
 }
 
 #logout-link:hover{
@@ -46,12 +47,12 @@
 }
 
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 7px;
     background-color: #F5F5F5;
 } 
 
 ::-webkit-scrollbar-thumb {
-    background-color: #b4b4b4;
+    background-color: #000000;
 }
 
 ::-webkit-scrollbar-track {
@@ -61,82 +62,84 @@
 
 </style>
 
-<body id="main">
+<body id="main" style="overflow:hidden;">
   <div class="collapse bg-dark" id="navbarHeader">
     <div class="container">
       <div class="row">
         <div class="col-md-7 py-4">
           <h4>Búsqueda avanzada</h4>
           <p style="color:white;">Marca las categorías para las que deseas encontrar resultados.</p>
-          <a href="#" data-toggle="collapse" data-target="#food_categories" style="color:white;font-size:15px;"><strong>Comida</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#food_categories" style="color:white;font-size:20px;"><strong>Comida</strong></a><BR>
           <div id="food_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="restaurantFilter" type="checkbox" onclick="evaluateFilters()" value="restaurant food">  <strong>  Restaurante</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="takeawayFilter" type="checkbox" onclick="evaluateFilters()" value="meal_takeaway food">  <strong>  Para llevar</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="restaurantFilter" type="checkbox" onclick="evaluateFilters()" value="restaurant food">  <strong style="color:white;font-size:16px;">  Restaurante</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="takeawayFilter" type="checkbox" onclick="evaluateFilters()" value="meal_takeaway food">  <strong style="color:white;font-size:16px;">  Para llevar</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#leisure_categories" style="color:white;font-size:15px;"><strong>Ocio</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#leisure_categories" style="color:white;font-size:20px;"><strong>Ocio</strong></a><BR>
           <div id="leisure_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="amusement_parkFilter" type="checkbox" onclick="evaluateFilters()" value="amusement_park leisure"><strong>  Parque de atracciones</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="bowling_alleyFilter" type="checkbox" onclick="evaluateFilters()" value="bowling_alley leisure"><strong>  Bolera</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="casinoFilter" type="checkbox" onclick="evaluateFilters()" value="casino leisure"><strong>  Casino</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="movie_theaterFilter" type="checkbox" onclick="evaluateFilters()" value="movie_theater leisure"><strong>  Cine</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="spaFilter" type="checkbox" onclick="evaluateFilters()" value="spa leisure"><strong>  Spa / Centros de belleza</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="stadiumFilter" type="checkbox" onclick="evaluateFilters()" value="stadium leisure"><strong>  Estadio</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="zooFilter" type="checkbox" onclick="evaluateFilters()" value="zoo leisure"><strong>  Zoo</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="amusement_parkFilter" type="checkbox" onclick="evaluateFilters()" value="amusement_park leisure"><strong style="color:white;font-size:16px;">  Parque de atracciones</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="bowling_alleyFilter" type="checkbox" onclick="evaluateFilters()" value="bowling_alley leisure"><strong style="color:white;font-size:16px;">  Bolera</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="casinoFilter" type="checkbox" onclick="evaluateFilters()" value="casino leisure"><strong style="color:white;font-size:16px;">  Casino</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="movie_theaterFilter" type="checkbox" onclick="evaluateFilters()" value="movie_theater leisure"><strong style="color:white;font-size:16px;">  Cine</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="spaFilter" type="checkbox" onclick="evaluateFilters()" value="spa leisure"><strong style="color:white;font-size:16px;">  Spa / Centros de belleza</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="stadiumFilter" type="checkbox" onclick="evaluateFilters()" value="stadium leisure"><strong style="color:white;font-size:16px;">  Estadio</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="zooFilter" type="checkbox" onclick="evaluateFilters()" value="zoo leisure"><strong style="color:white;font-size:16px;">  Zoo</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#culture_categories" style="color:white;font-size:15px;"><strong>Cultura</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#culture_categories" style="color:white;font-size:20px;"><strong>Cultura</strong></a><BR>
           <div id="culture_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="art-galleryFilter" type="checkbox" onclick="evaluateFilters()" value="art_gallery culture"><strong>  Galería de arte</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="libraryFilter" type="checkbox" onclick="evaluateFilters()" value="library culture"><strong>  Biblioteca</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="museumFilter" type="checkbox" onclick="evaluateFilters()" value="museum culture"><strong>  Museo</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="religious_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="religious_emplacements culture"><strong>  Templos religiosos</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="public_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="public_emplacements culture"><strong>  Espacios públicos</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="art-galleryFilter" type="checkbox" onclick="evaluateFilters()" value="art_gallery culture"><strong style="color:white;font-size:16px;">  Galería de arte</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="libraryFilter" type="checkbox" onclick="evaluateFilters()" value="library culture"><strong style="color:white;font-size:16px;">  Biblioteca</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="museumFilter" type="checkbox" onclick="evaluateFilters()" value="museum culture"><strong style="color:white;font-size:16px;">  Museo</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="religious_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="religious_emplacements culture"><strong style="color:white;font-size:16px;">  Templos religiosos</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="public_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="public_emplacements culture"><strong style="color:white;font-size:16px;">  Espacios públicos</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="monumentFilter" type="checkbox" onclick="evaluateFilters()" value="monument culture"><strong style="color:white;font-size:16px;">  Monumentos</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#services_categories" style="color:white;font-size:15px;"><strong>Servicios</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#services_categories" style="color:white;font-size:20px;"><strong>Servicios</strong></a><BR>
           <div id="services_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="campgroundFilter" type="checkbox" onclick="evaluateFilters()" value="campground services"><strong>  Camping</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="car-rentalFilter" type="checkbox" onclick="evaluateFilters()" value="car_rental services"><strong>  Alquiler de coches</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="atmFilter" type="checkbox" onclick="evaluateFilters()" value="atm services"><strong>  Cajero</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="parkingFilter" type="checkbox" onclick="evaluateFilters()" value="parking services"><strong>  Parking</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="gas-stationFilter" type="checkbox" onclick="evaluateFilters()" value="gas_station services"><strong>  Gasolinera</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="policeFilter" type="checkbox" onclick="evaluateFilters()" value="police services"><strong>  Policía</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="campgroundFilter" type="checkbox" onclick="evaluateFilters()" value="campground services"><strong style="color:white;font-size:16px;">  Camping</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="car-rentalFilter" type="checkbox" onclick="evaluateFilters()" value="car_rental services"><strong style="color:white;font-size:16px;">  Alquiler de coches</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="atmFilter" type="checkbox" onclick="evaluateFilters()" value="atm services"><strong style="color:white;font-size:16px;">  Cajero</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="parkingFilter" type="checkbox" onclick="evaluateFilters()" value="parking services"><strong style="color:white;font-size:16px;">  Parking</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="gas-stationFilter" type="checkbox" onclick="evaluateFilters()" value="gas_station services"><strong style="color:white;font-size:16px;">  Gasolinera</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="policeFilter" type="checkbox" onclick="evaluateFilters()" value="police services"><strong style="color:white;font-size:16px;">  Policía</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="lodgingFilter" type="checkbox" onclick="evaluateFilters()" value="lodging services"><strong style="color:white;font-size:16px;">  Alojamiento</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#shopping_categories" style="color:white;font-size:15px;"><strong>Tiendas</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#shopping_categories" style="color:white;font-size:20px;"><strong>Tiendas</strong></a><BR>
           <div id="shopping_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="book_storeFilter" type="checkbox" onclick="evaluateFilters()" value="book_store shopping"><strong>  Librería</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="clothing_storeFilter" type="checkbox" onclick="evaluateFilters()" value="clothing_store shopping"><strong>  Tiendas de ropa</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="convenience_storeFilter" type="checkbox" onclick="evaluateFilters()" value="convenience_store shopping"><strong>  Supermercados/Hipermercados</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="hardware_storeFilter" type="checkbox" onclick="evaluateFilters()" value="hardware_store shopping"><strong>  Tienda de electrónica</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="shopping_mallFilter" type="checkbox" onclick="evaluateFilters()" value="shopping_mall shopping"><strong>  Centro comercial</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="other_storesFilter" type="checkbox" onclick="evaluateFilters()" value="other_stores shopping"><strong>  Otras tiendas</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="book_storeFilter" type="checkbox" onclick="evaluateFilters()" value="book_store shopping"><strong style="color:white;font-size:16px;">  Librería</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="clothing_storeFilter" type="checkbox" onclick="evaluateFilters()" value="clothing_store shopping"><strong style="color:white;font-size:16px;">  Tiendas de ropa</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="convenience_storeFilter" type="checkbox" onclick="evaluateFilters()" value="convenience_store shopping"><strong style="color:white;font-size:16px;">  Supermercados/Hipermercados</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="hardware_storeFilter" type="checkbox" onclick="evaluateFilters()" value="hardware_store shopping"><strong style="color:white;font-size:16px;">  Tienda de electrónica</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="shopping_mallFilter" type="checkbox" onclick="evaluateFilters()" value="shopping_mall shopping"><strong style="color:white;font-size:16px;">  Centro comercial</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="other_storesFilter" type="checkbox" onclick="evaluateFilters()" value="other_stores shopping"><strong style="color:white;font-size:16px;">  Otras tiendas</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#medical_services_categories" style="color:white;font-size:15px;"><strong>Servicios sanitarios</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#medical_services_categories" style="color:white;font-size:20px;"><strong>Servicios sanitarios</strong></a><BR>
           <div id="medical_services_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="hospitalFilter" type="checkbox" onclick="evaluateFilters()" value="hospital medical_services"><strong>  Hospital/Centro médico</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="pharmacyFilter" type="checkbox" onclick="evaluateFilters()" value="pharmacy medical_services"><strong>  Farmacia</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="hospitalFilter" type="checkbox" onclick="evaluateFilters()" value="hospital medical_services"><strong style="color:white;font-size:16px;">  Hospital/Centro médico</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="pharmacyFilter" type="checkbox" onclick="evaluateFilters()" value="pharmacy medical_services"><strong style="color:white;font-size:16px;">  Farmacia</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#bar_and_clubs_categories" style="color:white;font-size:15px;"><strong>Bares y clubs</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#bar_and_clubs_categories" style="color:white;font-size:20px;"><strong>Bares y clubs</strong></a><BR>
           <div id="bar_and_clubs_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar bar_and_clubs"><strong>  Bar</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="night_clubFilter" type="checkbox" onclick="evaluateFilters()" value="night_club bar_and_clubs"><strong>  Clubs</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar bar_and_clubs"><strong style="color:white;font-size:16px;">  Bar</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="night_clubFilter" type="checkbox" onclick="evaluateFilters()" value="night_club bar_and_clubs"><strong style="color:white;font-size:16px;">  Club</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#transport_categories" style="color:white;font-size:15px;"><strong>Transporte</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#transport_categories" style="color:white;font-size:20px;"><strong>Transporte</strong></a><BR>
           <div id="transport_categories" class="collapse" style="margin-left:15px;">
-            <a href="#"><input class="filter-checkbox" id="airportFilter" type="checkbox" onclick="evaluateFilters()" value="airport transport"><strong>  Aeropuerto</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="bus_stationFilter" type="checkbox" onclick="evaluateFilters()" value="bus_station transport"><strong>  Estación / Parada de bus</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="train_stationFilter" type="checkbox" onclick="evaluateFilters()" value="train_station transport"><strong>  Estación / Parada de tren</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="subway_stationFilter" type="checkbox" onclick="evaluateFilters()" value="subway_station transport"><strong>  Estación / Parada de metro</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="taxi_standFilter" type="checkbox" onclick="evaluateFilters()" value="taxi_stand transport"><strong>  Parada de taxis</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="airportFilter" type="checkbox" onclick="evaluateFilters()" value="airport transport"><strong style="color:white;font-size:16px;">  Aeropuerto</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="bus_stationFilter" type="checkbox" onclick="evaluateFilters()" value="bus_station transport"><strong style="color:white;font-size:16px;">  Estación / Parada de bus</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="train_stationFilter" type="checkbox" onclick="evaluateFilters()" value="train_station transport"><strong style="color:white;font-size:16px;">  Estación / Parada de tren</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="subway_stationFilter" type="checkbox" onclick="evaluateFilters()" value="subway_station transport"><strong style="color:white;font-size:16px;">  Estación / Parada de metro</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="taxi_standFilter" type="checkbox" onclick="evaluateFilters()" value="taxi_stand transport"><strong style="color:white;font-size:16px;">  Parada de taxis</strong></a><BR>
           </div>
         </div>     
       </div>
-      <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3" style="margin:auto;width:20%;">Buscar</button>
+      <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3" style="margin:auto;width:20%;"><strong>Buscar</strong></button>
     </div>
   </div>
   <div class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between">
       <a href="{% url 'venues:index'%}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-home mr-2"></i><strong>Inicio</strong></a>
       <a href="#" data-toggle="collapse" data-target="#navbarHeader" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-filter mr-2"></i><strong>Búsqueda Avanzada</strong> </a>
-      <a href="javascript:void(0)" class="navbar-brand d-flex align-items-center" onclick="openNav()"><i class="fa d-inline fa-list-ul mr-2"></i><strong>Lista PDI</strong> </a>
+      <a href="javascript:void(0)" class="navbar-brand d-flex align-items-center" onclick="openNav()"><i class="fa d-inline fa-list-ul mr-2"></i><strong>Lista de resultados</strong> </a>
       {% if request.user.is_authenticated %}
           <a class="navlink" id="passwd-change" href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
       {% else %} 
@@ -150,7 +153,7 @@
 
   <div id="mySidenav" class="sidenav" style="background-color:#555555;">
     <a href="javascript:void(0)" class="closebtn" style="color:white;" onclick="closeNav()">&times;</a>
-    <p style="color:white;text-align:center;"><strong>Ordernar resultados por:</strong></p>
+    <p style="color:white;text-align:center;"><strong>Ordenar resultados por:</strong></p>
       <select class="custom-select d-block w-50" id="sorting-criteria" style="margin:auto;" required="">
           <option value="rating">Puntuación</option>
           <option value="distance">Más cercano</option>
@@ -198,7 +201,7 @@
         <button id="confirm-route-button" onclick="startRoute()" class="btn btn-primary btn-lg btn-block mt-3" style="margin:auto;width:40%;"><strong>Confirmar</strong></button>
       </div>
 
-  <div id="directions-panel">
+  <div id="directions-panel" style="height:92%;">
           <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
           <button id="prev" onclick="previousSegment()">Destino previo</button>
           <button id="next" onclick="nextSegment()">Destino siguiente</button>
@@ -238,6 +241,19 @@ var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
 
 var map;
 
+function removeDuplicatesByName(jsonArray){
+    var seenNames = {};
+    jsonArray = jsonArray.filter(function(currentObject) {
+        if (currentObject.venue_name in seenNames) {
+            return false;
+        } else {
+            seenNames[currentObject.venue_name] = true;
+            return true;
+        }
+    });
+    return jsonArray;
+}
+
 function resultSearch(){
     var sorting_criteria = document.getElementById("sorting-criteria").value;
     input = document.getElementById("poi-search");
@@ -257,7 +273,7 @@ function updateDistanceFromUser(){
 
     Object.keys(j).forEach(function(venue){
         d = getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
-        document.getElementById("distance-"+j[venue]['venue_name']).innerText = "A "+d.toFixed(2)+" km\n";
+        document.getElementById("distance-"+j[venue]['venue_name']).innerHTML = "<b style='color:gray;'>A "+d.toFixed(2)+" km</b><BR>";
         j[venue]['dist_from_user']=getDistanceFromLatLonInKm(user_position["lat"],user_position["lng"],j[venue]["lat"],j[venue]["lng"]);
     });
 
@@ -521,7 +537,7 @@ function evaluateFilters(){
 function filterResults(){
     
     if (currentlyDisplayedCategories.length > 0){
-        document.getElementById("venue-list").innerText = "Cargando nuevos resultados...";
+        document.getElementById("venue-list").innerHTML = "<b style='margin-left:20%;color:white;font-size:30px;'>Cargando nuevos resultados...</b>";
         $.ajax({
             url : "{% url 'venues:filter' %}"+"?category="+formatCategories(currentlyDisplayedCategories)+"&user_position="+user_position["lat"]+","+user_position["lng"],  
             method : "GET",
@@ -540,10 +556,10 @@ function filterResults(){
                 console.log(data.status);
                 if (data.status == 404){
                     alert("No se han encontrado resultados para la/s categoría/s solicitadas")
-                    document.getElementById("venue-list").innerText = "No se han encontrado resultados para la/s categoría/s solicitadas";
+                    document.getElementById("venue-list").innerHTML = "<b style='margin-left:5%;color:white;font-size:20px;'>No se han encontrado resultados para la/s categoría/s solicitadas.</b>";
                 } else {
                     alert("Ha habido un error, inténtalo más tarde.");
-                    document.getElementById("venue-list").innerText = "Ha habido un error, inténtalo más tarde.";
+                    document.getElementById("venue-list").innerText = "<b style='margin-left:5%;color:white;font-size:20px;'>Ha habido un error, inténtalo más tarde.</b>";
                 }
             }
         });
@@ -560,7 +576,7 @@ function placeMarkers(venue_list){
         '</div>'+
         '<h4 id="firstHeading" class="firstHeading">'+sorted[venue]['venue_name']+'</h4>'+
         '<div id="bodyContent">'+
-        '<p><b>'+sorted[venue]['formatted_address']+'</b></p>'+
+        '<h5><b>'+sorted[venue]['formatted_address']+'</b></h5>'+
         '<a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'" target="_blank" style="font-size:15px;">Buscar con Google</a><BR>'+
         '</div>';
 
@@ -626,14 +642,22 @@ function fillList(venue_list, sorting_criteria){
         h5.innerText = sorted[venue]['venue_name']+"  ";
         h5.appendChild(icon);
 
+        var h9 = document.createElement("p");
+        h9.className;
+        /*var boldaddress = document.createElement("strong");
+        boldaddress.innerText = sorted[venue]['formatted_address']+"\n";
+        h9.appendChild(boldaddress);*/
+        h9.innerHTML = "<b style='color:gray;'>"+sorted[venue]['formatted_address']+"</b><BR>";
+
         var small_dist = document.createElement("small");
         small_dist.id = "distance-"+sorted[venue]['venue_name'];
-        small_dist.innerText = "A "+sorted[venue]['dist_from_user'].toFixed(2)+" km\n";
+        small_dist.innerHTML = "<b style='color:gray'>A "+sorted[venue]['dist_from_user'].toFixed(2)+" km</b><BR>";
         
         div.appendChild(h5);
         div.appendChild(small_dist);
 
         var p = document.createElement("p");
+        p.appendChild(h9);
 
         for (i=0; i<sorted[venue]['rating']; i++){
             s = document.createElement("span");
@@ -645,6 +669,7 @@ function fillList(venue_list, sorting_criteria){
             s.className = "fa fa-star";
             p.appendChild(s);
         }
+        
         var icon = document.createElement("img");
         icon.src = sorted[venue]["icon"];
         icon.style.height = "10%";
@@ -655,21 +680,21 @@ function fillList(venue_list, sorting_criteria){
         checkbox.className = "route_checkbox";
         checkbox.id = "check_"+sorted[venue]['venue_name'];
 
-        small_addToRoute.innerText = "Añadir a ruta ";
+        small_addToRoute.innerHTML = "<b style='color:gray'>Añadir a ruta </b>";
         small_addToRoute.append(checkbox);
 
 
         var small = document.createElement("small");
         var p_category = document.createElement("p");
-        p_category.innerText = "Categoría/s: "+getCategorySpanish(sorted[venue]['category']);
+        p_category.innerHTML = "<b style='color:gray;'>Categoría/s: "+getCategorySpanish(sorted[venue]['category'])+"</b><BR>";
         small.appendChild(p_category);
         var a_map = document.createElement("a");
         a_map.href = "javascript:void(0)";
-        a_map.innerText = "Ver en mapa\n";
+        a_map.innerHTML = "<b style='color:gray'>Ver en mapa</b><BR>";
         a_map.style = "color:black;"
         var a_detail = document.createElement("a");
         a_detail.href = sorted[venue]['reference']+"/";
-        a_detail.innerText = "Más detalles\n";
+        a_detail.innerHTML = "<b style='color:gray'>Más detalles</b><BR>";
         a_detail.style = "color:black;font-size:17px;"
         small.appendChild(a_detail);
         small.appendChild(a_map);

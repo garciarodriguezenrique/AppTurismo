@@ -6,8 +6,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- PAGE settings -->
-  <link rel="icon" href="https://templates.pingendo.com/assets/Pingendo_favicon.ico">
-  <title>Mobile - TourismApp</title>
+  <link rel="icon" href="{% static 'venues/backgrounds/applogo.png' %}">
+  <title>TourismApp - Detail Page Mobile</title>
   <meta name="description" content="Wireframe design of an album page by Pingendo">
   <meta name="keywords" content="Pingendo bootstrap example template wireframe album ">
   <meta name="author" content="Pingendo">
@@ -45,7 +45,7 @@
   </div>
   <div class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between">
-      <a href="{% url 'venues:mapview' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-chevron-circle-left mr-2"></i><strong>Volver a resultados</strong> </a>
+      <a href="{% url 'venues:index' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-home mr-2"></i><strong>Inicio</strong> </a>
       <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>-->
     </div>
   </div>
@@ -73,13 +73,13 @@
           <hr style="border:3px solid #f1f1f1">
 
 <!--
-<div class="row">
+<div class="row" style="width:50%;margin:0 auto;">
   <div class="side">
     <div>5 star</div>
   </div>
   <div class="middle">
     <div class="bar-container">
-      <div class="bar-5" id="bar-5"></div>
+      <div class="bar-5" id="bar-5">56</div>
     </div>
   </div>
   <div class="side right">
@@ -140,7 +140,7 @@
             <p class="lead text-muted">Dirección: {{ address }}</p>
           {% endif %}
           {% if website %}
-            <p class="lead text-muted"><a href= "{{ website }}" >Sitio web</a></p>
+            <p class="lead text-muted"><a href= "{{ website }}" ><b><i>Sitio web</i></b></a></p>
           {% endif %}
           {% if schedule %}
             <BR>
@@ -189,7 +189,7 @@
             </form>
           {% else %}
 	    Sólo los usuarios registrados pueden dejar comentarios. Por favor, inicia sesión o regístrate.
-            <a class="nav-link" href="{% url 'venues:login' %}">Log in</a>
+            <a class="nav-link" href="{% url 'venues:login' %}"><b><i>Iniciar sesión</i></b></a>
           {% endif %}
         </div>
       </div>
@@ -239,7 +239,7 @@
             </form>
           {% else %}
 	    Sólo los usuarios registrados pueden subir fotos. Por favor, inicia sesión o regístrate.
-            <a class="nav-link" href="{% url 'venues:login' %}">Log in</a>
+            <a class="nav-link" href="{% url 'venues:login' %}"><b><i>Iniciar sesión</i></b></a>
           {% endif %}
         </div>
       </div>
@@ -278,7 +278,7 @@
   <footer class="text-muted py-5">
     <div class="container">
       <p class="float-right">
-        <a href="#">Back to top</a>
+        <a href="#"><b>Volver a la parte superior</b></a>
       </p>
       <p>TourismApp 2019 (Universidade da Coruña).&nbsp; <br>Enrique García Rodríguez <a href="#">(enrique.garcia1@udc.es)</a> - <a href="#">(garciarodriguezenrique10@gmail.com)</a>.</p>
     </div>
@@ -412,7 +412,8 @@
 
               var comment_text = document.createElement("p");
               comment_text.className = "card-text";
-              comment_text.innerText = data[comment]['owner']+" :\n "+data[comment]['text'];
+              //comment_text.innerText = data[comment]['owner']+" :\n "+data[comment]['text'];
+              comment_text.innerHTML = "<b><i>"+data[comment]['owner']+"</i>:</b><BR>"+data[comment]['text'];
               first_inner_div.appendChild(comment_text);
               for (i=0; i<data[comment]['rating']; i++){
                   s = document.createElement("span");
@@ -437,7 +438,7 @@
                   delete_button.className="btn btn-sm btn-outline-secondary";
                   var comment_id = data[comment]['id'];
                   delete_button.addEventListener('click', function(){deleteComment(comment_id);});
-                  delete_button.innerText="Delete";
+                  delete_button.innerText="Eliminar";
                   innermost_div.appendChild(delete_button);
               }
 
@@ -455,6 +456,21 @@
               document.getElementById("main-comment-box").appendChild(outer_div);
 
           });
+          /*bar5 = document.getElementById("bar-5");
+          bar4 = document.getElementById("bar-4");
+          bar3 = document.getElementById("bar-3");
+          bar2 = document.getElementById("bar-2");
+          bar1 = document.getElementById("bar-1");
+          bar5.style.width = String(stars["5"]/totalComments * 100)+"%";
+          bar4.style.width = String(stars["4"]/totalComments * 100)+"%";
+          bar3.style.width = String(stars["3"]/totalComments * 100)+"%";
+          bar2.style.width = String(stars["2"]/totalComments * 100)+"%";
+          bar1.style.width = String(stars["1"]/totalComments * 100)+"%";
+          document.getElementById("amount5").innerText = stars["5"];
+          document.getElementById("amount4").innerText = stars["4"];
+          document.getElementById("amount3").innerText = stars["3"];
+          document.getElementById("amount2").innerText = stars["2"];
+          document.getElementById("amount1").innerText = stars["1"];*/          
       }
 
       function setImages(data, totalImages){
@@ -465,10 +481,10 @@
           Object.keys(data).forEach(function(image){
               console.log(data[image]);
               img_src = data[image]['image'];
+              var caption_e = document.createElement("p");
+              caption_e.className = "card-text";
+              caption_e.innerHTML = "<b><i>"+data[image]['owner']+"</i>:</b><BR>"+data[image]['caption'];
               owner = data[image]['owner'];
-              caption = data[image]['caption'];
-              full_caption = owner + ":\n" + caption;
-              console.log(caption);
               ts = new Date(data[image]['created']);
               created = ts.toLocaleDateString()+" - "+ts.toLocaleTimeString();
               id = data[image]['id'];
@@ -490,11 +506,7 @@
               var first_inner_div = document.createElement("div");
               first_inner_div.className = "card-body";
 
-              var caption = document.createElement("p");
-              caption.className = "card-text";
-              
-              caption.innerText = full_caption;
-              first_inner_div.appendChild(caption);
+              first_inner_div.appendChild(caption_e);
 
               var second_inner_div = document.createElement("div");
               second_inner_div.className = "d-flex justify-content-between align-items-center";
@@ -509,7 +521,7 @@
                   var comment_id = id;
                   let image_id = id;
                   delete_button.addEventListener('click', function(){deleteImage(image_id);});
-                  delete_button.innerText="Delete";
+                  delete_button.innerText="Eliminar";
                   innermost_div.appendChild(delete_button);
               }
 
@@ -706,7 +718,7 @@
           });
       }
 
-      $(document).ready(function(){
+      $(window).on('load',function(){
           console.log("Loading 1st page of comments")
           getComments("1",place_identifier);
           getImages("1",place_identifier);

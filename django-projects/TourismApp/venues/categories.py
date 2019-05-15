@@ -12,14 +12,16 @@ spa=["spa"]
 stadium=["stadium"]
 zoo=["zoo"]
 
-culture=["art_gallery","library","museum","church","city_hall","synagogue","mosque","hindu_temple","park"]
+culture=["art_gallery","library","museum","church","city_hall","synagogue","mosque","hindu_temple","park","monument"]
+monument=["monument"]
 art_gallery=["art_gallery"]
 library=["library"]
 museum=["museum"]
 religious_emplacements = ["synagogue", "church", "mosque", "hindu_temple"]
 public_emplacements=["city_hall","park"]
 
-services=["campground","car_rental","atm","parking","gas_station","police","rv_park"]
+services=["campground","car_rental","atm","parking","gas_station","police","rv_park","lodging"]
+lodging=["lodging"]
 campground=["campground","rv_camp"]
 car_rental=["car_rental"]
 atm=["atm"]
@@ -56,8 +58,8 @@ other=["park"]
 
 CATEGORIES = {'food':food, 'restaurant':restaurant, 'meal_takeaway':meal_takeaway,
 'leisure':leisure, 'amusement_park':amusement_park, 'bowling_alley':bowling_alley, 'casino':casino, 'movie_theater':movie_theater, 'spa':spa, 'stadium':stadium, 'zoo':zoo, 
-'culture':culture, 'art_gallery':art_gallery, 'museum':museum, 'library':library, 'religious_emplacements':religious_emplacements, 'public_emplacements':public_emplacements,
-'services':services, 'campground':campground, 'car_rental':car_rental, 'atm':atm, 'parking':parking, 'gas_station':gas_station, 'police':police,
+'culture':culture, 'art_gallery':art_gallery, 'museum':museum, 'library':library, 'religious_emplacements':religious_emplacements, 'public_emplacements':public_emplacements, 'monument':monument,
+'services':services, 'campground':campground, 'car_rental':car_rental, 'atm':atm, 'parking':parking, 'gas_station':gas_station, 'police':police, 'lodging':lodging,
 'shopping':shopping, 'book_store':book_store, 'clothing_store':clothing_store, 'convenience_store':convenience_store, 'hardware_store':hardware_store, 'shopping_mall':shopping_mall, 'other_stores':other_stores,
 'medical_services':medical_services, 'hospital':hospital, 'pharmacy':pharmacy,
 'bar_and_clubs':bar_and_clubs, 'bar':bar, 'night_club':night_club,

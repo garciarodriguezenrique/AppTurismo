@@ -71,21 +71,21 @@ def check_cache(radius, category_list, LatLng):
     qs = PointOfInterest.objects.within_distance(float(LatLng.split(",")[0]),float(LatLng.split(",")[1])).filter(distance__lte=radius_km)
     final_qs = PointOfInterest.objects.none()
     for cat in category_list:
-        print("Retrieving cached results for: "+cat)
         aux = qs.filter(category__contains=cat)
         if len(aux)<5:
-            print("Not enough results for:"+cat+". Retrieving more...")
-            results = make_asyncronous_request(CATEGORIES[cat], LatLng, radius)
-            aux = qs.filter(category__contains=cat)       
+            make_asyncronous_request(CATEGORIES[cat], LatLng, radius)
+            qs = PointOfInterest.objects.within_distance(float(LatLng.split(",")[0]),float(LatLng.split(",")[1])).filter(distance__lte=radius_km)
+            aux = qs.filter(category__contains=cat)  
         final_qs = final_qs | aux
     return final_qs
 
 def make_asyncronous_request(category_list, LatLng, radius):
     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&type={}&key="+KEY
+    alt_url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query={}&location="+LatLng.split(",")[0]+","+LatLng.split(",")[1]+"&radius="+radius+"&key="+KEY
     print(url)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    future = asyncio.ensure_future(run(url, category_list))
+    future = asyncio.ensure_future(run(url, alt_url, category_list))
     data = loop.run_until_complete(future)
     
     if 'results' in data:
@@ -95,11 +95,26 @@ def make_asyncronous_request(category_list, LatLng, radius):
             element['lng'] = element['geometry']['location']['lng']
             if 'rating' in element:
                 rating = element['rating']
+            #--------------------------------------------------------------------
+            if 'vicinity' in element:
+                if len(element['vicinity'])<12:
+                    addr_resp = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(element['lat'])+","+str(element['lng'])+"&key="+KEY)
+                    if addr_resp.ok:
+                        element['vicinity']=addr_resp.json()['results'][1]['formatted_address']
+            elif 'formatted_address' in element:
+                if len(element['formatted_address'])<12:
+                    addr_resp = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(element['lat'])+","+str(element['lng'])+"&key="+KEY)
+                    if addr_resp.ok:
+                        element['formatted_address']=addr_resp.json()['results'][1]['formatted_address']
+                
+            #--------------------------------------------------------------------
             if not PointOfInterest.objects.filter(reference=element['reference']):
-     
-                poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['vicinity'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
-                poi.save()
-        return data['results']
+                if not 'vicinity' in element:
+                    poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['formatted_address'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=["culture","monument"])
+                    poi.save()
+                else: 
+                    poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['vicinity'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
+                    poi.save()
 
 def evaluate_types(types):
     categories=[]
@@ -136,20 +151,21 @@ async def fetch(url, session):
                     time.sleep(1)
 
 
-async def run(url, category_list):
+async def run(url, alt_url, category_list):
     
     tasks = []
 
     async with ClientSession() as session:
         for i in category_list:
-            task = asyncio.ensure_future(fetch(url.format(i), session))
+            if i=="hotel" or i=="monument":
+                task = asyncio.ensure_future(fetch(alt_url.format(i), session))
+            else:
+                task = asyncio.ensure_future(fetch(url.format(i), session))
             tasks.append(task)
 
         responses = await asyncio.gather(*tasks)
         responses_clean = [x for x in responses if x is not None]
 
-        print("THIS IS RESPONSES CLEAN: \n")
-        print(responses_clean)
         if responses_clean:
             data = responses_clean[0]
             for item in responses_clean[1:]:

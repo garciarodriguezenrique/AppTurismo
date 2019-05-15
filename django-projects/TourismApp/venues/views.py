@@ -221,35 +221,46 @@ class Detail(View):
             schedule = ""
             categories = ""
  
-            name = jData['result']['name']
+            name = jData['result']['name'].replace("_"," ")
             if 'formatted_phone_number' in jData['result']: 
                 phone_number = jData['result']['formatted_phone_number']
-            if 'formatted_address' in jData['result']:
+            #if 'formatted_address' in jData['result']:
+            #    address = jData['result']['formatted_address']
+            #else:
+                #response = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+jData['result']['geometry']['location']['lat']+","+jData['result']['geometry']['location']['lng'])
+                #if response.ok:
+                #    data=response.json();
+                    #for component in data['results'][0]['address_components']:
+                    #    if 'street_number' in component['types']:
+                    #        street_number = component['long_name']
+                    #    if 'route' in component['types']:
+                    #        route = component['long_name']
+                    #    if 'locality' in component['types']:
+                    #        locality = component['long_name']
+                    #    if 'administrative_area_level_2' in component['types']:
+                    #        administrative_area_level_2 = component['long_name']
+                    #    if 'administrative_area_level_1' in component['types']:
+                    #        administrative_area_level_1 = component['long_name']
+                    #    if 'country' in component['types']:
+                    #        country = component['long_name']
+                    #    if 'postal_code' in component['types']:
+                    #        postal_code = component['long_name']
+                    #address = route+", Nº:"+street_number+", CP:"+postal_code+", "+locality+", "+administrative_area_level_2+", "+administrative_area_level_1+", "+country
+                    #address = data['results'][1]['formatted_address']
+            response_addr = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+str(jData['result']['geometry']['location']['lat'])+","+str(jData['result']['geometry']['location']['lng']))
+            if response_addr.ok:
+                data=response_addr.json()
+                address = data['results'][1]['formatted_address']
+            elif 'formatted_address' in jData['result']:
                 address = jData['result']['formatted_address']
             else:
-                response = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+jData['result']['geometry']['location']['lat']+","+jData['result']['geometry']['location']['lng'])
-                if response.ok:
-                    data=response.json();
-                    for component in data['results'][0]['address_components']:
-                        if 'street_number' in component['types']:
-                            street_number = component['long_name']
-                        if 'route' in component['types']:
-                            route = component['long_name']
-                        if 'locality' in component['types']:
-                            locality = component['long_name']
-                        if 'administrative_area_level_2' in component['types']:
-                            administrative_area_level_2 = component['long_name']
-                        if 'administrative_area_level_1' in component['types']:
-                            administrative_area_level_1 = component['long_name']
-                        if 'country' in component['types']:
-                            country = component['long_name']
-                        if 'postal_code' in component['types']:
-                            postal_code = component['long_name']
-                    address = route+", Nº:"+street_number+", CP:"+postal_code+", "+locality+", "+administrative_area_level_2+", "+administrative_area_level_1+", "+country
+                address = ""
             if 'website' in jData['result']:
                 website = jData['result']['website']
             if 'opening_hours' in jData['result'] and 'weekday_text' in jData['result']['opening_hours']:
                 schedule = [day.replace(day.split(':')[0],days_es.get(day.split(':')[0])) for day in jData['result']['opening_hours']['weekday_text']]
+                schedule = [day.replace("Closed","Cerrado") for day in schedule]
+                schedule = [day.replace("Open","Abierto") for day in schedule]
             if 'types' in jData['result']:
                 categories = jData['result']['types']
 
@@ -273,8 +284,10 @@ def cleanResponse(jData):
             df = pd.DataFrame(jData)[required_keys] 
             df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("'",""))
             df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("`",""))
+            df["venue_name"] = df["venue_name"].apply(lambda x: x.replace("_"," "))
             df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("'",""))
             df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("`",""))
+            df["formatted_address"] = df["formatted_address"].apply(lambda x: x.replace("_"," "))
             df = df.fillna(0) 
             d = df.to_json(orient='records')
             return d
@@ -335,6 +348,13 @@ class Mapview(View):
 
         if response.ok:
             jData = response.json()
+            #---------Nuevo-----------ReverseGeocode------------
+            #for venue in jData:
+            #    if venue['formatted_address'] == "Spain":
+            #        response_addr = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+str(venue['lat'])+","+str(venue['lng']))
+            #        if response_addr.ok:
+            #            venue['formatted_address'] = response_addr.json()['results'][1]['formatted_address']
+            #---------------------------------------------------
             d = cleanResponse(jData)
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))

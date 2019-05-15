@@ -23,6 +23,8 @@ function getClassName(category){
         return "fa d-inline fa-church mr-2";
     } else if (category.includes('public_emplacements')){
         return "fa d-inline fa-monuments mr-2";
+    } else if (category.includes('monument')){
+        return "fa d-inline fa-monuments mr-2";
     } else if (category.includes('campground')){
         return "fa d-inline fa-campground mr-2";
     } else if (category.includes('car_rental')){
@@ -35,6 +37,8 @@ function getClassName(category){
         return "fa d-inline fa-gas-pump mr-2";
     } else if (category.includes('police')){
         return "fa d-inline fa-shield-alt mr-2";
+    } else if (category.includes('lodging')){
+        return "fas fa-bed";
     } else if (category.includes('book_store')){
         return "fa d-inline fa-book mr-2";
     } else if (category.includes('clothing_store')){
@@ -115,6 +119,9 @@ function getCategorySpanish(category){
     if (category.includes('bowling_alley')){
         category_name += "bolera, ";
     } 
+    if (category.includes('casino')){
+        category_name += "casino, ";
+    } 
     if (category.includes('movie_theater')){
         category_name += "cine, ";
     } 
@@ -139,6 +146,9 @@ function getCategorySpanish(category){
     if (category.includes('public_emplacements')){
         category_name += "espacio público, ";
     }
+    if (category.includes('monument')){
+        category_name += "monumento, ";
+    }
     if (category.includes('campground')){
         category_name += "camping, ";
     }
@@ -156,6 +166,9 @@ function getCategorySpanish(category){
     }
     if (category.includes('police')){
         category_name += "policía, ";
+    }
+    if (category.includes('lodging')){
+        category_name += "alojamiento, ";
     }
     if (category.includes('book_store')){
         category_name += "librería, ";
