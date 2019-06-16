@@ -3,6 +3,8 @@ from django.conf import settings
 from django.db.models import Func, F
 from django_mysql.models import ListCharField
 
+
+# Manager class used to query DB for PointsOfInterest within a given area
 class DistanceManager(models.Manager):
     def within_distance(self, latitude, longitude):
         

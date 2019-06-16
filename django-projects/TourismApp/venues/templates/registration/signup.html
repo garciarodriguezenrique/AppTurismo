@@ -28,11 +28,13 @@
     </div>
   </div>
   {% if messages %}
-  <ul class="messages">
+  <ul class="messages" style="margin:auto;width:80%;">
     {% for message in messages %}
       <li class="{{ message.tags }}">{{ message }}</li>
     {% endfor %}
   </ul>
+  <BR>
+  <BR>
   {% endif %}
   <div class="">
     <div class="container">
@@ -40,7 +42,11 @@
         <div class="col-md-12 order-md-1">
           <form class="needs-validation" novalidate="" method="post" action="{% url 'venues:signup' %}">
             {% csrf_token %} {{ form.as_p }}
-            <button type="submit" style="margin:auto;width:20%;" class="btn btn-primary btn-lg btn-block">Enviar</button>
+            {% if request.user_agent.is_mobile %}
+              <button type="submit" style="margin:auto;width:30%;" class="btn btn-primary btn-lg btn-block"><strong>Enviar<strong></button>
+            {% else %}
+              <button type="submit" style="margin:auto;width:10%;" class="btn btn-primary btn-lg btn-block"><strong>Enviar<strong></button>
+            {% endif %}
           </form>
         </div>
       </div>
@@ -51,20 +57,6 @@
   <div class="py-5 text-muted text-center">
     <div class="container">
       <div class="row">
-        <div class="col-md-12 my-4">
-          <p class="mb-1">© 2017-2018 Company Name</p>
-          <ul class="list-inline">
-            <li class="list-inline-item">
-              <a href="#">Privacy</a>
-            </li>
-            <li class="list-inline-item">
-              <a href="#">Terms</a>
-            </li>
-            <li class="list-inline-item">
-              <a href="#">Support</a>
-            </li>
-          </ul>
-        </div>
       </div>
     </div>
   </div>

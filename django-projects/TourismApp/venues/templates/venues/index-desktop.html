@@ -30,7 +30,7 @@
 }
 
 </style>
-<body class="text-center bg-dark" style="height:100%; overflow:hidden;background-image:url({% static 'venues/backgrounds/background12.jpg' %});background-repeat:no-repeat;background-size: cover;">
+<body class="text-center bg-dark">
   <div class="p-3 h-100 d-flex flex-column">
     <div class="container mb-auto">
       <div class="row">
@@ -49,14 +49,11 @@
                     <a class="nav-link" href="#"><b>Contacto</b></a>
                   </li> {% if request.user.is_authenticated %} 
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}"><strong>Cerrar sesión</strong></a>
+                    <a id="logout" class="nav-link" href="{% url 'logout' %}"><strong>Cerrar sesión</strong></a>
                   </li>
                   <li class="nav-item">
                     <p><a class="nav-link" href="{% url 'venues:my-account' %}"><strong>Mi cuenta</strong></a></p>
                   <li>
-                  <!--<li class="nav-item">
-                    <p><a style="color:black" href="{% url 'venues:del_account' %}">Borrar cuenta</a></p>
-                  <li>-->
                    {% else %} <li class="nav-item">
                     <a class="nav-link" href="{% url 'venues:login' %}"><strong>Iniciar sesión</strong></a>
                   </li> {% endif %}
@@ -70,43 +67,86 @@
     <div class="container">
       <div class="row mb-5 pb-0">
         <div class="col-md-8 mx-auto">
-          <h1 class="cover-heading mt-5"><b>Encuentra puntos de interés cerca de ti!</b></h1>
-          <p class="lead mb-5">Esta app te permite encontrar puntos de interés de una determinada categoría ordenados por relevancia. Obtén la ruta más eficiente hacia los destinos seleccionados, visualiza fotos y valoraciones de otros usuarios o aporta los tuyos.</p>
-          <label for="category"><strong>Introducir dirección</strong></label>
+          <h1 class="cover-heading mt-5"><b>Encuentra lo que buscas cerca de ti</b></h1>
+          <p class="lead mb-5">Esta app te permite encontrar puntos de interés de una determinada categoría presentes en el área circundante. Obtén la ruta más eficiente hacia los destinos seleccionados, visualiza fotos y valoraciones de otros usuarios o aporta las tuyas.</p>
+          <label for="category"><strong>Introduce una dirección</strong></label>
             <div class="" id="autoCompleteDiv">
               <input class="form-control d-block w-100"  id="pac-input" type="text" placeholder="Enter a location">
             </div>
+            <BR>
             <a href="#!" onclick="getLocation()"><strong style="color:white;">Usar mi ubicación</strong></a>
           <form class="needs-validation" novalidate="" action="{% url 'venues:mapview' %}" method="post">
           {% csrf_token %}
             <BR>
             <div class="row ml-5 pl-5">
               <BR>
-              <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="category"><strong>Categoría</strong></label> <select class="custom-select d-block w-100" id="category" name="category" required="">
-                  <option value="food">Comida</option>
-                  <option value="leisure">Ocio</option>
-                  <option value="culture">Cultura</option>
-                  <option value="services">Servicios</option>
-                  <option value="shopping">Tiendas</option>
-                  <option value="medical_services">Servicios sanitarios</option>
-                  <option value="bar_and_clubs">Bares y clubs</option>
-                  <option value="transport">Transporte</option>
+              <div class="col-md-5 mb-3 ml-5 pl-5"> <label for="category"><strong>¿Qué estás buscando?</strong></label> <select class="custom-select d-block w-100" id="category" name="category" required="">
+                  <optgroup label="Comida">
+                  <option value="restaurant">Restaurantes</option>
+                  <option value="meal_takeaway">Comida para llevar</option>
+                  <option value="food">Todos</option>
+                  </optgroup>
+                  <optgroup label="Ocio">
+                  <option value="amusement_park">Parque de atracciones</option>
+                  <option value="bowling_alley">Bolera</option>
+                  <option value="casino">Casino</option>
+                  <option value="movie_theater">Cine</option>
+                  <option value="spa">Spa / Centro de belleza</option>
+                  <option value="stadium">Estadio</option>
+                  <option value="zoo">Zoo</option>
+                  <option value="leisure">Todos</option>
+                  </optgroup>
+                  <optgroup label="Cultura">
+                  <option value="art_gallery">Galería de arte</option>
+                  <option value="library">Biblioteca</option>
+                  <option value="museum">Museo</option>
+                  <option value="religious_emplacements">Templos religiosos</option>
+                  <option value="park">Parques</option>
+                  <option value="monument">Monumentos</option>
+                  <option value="culture">Todos</option>
+                  </optgroup>
+                  <optgroup label="Servicios">
+                  <option value="lodging">Alojamiento</option>
+                  <option value="car_rental">Alquiler de vehículos</option>
+                  <option value="parking">Parking</option>
+                  <option value="atm">Cajero</option>
+                  <option value="campground">Cámping</option>
+                  <option value="rv_park">Parque de caravanas</option>
+                  <option value="gas_station">Gasolinera</option>
+                  <option value="police">Policía</option>
+                  <option value="services">Todos</option>
+                  </optgroup>
+                  <optgroup label="Tiendas">
+                  <option value="book_store">Librería</option>
+                  <option value="clothing_store">Ropa</option>
+                  <option value="convenience_store">Supermercado / Hipermercado</option>
+                  <option value="hardware_store">Electrónica</option>
+                  <option value="shopping_mall">Centro comercial</option>
+                  <option value="other_stores">Otros</option>
+                  <option value="shopping">Todos</option>
+                  </optgroup>
+                  <optgroup label="Servicios sanitarios">
+                  <option value="hospital">Hospitales y Centros Médicos</option>
+                  <option value="pharmacy">Farmacias</option>
+                  <option value="medical_services">Todos</option>
+                  </optgroup>
+                  <optgroup label="Bares y clubs">
+                  <option value="bar">Bar</option>
+                  <option value="night_club">Club/Pub</option>
+                  <option value="bar_and_clubs">Todos</option>
+                  </optgroup>
+                  <optgroup label="Transporte">
+                  <option value="taxi_stand">Parada de taxis</option>
+                  <option value="airport">Aeropuerto</option>
+                  <option value="bus_station">Estación / parada de bus</option>
+                  <option value="train_station">Estación / parada de tren</option>
+                  <option value="subway_station">Estación / parada de metro</option>
+                  <option value="transport">Todos</option>
+                  </optgroup>
                 </select>
                 <BR>
-                <label for="radius"><strong>Desplazamiento máximo</strong></label> <select class="custom-select d-block w-100" id="radius" name="radius" required="">
-                  <option value="500">500 m</option>
-                  <option value="1000">1 km</option>
-                  <option value="2000">2 km</option>
-                  <option value="3000">3 km</option>
-                  <option value="4000">4 km</option>
-                  <option value="5000">5 km</option>
-                  <option value="7000">7 km</option>
-                  <option value="10000">10 km</option>
-                  <option value="15000">15 km</option>
-                </select>
                 <div class="invalid-feedback"> Please select a valid category. </div>
                 <div><input id="position" type="hidden" name="position"/></div>
-                <!--<div><input id="radius" type="hidden" name="radius" value="1500"/></div>-->
                 <div><input id="gps" type="hidden" name="gps" value=true /></div>
                 <button class="btn btn-primary btn-lg btn-block mt-3" type="submit"><strong>Buscar</strong></button>
               </div>
@@ -124,10 +164,30 @@
 <script>
     var x = document.getElementById("position");
 
+    var options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0
+    };
+
+    function error(error) {
+      switch(error.code) {
+        case error.POSITION_UNAVAILABLE:
+          alert("No ha sido posible obtener la información de ubicación. Por favor, inténtalo más tarde")
+          break;
+        case error.TIMEOUT:
+          alert("Se ha excedido el tiempo de espera para obtener la información de ubicación.")
+          break;
+        case error.UNKNOWN_ERROR:
+          alert("No ha sido posible obtener la información de ubicación. Por favor, inténtalo más tarde")
+          break;
+      }
+    };
+
     function getLocation() {
         document.getElementById('gps').value = true;
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(setPositionValue);
+            navigator.geolocation.getCurrentPosition(setPositionValue, error, options);
         } else {
             alert("Geolocation is not supported by this browser.");
         }
@@ -137,8 +197,6 @@
         x.value = position.coords.latitude + "," + position.coords.longitude; 
         getLocationString();
     }
-
-    //window.addEventListener('load', getLocation);
 
     function initAutoComplete(){
         var input = document.getElementById('pac-input');
@@ -156,8 +214,6 @@
           }
 
           if (place.geometry.viewport) {
-            console.log("FOUND");
-            console.log(place.geometry.location);
             x.value = place.geometry.location.lat()+","+place.geometry.location.lng();
             document.getElementById('gps').value=false;
           }
@@ -172,11 +228,9 @@
                 dataType: "json",  
                 method : "GET",
                 success : function (data) {
-                    console.log(data);
                     document.getElementById("pac-input").value = data['results'][0]['formatted_address'];
                 },
                 error : function (data){
-                    console.log(data);
                     alert("Ha habido un error, inténtalo más tarde.");
                 }
             });

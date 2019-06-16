@@ -19,6 +19,7 @@ museum=["museum"]
 monument=["monument"]
 religious_emplacements = ["synagogue", "church", "mosque", "hindu_temple"]
 public_emplacements=["city_hall","park"]
+park=["park"]
 
 services=["campground","car_rental","atm","parking","gas_station","police","rv_park","lodging"]
 campground=["campground","rv_camp"]
@@ -43,6 +44,7 @@ medical_services=["doctor","hospital","pharmacy"]
 hospital=["doctor","hospital"]
 pharmacy=["pharmacy"]
 
+
 bar_and_clubs=["bar","cafe","night_club"]
 bar=["bar","cafe"]
 night_club=["night_club"]
@@ -58,10 +60,10 @@ other=["park"]
 
 CATEGORIES = {'food':food, 'restaurant':restaurant, 'meal_takeaway':meal_takeaway,
 'leisure':leisure, 'amusement_park':amusement_park, 'bowling_alley':bowling_alley, 'casino':casino, 'movie_theater':movie_theater, 'spa':spa, 'stadium':stadium, 'zoo':zoo, 
-'culture':culture, 'art_gallery':art_gallery, 'museum':museum, 'library':library, 'religious_emplacements':religious_emplacements, 'monument':monument, 'public_emplacements':public_emplacements,
+'culture':culture, 'art_gallery':art_gallery, 'museum':museum, 'library':library, 'religious_emplacements':religious_emplacements, 'monument':monument, 'public_emplacements':public_emplacements, 'park':park,
 'services':services, 'campground':campground, 'car_rental':car_rental, 'atm':atm, 'parking':parking, 'gas_station':gas_station, 'police':police, 'lodging':lodging,
 'shopping':shopping, 'book_store':book_store, 'clothing_store':clothing_store, 'convenience_store':convenience_store, 'hardware_store':hardware_store, 'shopping_mall':shopping_mall, 'other_stores':other_stores,
-'medical_services':medical_services, 'hospital':hospital, 'pharmacy':pharmacy,
+'medical_services':medical_services, 'hospital':hospital, 'pharmacy':pharmacy, 
 'bar_and_clubs':bar_and_clubs, 'bar':bar, 'night_club':night_club,
 'transport':transport, 'airport':airport, 'bus_station':bus_station, 'train_station':train_station, 'subway_station':subway_station, 'taxi_stand':taxi_stand,
 'other':other}

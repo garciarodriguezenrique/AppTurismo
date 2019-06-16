@@ -39,14 +39,6 @@ class CommentList(generics.ListCreateAPIView):
         num_reviews = Comment.objects.filter(venue_id=venue_id).count()
         rating = Rating(avg_rating=avg, review_number=num_reviews, venue_id=venue_id)
         rating.save()
-
-    def perform_destroy(self, serializer):
-        #Retrieve comments, compute avg rating and create/update a new Rating object.
-        venue_id = self.request.data.get("venue_id")
-        avg = Comment.objects.filter(venue_id=venue_id).aggregate(Avg('rating'))['rating__avg']
-        num_reviews = Comment.objects.filter(venue_id=venue_id).count()
-        rating = Rating(avg_rating=avg, review_number=num_reviews, venue_id=venue_id)
-        rating.save()
              
     def get_queryset(self):
         queryset = Comment.objects.all()
@@ -62,6 +54,16 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def perform_destroy(self, instance):
+        serializer = CommentSerializer(instance)
+        venue_id = serializer.data['venue_id']
+        instance.delete()
+        #Retrieve comments, compute avg rating and create/update a new Rating object.
+        avg = Comment.objects.filter(venue_id=venue_id).aggregate(Avg('rating'))['rating__avg']
+        num_reviews = Comment.objects.filter(venue_id=venue_id).count()
+        rating = Rating(avg_rating=avg, review_number=num_reviews, venue_id=venue_id)
+        rating.save()
         
 
 class ImageList(generics.ListCreateAPIView):
@@ -112,7 +114,7 @@ class UserList(generics.ListAPIView):
 class UserCreation(generics.CreateAPIView):
     model = User
     permission_classes = [
-        permissions.AllowAny # Or anon users can't register
+        permissions.AllowAny # Or else anon users can't register
     ]
     serializer_class = UserSerializer
 

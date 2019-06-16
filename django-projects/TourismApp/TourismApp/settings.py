@@ -25,7 +25,7 @@ SECRET_KEY = 'jm1&%131uju_8=xmzez9)u%6h4zngu8ss8v^)%#p^av@ip57)o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.115', '127.0.0.1', '192.168.1.104', '0.0.0.0', 'TourismApp.com']
+ALLOWED_HOSTS = ['192.168.1.46', '192.168.1.115', '127.0.0.1', '192.168.1.104', '0.0.0.0', 'TourismApp.com']
 
 
 # Application definition

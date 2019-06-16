@@ -72,7 +72,7 @@ def check_cache(radius, category_list, LatLng):
     final_qs = PointOfInterest.objects.none()
     for cat in category_list:
         aux = qs.filter(category__contains=cat)
-        if len(aux)<5:
+        if len(aux)<25:
             make_asyncronous_request(CATEGORIES[cat], LatLng, radius)
             qs = PointOfInterest.objects.within_distance(float(LatLng.split(",")[0]),float(LatLng.split(",")[1])).filter(distance__lte=radius_km)
             aux = qs.filter(category__contains=cat)  
@@ -95,7 +95,7 @@ def make_asyncronous_request(category_list, LatLng, radius):
             element['lng'] = element['geometry']['location']['lng']
             if 'rating' in element:
                 rating = element['rating']
-            #--------------------------------------------------------------------
+           
             if 'vicinity' in element:
                 if len(element['vicinity'])<12:
                     addr_resp = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(element['lat'])+","+str(element['lng'])+"&key="+KEY)
@@ -107,13 +107,15 @@ def make_asyncronous_request(category_list, LatLng, radius):
                     if addr_resp.ok:
                         element['formatted_address']=addr_resp.json()['results'][1]['formatted_address']
                 
-            #--------------------------------------------------------------------
+            
             if not PointOfInterest.objects.filter(reference=element['reference']):
                 if not 'vicinity' in element:
-                    poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['formatted_address'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=["culture","monument"])
+                    print(element)
+                    poi = PointOfInterest(venue_id=element['place_id'], reference=element['reference'], formatted_address=element['formatted_address'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=["culture","monument"])
                     poi.save()
                 else: 
-                    poi = PointOfInterest(venue_id=element['id'], reference=element['reference'], formatted_address=element['vicinity'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
+                    print(element)
+                    poi = PointOfInterest(venue_id=element['place_id'], reference=element['reference'], formatted_address=element['vicinity'], venue_name=element['name'], lat=element['lat'], lng=element['lng'], icon=element['icon'], rating=rating, category=evaluate_types(element['types']))
                     poi.save()
 
 def evaluate_types(types):
@@ -157,7 +159,7 @@ async def run(url, alt_url, category_list):
 
     async with ClientSession() as session:
         for i in category_list:
-            if i=="hotel" or i=="monument":
+            if i=="monument":
                 task = asyncio.ensure_future(fetch(alt_url.format(i), session))
             else:
                 task = asyncio.ensure_future(fetch(url.format(i), session))

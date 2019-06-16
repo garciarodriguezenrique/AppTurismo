@@ -2,13 +2,16 @@ import requests
 import json
 import geocoder
 import base64
+import bleach
 import pandas as pd
 from math import sin, cos, sqrt, atan2, radians
 from dateutil import parser
 from django.core.files.base import ContentFile
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils.html import escape
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
@@ -19,6 +22,12 @@ from requests.auth import HTTPBasicAuth
 from .categories import *
 from .webservice_endpoints import *
 from .variables import R, request_radius, days_es
+
+#------------------------------------------------------------------------------------#
+# Vista de eliminación de usuario.                                                   #
+#                                                                                    #
+# Gestiona el borrado de usuarios en la BD del servicio web                          #
+#------------------------------------------------------------------------------------#
 
 class DeleteAccount(View):
     template_name_on_success = 'venues/index-desktop.html'
@@ -33,17 +42,17 @@ class DeleteAccount(View):
         if response.ok:
             context={}
             if request.user_agent.is_mobile:
-                return render(request, self.mobile_template_on_success_mobile, context)
+                return render(request, self.template_on_success_mobile, context)
             else:
-                return render(request, self.mobile_template_on_success, context)
+                return render(request, self.template_on_success, context)
         else:
             return render(request, self.template_name_on_error, {"No se ha podido eliminar la cuenta. Por favor, inténtalo más tarde."})
 
 #------------------------------------------------------------------------------------#
-# Vista de alta de usuario. Crea una entidad User tanto en la aplicación como en     #
-# el servicio web. Se crea también en la aplicación para poder acceder a propiedades #
-# del usuario sin consultar el servicio web, como user.username; o hacer uso de la   #
-# sentencia user.is_authenticaded                                                    #
+# Vista de alta de usuario.                                                          #
+#                                                                                    #
+# Gestiona el renderizado de la página de sing-up y la creación de nuevos usuarios   #
+# en la BD del servicio web                                                          #
 #------------------------------------------------------------------------------------#
 
 class SignUp(View):
@@ -63,8 +72,8 @@ class SignUp(View):
         form = SignupForm(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
+            username = bleach.clean(form.cleaned_data.get('username'))
+            raw_password = bleach.clean(form.cleaned_data.get('password1'))
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             data = {'username':username,'password':raw_password}
@@ -81,7 +90,7 @@ class SignUp(View):
                     else:
                         return render(request, self.template_name_on_success, context)
                 else:
-                    messages.error(request,'Algo salió mal durante el inicio de sesión. Inténtalo más tarde.')
+                    messages.error(request,'El usuario no existe.')
                     context = {'form':AuthenticationForm}
                     return render(request, self.template_name_on_login_error, context)
             else:
@@ -93,10 +102,10 @@ class SignUp(View):
                 
            
 #------------------------------------------------------------------------------------#
-# Vista de incio de sesión. Inicia sesión para un usuario tanto en la aplicación     #
-# como en el servicio web. Se crea también en la aplicación para poder acceder a     #
-# propiedades del usuario sin consultar el servicio web, como user.username; o hacer #
-# uso de la sentencia user.is_authenticaded                                          #
+# Vista de cambio de contraseña.                                                     #
+#                                                                                    #
+# Gestiona el renderizado de la página de usuario y la modificación de las creden-   #
+# ciales de los usuarios en la BD del servicio web                                   #
 #------------------------------------------------------------------------------------#
 
 class PasswordChange(View):
@@ -114,24 +123,30 @@ class PasswordChange(View):
         form = AccModForm(request.POST)
         if form.is_valid():
             user = User.objects.get(username=self.request.user)
-            #if user.get_password() == request.POST['old_password']:
-            response = requests.put(url, data={'password':request.POST['password2']}, headers = {'Authorization':'token '+request.session['auth_token']})
-            if response.ok:
-                data = {'password':request.POST['password2']}
-                #user.email = request.POST['email']
-                user.set_password(request.POST['password1'])
-                user.save()
-                if request.user_agent.is_mobile:
-                    return render(request, self.template_name_on_success_mobile, {})
+            if user.check_password(request.POST['old_password']):
+                response = requests.put(url, data={'password':bleach.clean(request.POST['password2'])}, headers = {'Authorization':'token '+request.session['auth_token']})
+                if response.ok:
+                    data = {'password':bleach.clean(request.POST['password2'])}
+                    user.set_password(bleach.clean(request.POST['password1']))
+                    user.save()
+                    if request.user_agent.is_mobile:
+                        return render(request, self.template_name_on_success_mobile, {})
+                    else:
+                        return render(request, self.template_name_on_success, {})
                 else:
-                    return render(request, self.template_name_on_success, {})
+                    return render(request, self.template_name_on_error, {'error':"Ha habido un problema al intentar modificar la información de inicio de sesión. Por favor, inténtalo más tarde"})
             else:
-                return render(request, self.template_name_on_error, {'error':"Ha habido un problema al intentar modificar la información de inicio de sesión. Por favor, inténtalo más tarde"})
-            #else:
-                #return render(request, self.template_name, {'messages':["La contraseña actual introducida no es correcta"]})
+                messages.error(request, "La contraseña actual introducida no es correcta")
+                return render(request, self.template_name, {'form':self.form_class})
         else:
             return render(request, self.template_name, {'form':form})
             
+#------------------------------------------------------------------------------------#
+# Vista de inicio de sesión.                                                         #
+#                                                                                    #
+# Gestiona el renderizado de la página de log-in y la validación de las credencia-   #
+# les de los usuarios contra el servicio web                                         #
+#------------------------------------------------------------------------------------#
 
 class Login(View):
     form_class = AuthenticationForm
@@ -141,13 +156,15 @@ class Login(View):
     template_name = 'registration/login.html'
 
     def get(self, request):
+        print(request.META.get('HTTP_REFERER', '/'))
         request.session['login_from'] = request.META.get('HTTP_REFERER', '/')
         return render(request, self.template_name, {'form':self.form_class})
     
     def post(self, request):
-        username = self.request.POST['username']
-        password = self.request.POST['password']
-        print(password)
+        username = bleach.clean(self.request.POST['username'])
+        password = bleach.clean(self.request.POST['password'])
+        if request.session['login_from']:
+                    print("you logged from: "+request.session['login_from'])
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
@@ -174,11 +191,11 @@ class Login(View):
         
 
 
-#--------------------------------------------------------------------------------------#
-# Vista índice. Redirige a la plantilla index.html, que presenta un formulario para la #
-# búsqueda de puntos de interés. Esta plantilla solicitará permiso del usuario para    #
-# obtener su localización                                                              #
-#--------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------#
+# Vista índice.                                                                      #
+#                                                                                    #
+# Gestiona el renderizado de la página de inicio.                                    #
+#------------------------------------------------------------------------------------#
 
 class Index(View):
     template_name = 'venues/index-desktop.html'
@@ -193,10 +210,12 @@ class Index(View):
             return render(request, self.template_name, context)
 
         
-#---------------------------------------------------------------------------------------------#
-# Vista detalle. Obtiene y presenta los detalles de un punto de interés a través del servicio #
-# web, junto con las fotos y comentarios asociados a este                                     #
-#---------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------#
+# Vista de detalle.                                                                  #
+#                                                                                    #
+# Gestiona la obtención de los detalles de un punto de interés a través del servicio #
+# web, además del renderizado de la página de detalle                                #
+#------------------------------------------------------------------------------------#
 
 class Detail(View):
     template_name = 'venues/detail-desktop.html'
@@ -224,29 +243,6 @@ class Detail(View):
             name = jData['result']['name'].replace("_"," ")
             if 'formatted_phone_number' in jData['result']: 
                 phone_number = jData['result']['formatted_phone_number']
-            #if 'formatted_address' in jData['result']:
-            #    address = jData['result']['formatted_address']
-            #else:
-                #response = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+jData['result']['geometry']['location']['lat']+","+jData['result']['geometry']['location']['lng'])
-                #if response.ok:
-                #    data=response.json();
-                    #for component in data['results'][0]['address_components']:
-                    #    if 'street_number' in component['types']:
-                    #        street_number = component['long_name']
-                    #    if 'route' in component['types']:
-                    #        route = component['long_name']
-                    #    if 'locality' in component['types']:
-                    #        locality = component['long_name']
-                    #    if 'administrative_area_level_2' in component['types']:
-                    #        administrative_area_level_2 = component['long_name']
-                    #    if 'administrative_area_level_1' in component['types']:
-                    #        administrative_area_level_1 = component['long_name']
-                    #    if 'country' in component['types']:
-                    #        country = component['long_name']
-                    #    if 'postal_code' in component['types']:
-                    #        postal_code = component['long_name']
-                    #address = route+", Nº:"+street_number+", CP:"+postal_code+", "+locality+", "+administrative_area_level_2+", "+administrative_area_level_1+", "+country
-                    #address = data['results'][1]['formatted_address']
             response_addr = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+str(jData['result']['geometry']['location']['lat'])+","+str(jData['result']['geometry']['location']['lng']))
             if response_addr.ok:
                 data=response_addr.json()
@@ -276,6 +272,12 @@ class Detail(View):
             context = {'error':error}
             return render(request, self.template_name_on_error, context)
 
+#------------------------------------------------------------------------------------#
+#                                                                                    #
+# Función auxiliar que realiza tareas de preparación y limpieza de caracteres        #
+# conflictivos en la respuesta del servicio web                                      #
+#                                                                                    #
+#------------------------------------------------------------------------------------#
 
 def cleanResponse(jData): 
 
@@ -292,6 +294,14 @@ def cleanResponse(jData):
             d = df.to_json(orient='records')
             return d
 
+#------------------------------------------------------------------------------------#
+#                                                                                    #
+# Función auxiliar que prepara el conjunto de categorías seleccionadas para          #
+# incluírlas de manera que en la petición de búsqueda de manera que se ajusten       #
+#al formato esperado por el servicio web.                                            #
+#                                                                                    #
+#------------------------------------------------------------------------------------#
+
 def formatCategory(category):
     finalString = ""
     for element in category:
@@ -299,8 +309,11 @@ def formatCategory(category):
     return finalString[:-1]
 
 #-------------------------------------------------------------------------------------------------#
-# Vista de resultados. Procesa los resultados de puntos de interés obtenidos del servicio web y   # 
-# realiza las preparaciones pertinentes                                                           #
+# Vista de resultados.                                                                            #
+#                                                                                                 #
+# Obtiene información de los puntos de interés de la categoría seleccionada por el usuario y pre- #
+# para está información para ser presentada. Gestiona también el renderizado de la página de      #
+# resultados.                                                                                     #
 #-------------------------------------------------------------------------------------------------#
 
 class Mapview(View):
@@ -311,10 +324,35 @@ class Mapview(View):
 
     def get(self, request):
 
-        if request.session['last_response'] and request.session['user_coordinates'] and request.session['last_category']:
+        if request.session['user_coordinates'] and request.session['last_category']:
             venues = request.session['last_response']
-            user_coordinates_json = user_coordinates_json = json.loads(json.dumps(request.session['user_coordinates']))
-            category = request.session['last_category']
+            url=external_services_endpoint+"getvenues/?LatLng=%s,%s&radius=%s&category=%s" % (request.session['user_coordinates']['lat'], request.session['user_coordinates']['long'],request_radius, request.session['last_category']) 
+            response = requests.get(url)
+            if response.ok:
+                jData = response.json()
+                d = cleanResponse(jData)
+                venues = json.loads(d)
+                r = requests.get(rating_endpoint)
+                if r.ok:
+                    ratings = r.json()
+                    aux_dict = {}
+                    for rating in ratings['results']:
+                        aux_dict[rating['venue_id']] = rating['avg_rating']
+                    for venue in venues:
+                        venue['dist_from_user'] = calcDistance(venue['lat'], venue['lng'], request) #R*c
+                        if venue['reference'] in aux_dict:
+                            venue['rating'] = aux_dict[venue['reference']]
+                        else:
+                            venue['rating'] = "0.00"
+                user_coordinates_json = json.loads(json.dumps(request.session['user_coordinates']))
+                category = request.session['last_category']
+            else: 
+                error_msg = str(response.status_code)+":"+response.reason
+                error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación ("+error_msg+")"
+                if str(response.status_code) == "404":
+                    error="No se han encontrado puntos de interés de la categoría especificada en el área."
+                context = {'error':error}
+                return render(request, self.template_name_on_error, context)
         else:
             error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación"
             context = {'error':error}
@@ -348,13 +386,6 @@ class Mapview(View):
 
         if response.ok:
             jData = response.json()
-            #---------Nuevo-----------ReverseGeocode------------
-            #for venue in jData:
-            #    if venue['formatted_address'] == "Spain":
-            #        response_addr = requests.get(external_services_endpoint+"reverse-geocode/?LatLng="+str(venue['lat'])+","+str(venue['lng']))
-            #        if response_addr.ok:
-            #            venue['formatted_address'] = response_addr.json()['results'][1]['formatted_address']
-            #---------------------------------------------------
             d = cleanResponse(jData)
             venues = json.loads(d)
             user_coordinates_json = json.loads(json.dumps(user_coordinates))
@@ -365,12 +396,6 @@ class Mapview(View):
                 for rating in ratings['results']:
                     aux_dict[rating['venue_id']] = rating['avg_rating']
                 for venue in venues:
-                    #lat2 = radians(float(venue['lat']))
-                    #lon2 = radians(float(venue['lng']))
-                    #dlat = lat2 - radians(user_coordinates['lat'])
-                    #dlon = lon2 - radians(user_coordinates['long'])
-                    #a = sin(dlat / 2)**2 + cos(radians(user_coordinates['lat'])) * cos(lat2) * sin(dlon / 2)**2
-                    #c = 2 * atan2(sqrt(a), sqrt(1 - a))
                     venue['dist_from_user'] = calcDistance(venue['lat'], venue['lng'], request) #R*c
                     if venue['reference'] in aux_dict:
                         venue['rating'] = aux_dict[venue['reference']]
@@ -389,13 +414,18 @@ class Mapview(View):
         else: 
             error_msg = str(response.status_code)+":"+response.reason
             error="Hubo un error al tratar de obtener puntos de interés cerca de tu ubicación ("+error_msg+")"
+            if str(response.status_code) == "404":
+                error="No se han encontrado puntos de interés de la categoría especificada en el área."
             context = {'error':error}
             return render(request, self.template_name_on_error, context)
 
+
 #---------------------------------------------------------------------------------------------#
+#                                                                                             #
 # Las siguientes funciones se usan para actualizar las cajas de comentarios e imágenes de     #
 # las páginas detalle, así como mantener actualizada la información relativa a la puntuación  #
-# según las valoraciones de los usuarios                                                      #
+# media según las valoraciones de los usuarios                                                #
+#                                                                                             #
 #---------------------------------------------------------------------------------------------#
 
 
@@ -415,7 +445,7 @@ class NewComment(View):
 
     def post(self, request):
         place_id = request.GET['venue_id']
-        comment = request.POST["text"]
+        comment = bleach.clean(request.POST["text"])
         rating = request.POST["rating"]
         image = None
         if "image" in request.FILES:
@@ -432,7 +462,7 @@ class NewImage(View):
 
     def post(self, request):
         place_id = request.GET['venue_id']
-        caption = request.POST["caption"]
+        caption = bleach.clean(request.POST["caption"])
         image = None
         if "image" in request.FILES:
             stream = request.FILES["image"].file
@@ -526,9 +556,9 @@ def calcDistance(venue_lat, venue_lng, request):
     return R*c
 
 #-------------------------------------------------------------------------------------------#
-# Vista de filtros por categoría. Vuelve a cargar la respuesta original del servicio en un  #
-# DataFrame y aplica el filtrado correspondiente. Vista invocada por llamada AJAX mediante  #   
-# jQuery                                                                                    #
+# Vista de búsqueda avanzada.                                                               #
+#                                                                                           #
+# Gestiona las operaciones de búsqueda avanzada invocadas desde la página de resultados     #
 #-------------------------------------------------------------------------------------------#
 
 class Filter(View):
@@ -547,7 +577,6 @@ class Filter(View):
         if response.ok:
             jData = response.json()
             d = cleanResponse(jData)
-            #-----------------------------------------------------------------
             venues = json.loads(d)
             r = requests.get(rating_endpoint)
             if r.ok:
@@ -556,18 +585,11 @@ class Filter(View):
                 for rating in ratings['results']:
                     aux_dict[rating['venue_id']] = rating['avg_rating']
                 for venue in venues:
-                    #lat2 = radians(float(venue['lat']))
-                    #lon2 = radians(float(venue['lng']))
-                    #dlat = lat2 - radians(request.session['user_coordinates']['lat'])
-                    #dlon = lon2 - radians(request.session['user_coordinates']['long'])
-                    #a = sin(dlat / 2)**2 + cos(radians(request.session['user_coordinates']['lat'])) * cos(lat2) * sin(dlon / 2)**2
-                    #c = 2 * atan2(sqrt(a), sqrt(1 - a))
-                    venue['dist_from_user'] = calcDistance(venue['lat'], venue['lng'], request) #R*c
+                    venue['dist_from_user'] = calcDistance(venue['lat'], venue['lng'], request) 
                     if venue['reference'] in aux_dict:
                         venue['rating'] = aux_dict[venue['reference']]
                     else:
                         venue['rating'] = "0.00"
-            #-----------------------------------------------------------------
             request.session['last_response'] = venues
             return HttpResponse(json.dumps(venues), content_type="application/json")
         elif response.json() == 'ZERO_RESULTS':

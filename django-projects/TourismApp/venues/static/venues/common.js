@@ -70,6 +70,13 @@ function getClassName(category){
     }
 }
 
+function deleteMarkers(){
+    for (e in markers){
+        markers[e].setMap(null);
+    }
+    markers = [];
+}
+
 function showMarkers(){
     for (e in markers){
         markers[e].setVisible(true);
@@ -96,7 +103,7 @@ function addToRoute(name, lat, lng) {
     var checkBox = document.getElementById("check_"+name);
     if (checkBox.checked == true){
         console.log("true");
-        route[name] = {"lat":lat, "lng":lng};//new google.maps.LatLng(lat, lng) //{"lat":lat, "lng":lng};
+        route[name] = {"lat":lat, "lng":lng};
     } else {
         console.log("false");
         delete route[name];
@@ -144,6 +151,9 @@ function getCategorySpanish(category){
         category_name += "templo religioso, ";
     } 
     if (category.includes('public_emplacements')){
+        category_name += "espacio público, ";
+    }
+    if (category.includes('park')){
         category_name += "espacio público, ";
     }
     if (category.includes('monument')){

@@ -68,11 +68,11 @@
       <div class="row">
         <div class="col-md-7 py-4">
           <h4>Búsqueda avanzada</h4>
-          <p style="color:white;">Marca las categorías para las que deseas encontrar resultados.</p>
+          <p style="color:white;"><strong>Marca las categorías para las que deseas encontrar resultados.</strong></p>
           <a href="#" data-toggle="collapse" data-target="#food_categories" style="color:white;font-size:20px;"><strong>Comida</strong></a><BR>
           <div id="food_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="restaurantFilter" type="checkbox" onclick="evaluateFilters()" value="restaurant food">  <strong style="color:white;font-size:16px;">  Restaurante</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="takeawayFilter" type="checkbox" onclick="evaluateFilters()" value="meal_takeaway food">  <strong style="color:white;font-size:16px;">  Para llevar</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="takeawayFilter" type="checkbox" onclick="evaluateFilters()" value="meal_takeaway food">  <strong style="color:white;font-size:16px;">  Comida para llevar</strong></a><BR>
           </div>
           <a href="#" data-toggle="collapse" data-target="#leisure_categories" style="color:white;font-size:20px;"><strong>Ocio</strong></a><BR>
           <div id="leisure_categories" class="collapse" style="margin-left:15px;">
@@ -90,13 +90,13 @@
             <a href="#"><input class="filter-checkbox" id="libraryFilter" type="checkbox" onclick="evaluateFilters()" value="library culture"><strong style="color:white;font-size:16px;">  Biblioteca</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="museumFilter" type="checkbox" onclick="evaluateFilters()" value="museum culture"><strong style="color:white;font-size:16px;">  Museo</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="religious_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="religious_emplacements culture"><strong style="color:white;font-size:16px;">  Templos religiosos</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="public_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="public_emplacements culture"><strong style="color:white;font-size:16px;">  Espacios públicos</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="public_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="park culture"><strong style="color:white;font-size:16px;">  Parques</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="monumentFilter" type="checkbox" onclick="evaluateFilters()" value="monument culture"><strong style="color:white;font-size:16px;">  Monumentos</strong></a><BR>
           </div>
           <a href="#" data-toggle="collapse" data-target="#services_categories" style="color:white;font-size:20px;"><strong>Servicios</strong></a><BR>
           <div id="services_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="campgroundFilter" type="checkbox" onclick="evaluateFilters()" value="campground services"><strong style="color:white;font-size:16px;">  Camping</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="car-rentalFilter" type="checkbox" onclick="evaluateFilters()" value="car_rental services"><strong style="color:white;font-size:16px;">  Alquiler de coches</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="car-rentalFilter" type="checkbox" onclick="evaluateFilters()" value="car_rental services"><strong style="color:white;font-size:16px;">  Alquiler de vehículos</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="atmFilter" type="checkbox" onclick="evaluateFilters()" value="atm services"><strong style="color:white;font-size:16px;">  Cajero</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="parkingFilter" type="checkbox" onclick="evaluateFilters()" value="parking services"><strong style="color:white;font-size:16px;">  Parking</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="gas-stationFilter" type="checkbox" onclick="evaluateFilters()" value="gas_station services"><strong style="color:white;font-size:16px;">  Gasolinera</strong></a><BR>
@@ -141,10 +141,10 @@
       <a href="#" data-toggle="collapse" data-target="#navbarHeader" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-filter mr-2"></i><strong>Búsqueda Avanzada</strong> </a>
       <a href="javascript:void(0)" class="navbar-brand d-flex align-items-center" onclick="openNav()"><i class="fa d-inline fa-list-ul mr-2"></i><strong>Lista de resultados</strong> </a>
       {% if request.user.is_authenticated %}
-          <a class="navlink" id="passwd-change" href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
+          <a class="nav-link" id="passwd-change" href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
       {% else %} 
         <li class="nav-item" style="list-style:none;">
-          <a class="nav-link" id="login-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i><strong> Iniciar sesión</strong></a>
+          <a class="nav-link" id="login-link" href="{% url 'venues:login' %}?next=mapview"><i class="fas fa-sign-in-alt"></i><strong> Iniciar sesión</strong></a>
         </li>
       </ul>
       {% endif %}
@@ -152,7 +152,7 @@
   </div>
 
   <div id="mySidenav" class="sidenav" style="background-color:#555555;">
-    <a href="javascript:void(0)" class="closebtn" style="color:white;" onclick="closeNav()">&times;</a>
+    <a href="javascript:void(0)" class="closebtn" style="color:white;" onclick="closeNav()"><strong>&times;</strong></a>
     <p style="color:white;text-align:center;"><strong>Ordenar resultados por:</strong></p>
       <select class="custom-select d-block w-50" id="sorting-criteria" style="margin:auto;" required="">
           <option value="rating">Puntuación</option>
@@ -172,13 +172,13 @@
 
 
   <div id="adv-options-sidenav" class="adv-options-sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()">&times;</a>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()"><strong>&times;</strong></a>
         <p style="color:white;text-align:justify;margin-left:10px;margin-right:20px;color:white;"><strong>Escoge un método de transporte y el criterio de ordenación de la ruta.</strong></p> 
         <BR>
         <p style="color:white;text-align:justify;margin-left:10px;margin-right:20px;"><strong>La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</strong></p>
         <ul class="list-unstyled">
           <li>
-            <p style="color:white;margin:auto;margin-left:40px;">Medio de transporte:</p>
+            <p style="color:white;margin:auto;margin-left:40px;"><strong>Medio de transporte:</strong></p>
             <BR>
             <select class="custom-select d-block w-50" id="transport" style="margin:auto;" required="">
               <option value="DRIVING">Coche</option>
@@ -190,7 +190,7 @@
           </li>
           <li>
             <BR>
-            <p style="color:white;margin:auto;margin-left:40px;">Método de ordenación:</p>
+            <p style="color:white;margin:auto;margin-left:40px;"><strong>Método de ordenación:</strong></p>
             <BR>
             <select class="custom-select d-block w-50" id="route-sorting" style="margin:auto;" required="">
               <option value="automatic-sorting">Ordenación automática</option> 
@@ -237,7 +237,7 @@ var initial_category = '{{ initial_category }}'
 
 var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
 var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
-var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
+var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, '').replace('None',"0.00"));
 
 var map;
 
@@ -315,7 +315,6 @@ function initMap() {
     });
 
     google.maps.event.addListener(user_marker, 'dragend', function() {
-        //map.setCenter(this.position);
         user_position["lat"] = this.position.lat();
         user_position["lng"] = this.position.lng();
         updateDistanceFromUser();
@@ -345,13 +344,13 @@ function updateCurrentSegment(){
     calculateAndDisplayRoute(currentSegment["from"], currentSegment["to"]);
 }
 
-function generateSegments(sorting_criteria){
+function generateSegments(route_sorting){
 
     var start = user_position;
     start['name'] = "user_positon";
     var next = {};
     var segment = {};
-    if (sorting_criteria=="automatic-sorting"){
+    if (route_sorting=="automatic-sorting"){
         while (Object.keys(route).length>0){
             next = getClosest(start)
             segment = {'from':start, 'to':next}
@@ -377,7 +376,9 @@ function getNext(){
     next['lat'] = route[e]['lat'];
     next['lng'] = route[e]['lng'];
     delete route[e];
-    document.getElementById("check_"+e).checked = false;
+    if (document.getElementById("check_"+e) != null && document.getElementById("check_"+e).checked == true){
+        document.getElementById("check_"+e).checked = false;
+    }
     return next;
 
 }
@@ -395,7 +396,9 @@ function getClosest(start){
         }
     }
     delete route[next['name']];
-    document.getElementById("check_"+next['name']).checked = false;
+    if(document.getElementById("check_"+next['name']) != null && document.getElementById("check_"+next['name']).checked == true){
+        document.getElementById("check_"+next['name']).checked = false;
+    }
     return next;
 }
 
@@ -437,13 +440,10 @@ function startRoute(){
 
     if (Object.keys(route).length>0){
         hideMarkersOutsideOfRoute();
-        //for (venue in route){names.push(venue);}
-        //placeMarkers(j,names);
-        //openNav(); 
         closeOptionsNav();
-        routeSorting = document.getElementById("route-sorting").value;
+        route_sorting = document.getElementById("route-sorting").value;
         segments = [];
-        generateSegments();
+        generateSegments(route_sorting);
         segmentIndex = 0;
         document.getElementById("directions-panel").style.width="400px";
         displaySegment(segmentIndex);
@@ -453,8 +453,6 @@ function startRoute(){
 
 function calculateAndDisplayRoute(from, to) {
 
-    //Display options
-    //directionsDisplay.setOptions( { suppressMarkers: true } );
     directionsDisplay.setMap(map);
     directionsDisplay.setPanel(document.getElementById('directions-panel'));
 
@@ -462,19 +460,17 @@ function calculateAndDisplayRoute(from, to) {
     transport = document.getElementById("transport").value;
 
     if (transport == "transit-bus"){
-        console.log("transit-bus: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
             travelMode: 'TRANSIT',
             transitOptions: {
                 modes: ['BUS'],
-                routingPreference: 'FEWER_TRANSFERS' //La hora del siguiente bus depende de departureTime, así que si queremos que la hora de salida del bus tenga cierto margen por si la parada está más o menos lejos, poner un departureTime + X tiempo.
+                routingPreference: 'FEWER_TRANSFERS' 
             },
             unitSystem: google.maps.UnitSystem.METRIC
         }, routeCallback);
     } else if (transport == "transit-subway"){
-        console.log("transit-subway: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
@@ -486,19 +482,17 @@ function calculateAndDisplayRoute(from, to) {
             unitSystem: google.maps.UnitSystem.METRIC
         }, routeCallback);
     } else if (transport == "DRIVING"){
-        console.log("transit-driving: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
             travelMode: 'DRIVING',
             drivingOptions: {
-                departureTime: new Date(Date.now()),  //new Date(Date.now() + N) siendo N el nº de milisegundos desde ahora
+                departureTime: new Date(Date.now()),  
                 trafficModel: 'bestguess'
             },
             unitSystem: google.maps.UnitSystem.METRIC
         }, routeCallback);
     } else {
-        console.log("transit-walking-bicylcing: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
@@ -510,10 +504,6 @@ function calculateAndDisplayRoute(from, to) {
 
 function routeCallback(response, status) {
     if (status === 'OK') {
-        console.log(response);
-        //hideMarkersOutsideOfRoute();
-        /*instruction_panel=document.getElementById("directions-panel");
-        instruction_panel.style.display="block";*/
         directionsDisplay.setMap(map);
         directionsDisplay.setDirections(response);
     } else {
@@ -541,22 +531,19 @@ function filterResults(){
         $.ajax({
             url : "{% url 'venues:filter' %}"+"?category="+formatCategories(currentlyDisplayedCategories)+"&user_position="+user_position["lat"]+","+user_position["lng"],  
             method : "GET",
-            //dataType: "json",
             success : function (data) {
-                console.log(data)
-                //var jqueryJson = $.parseJSON(data)
                 document.getElementById("venue-list").innerText = "";
                 var sorting_criteria = document.getElementById("sorting-criteria").value;
                 j = data;
                 fillList(data, sorting_criteria);
-                hideMarkers();
+                deleteMarkers(); 
                 placeMarkers(data);
             },
             error : function (data){
-                console.log(data.status);
                 if (data.status == 404){
                     alert("No se han encontrado resultados para la/s categoría/s solicitadas")
                     document.getElementById("venue-list").innerHTML = "<b style='margin-left:5%;color:white;font-size:20px;'>No se han encontrado resultados para la/s categoría/s solicitadas.</b>";
+                    deleteMarkers();
                 } else {
                     alert("Ha habido un error, inténtalo más tarde.");
                     document.getElementById("venue-list").innerText = "<b style='margin-left:5%;color:white;font-size:20px;'>Ha habido un error, inténtalo más tarde.</b>";
@@ -567,17 +554,16 @@ function filterResults(){
 }
 
 function placeMarkers(venue_list){
-  var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+  var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); 
   sorted = removeDuplicatesByName(sorted);
   Object.keys(sorted).forEach(function(venue) {
-      //Marker placement------------------------------------------
       contentString = '<div id="content">'+
         '<div id="siteNotice">'+
         '</div>'+
         '<h4 id="firstHeading" class="firstHeading">'+sorted[venue]['venue_name']+'</h4>'+
         '<div id="bodyContent">'+
         '<h5><b>'+sorted[venue]['formatted_address']+'</b></h5>'+
-        '<a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'" target="_blank" style="font-size:15px;">Buscar con Google</a><BR>'+
+        '<a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'" target="_blank" style="font-size:15px;">Buscar en Internet</a><BR>'+
         '</div>';
 
       var infowindow = new google.maps.InfoWindow({
@@ -593,7 +579,6 @@ function placeMarkers(venue_list){
       var marker = new google.maps.Marker({
         position : new google.maps.LatLng(sorted[venue]["lat"], sorted[venue]["lng"]),
         map : map,
-        //icon : marker_icon,
         animation: google.maps.Animation.DROP,
         infoWindow: infowindow,
         title: sorted[venue]['venue_name']
@@ -601,12 +586,8 @@ function placeMarkers(venue_list){
 
              
       google.maps.event.addListener(marker, 'click', function() {
-        /*if (typeof open_marker !== 'undefined'){
-          open_marker.infoWindow.close();
-        }*/
         map.setCenter(this.position);
         this.infoWindow.open(map, this);
-        //open_marker = this;
       });
 
       markers.push(marker);
@@ -618,9 +599,9 @@ function fillList(venue_list, sorting_criteria){
 
     var sorted = {};
     if (sorting_criteria=="distance"){
-        sorted = venue_list.sort(function(a, b) {return a.dist_from_user - b.dist_from_user}); //Ordena los lugares de mayor a menor distancia.
+        sorted = venue_list.sort(function(a, b) {return a.dist_from_user - b.dist_from_user}); 
     } else {
-        sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+        sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); 
     }
     sorted = removeDuplicatesByName(sorted);
     var venue_list = document.getElementById("venue-list");
@@ -628,7 +609,6 @@ function fillList(venue_list, sorting_criteria){
 
         var a = document.createElement("a");
         a.id = "mainElement_"+sorted[venue]['venue_name'];
-        //a.href = "#";
         a.className = "list-group-item list-group-item-action flex-column align-items-start";
 
         var div = document.createElement("div");
@@ -644,9 +624,6 @@ function fillList(venue_list, sorting_criteria){
 
         var h9 = document.createElement("p");
         h9.className;
-        /*var boldaddress = document.createElement("strong");
-        boldaddress.innerText = sorted[venue]['formatted_address']+"\n";
-        h9.appendChild(boldaddress);*/
         h9.innerHTML = "<b style='color:gray;'>"+sorted[venue]['formatted_address']+"</b><BR>";
 
         var small_dist = document.createElement("small");
@@ -659,7 +636,7 @@ function fillList(venue_list, sorting_criteria){
         var p = document.createElement("p");
         p.appendChild(h9);
 
-        for (i=0; i<sorted[venue]['rating']; i++){
+        for (i=1; i<=sorted[venue]['rating']; i++){
             s = document.createElement("span");
             s.className = "fa fa-star checked";
             p.appendChild(s);
@@ -674,7 +651,7 @@ function fillList(venue_list, sorting_criteria){
         icon.src = sorted[venue]["icon"];
         icon.style.height = "10%";
 
-        var small_addToRoute = document.createElement("small");
+        var small_addToRoute = document.createElement("p");
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "route_checkbox";
@@ -712,7 +689,6 @@ function fillList(venue_list, sorting_criteria){
 }
 
 function openInfoWindow(name){
-    console.log(name);
     for (m in markers){
       if (markers[m].title == name){
         google.maps.event.trigger(markers[m], "click");

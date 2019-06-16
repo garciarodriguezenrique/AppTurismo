@@ -17,8 +17,27 @@
   <link rel="stylesheet" type="text/css" href="{% static 'venues/scorecard.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'venues/map-sidenav.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'venues/adv-options-sidenav.css' %}"> 
-  <!--<link rel="stylesheet" type="text/css" href="{% static 'venues/directions-panel.css' %}">-->
 </head>
+<style>
+#directions-panel {
+  font-family: 'Roboto','sans-serif';
+  line-height: 30px;
+  padding-left: 10px;
+  background-color: #D3D3D3;
+}
+
+#directions-panel select, #directions-panel input {
+  font-size: 15px;
+}
+
+#directions-panel i {
+  font-size: 12px;
+}
+
+#directions-panel a {
+  font-size: 15px;
+}
+</style>
 
 <body id="main">
   <div class="collapse bg-dark" id="navbarHeader">
@@ -26,12 +45,12 @@
       <div class="row">
         <div class="col-md-7 py-4">
           <p style="color:white;">Marca las categorías para las que deseas encontrar resultados.</p>
-          <a href="#" data-toggle="collapse" data-target="#food_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="foodFilter" type="checkbox" onclick="evaluateFilters()" value="food">--><strong>Comida</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#food_categories" style="color:white;font-size:15px;"><strong>Comida</strong></a><BR>
           <div id="food_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="restaurantFilter" type="checkbox" onclick="evaluateFilters()" value="restaurant food">  <strong>Restaurante</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="takeawayFilter" type="checkbox" onclick="evaluateFilters()" value="meal_takeaway food">  <strong>Para llevar</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#leisure_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="leisureFilter" type="checkbox" onclick="evaluateFilters()" value="leisure">--><strong>Ocio</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#leisure_categories" style="color:white;font-size:15px;"><strong>Ocio</strong></a><BR>
           <div id="leisure_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="amusement_parkFilter" type="checkbox" onclick="evaluateFilters()" value="amusement_park leisure">  <strong>Parque de atracciones</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="bowling_alleyFilter" type="checkbox" onclick="evaluateFilters()" value="bowling_alley leisure">  <strong>Bolera</strong></a><BR>
@@ -41,16 +60,16 @@
             <a href="#"><input class="filter-checkbox" id="stadiumFilter" type="checkbox" onclick="evaluateFilters()" value="stadium leisure">  <strong>Estadio</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="zooFilter" type="checkbox" onclick="evaluateFilters()" value="zoo leisure">  <strong>Zoo</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#culture_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="cultureFilter" type="checkbox" onclick="evaluateFilters()" value="culture">--><strong>Cultura</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#culture_categories" style="color:white;font-size:15px;"><strong>Cultura</strong></a><BR>
           <div id="culture_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="art-galleryFilter" type="checkbox" onclick="evaluateFilters()" value="art_gallery culture">  <strong>Galería de arte</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="libraryFilter" type="checkbox" onclick="evaluateFilters()" value="library culture">  <strong>Biblioteca</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="museumFilter" type="checkbox" onclick="evaluateFilters()" value="museum culture">  <strong>Museo</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="religious_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="religious_emplacements culture">  <strong>Templos religiosos</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="public_emplacementsFilter" type="checkbox" onclick="evaluateFilters()" value="public_emplacements culture">  <strong>Espacios públicos</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="monumentFilter" type="checkbox" onclick="evaluateFilters()" value="monument culture"><strong style="color:white;font-size:16px;">  Monumentos</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="monumentFilter" type="checkbox" onclick="evaluateFilters()" value="monument culture"><strong style="font-size:16px;">  Monumentos</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#services_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="servicesFilter" type="checkbox" onclick="evaluateFilters()" value="services">--><strong>Servicios</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#services_categories" style="color:white;font-size:15px;"><strong>Servicios</strong></a><BR>
           <div id="services_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="campgroundFilter" type="checkbox" onclick="evaluateFilters()" value="campground services">  <strong>Camping</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="car-rentalFilter" type="checkbox" onclick="evaluateFilters()" value="car_rental services">  <strong>Alquiler de coches</strong></a><BR>
@@ -58,9 +77,9 @@
             <a href="#"><input class="filter-checkbox" id="parkingFilter" type="checkbox" onclick="evaluateFilters()" value="parking services">  <strong>Parking</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="gas-stationFilter" type="checkbox" onclick="evaluateFilters()" value="gas_station services">  <strong>Gasolinera</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="policeFilter" type="checkbox" onclick="evaluateFilters()" value="police services">  <strong>Policía</strong></a><BR>
-            <a href="#"><input class="filter-checkbox" id="lodgingFilter" type="checkbox" onclick="evaluateFilters()" value="lodging services"><strong style="color:white;font-size:16px;">  Alojamiento</strong></a><BR>
+            <a href="#"><input class="filter-checkbox" id="lodgingFilter" type="checkbox" onclick="evaluateFilters()" value="lodging services"><strong> Alojamiento</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#shopping_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="shoppingFilter" type="checkbox" onclick="evaluateFilters()" value="shopping">--><strong>Tiendas</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#shopping_categories" style="color:white;font-size:15px;"><strong>Tiendas</strong></a><BR>
           <div id="shopping_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="book_storeFilter" type="checkbox" onclick="evaluateFilters()" value="book_store shopping">  <strong>Librería</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="clothing_storeFilter" type="checkbox" onclick="evaluateFilters()" value="clothing_store shopping">  <strong>Tiendas de ropa</strong></a><BR>
@@ -69,17 +88,17 @@
             <a href="#"><input class="filter-checkbox" id="shopping_mallFilter" type="checkbox" onclick="evaluateFilters()" value="shopping_mall shopping">  <strong>Centro comercial</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="other_storesFilter" type="checkbox" onclick="evaluateFilters()" value="other_stores shopping">  <strong>Otras tiendas</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#medical_services_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="medicalFilter" type="checkbox" onclick="evaluateFilters()" value="medical_services">--><strong>Servicios sanitarios</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#medical_services_categories" style="color:white;font-size:15px;"><strong>Servicios sanitarios</strong></a><BR>
           <div id="medical_services_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="hospitalFilter" type="checkbox" onclick="evaluateFilters()" value="hospital medical_services">  <strong>Hospital/Centro médico</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="pharmacyFilter" type="checkbox" onclick="evaluateFilters()" value="pharmacy medical_services">  <strong>Farmacia</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#bar_and_clubs_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar_and_clubs">--><strong>Bares y clubs</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#bar_and_clubs_categories" style="color:white;font-size:15px;"><strong>Bares y clubs</strong></a><BR>
           <div id="bar_and_clubs_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="barFilter" type="checkbox" onclick="evaluateFilters()" value="bar bar_and_clubs">  <strong>Bar</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="night_clubFilter" type="checkbox" onclick="evaluateFilters()" value="night_club bar_and_clubs">  <strong>Clubs</strong></a><BR>
           </div>
-          <a href="#" data-toggle="collapse" data-target="#transport_categories" style="color:white;font-size:15px;"><!--<input class="filter-checkbox" id="transportFilter" type="checkbox" onclick="evaluateFilters()" value="transport">--><strong>Transporte</strong></a><BR>
+          <a href="#" data-toggle="collapse" data-target="#transport_categories" style="color:white;font-size:15px;"><strong>Transporte</strong></a><BR>
           <div id="transport_categories" class="collapse" style="margin-left:15px;">
             <a href="#"><input class="filter-checkbox" id="airportFilter" type="checkbox" onclick="evaluateFilters()" value="airport transport">  <strong>Aeropuerto</strong></a><BR>
             <a href="#"><input class="filter-checkbox" id="bus_stationFilter" type="checkbox" onclick="evaluateFilters()" value="bus_station transport">  <strong>Estación / Parada de bus</strong></a><BR>
@@ -89,20 +108,19 @@
           </div>
         </div>     
       </div>
-      <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3" style="margin:auto;width:30%;">Buscar</button>
+      <button id="filter-button" class="btn btn-primary btn-lg btn-block mt-3" style="margin:auto;width:30%;"><strong>Buscar</strong></button>
     </div>
   </div>
   <div class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between">
        <a href="{% url 'venues:index' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-home mr-2"></i><strong>Inicio</strong></a>
-      <a href="#" data-toggle="collapse" data-target="#navbarHeader" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-cogs mr-2"></i><strong>Opciones Avanzadas</strong> </a>
-      <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>-->
+      <a href="#" data-toggle="collapse" data-target="#navbarHeader" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-filter mr-2"></i><strong>Búsqueda Avanzada</strong> </a>
     </div>
   </div>
   <div class="py-4 bg-light">
     <div class="container">
       <div id="adv-options-sidenav" class="adv-options-sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()">&times;</a>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeOptionsNav()"><strong>&times;</strong></a>
         <p style="color:white;margin-left:10px;"><strong>Escoge un método de transporte y el criterio de ordenación de la ruta.</strong></p> 
         <BR>
         <p style="color:white;margin-left:10px;"><strong>La ordenación manual te llevará a los lugares seleccionados en el orden en el que los hayas escogido, mientras que la ordenación automática intentará optimizar la ruta de manera que recorras la menor distancia posible.</strong></p> 
@@ -129,17 +147,16 @@
         <button id="confirm-route-button" onclick="startRoute()" class="btn btn-primary btn-lg btn-block mt-3"><strong>Confirmar</strong></button>
       </div>
       <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="resetMap()">&times;</a>
+        <a href="javascript:void(0)" class="closebtn" onclick="resetMap()"><strong>&times;</strong></a>
         <div id="map"></div>
         <div id="directions-panel">
-          <!-- <button id="next-segment" onclick="displaySegmentOptimized(false)">Siguiente destino</button> -->
           <button id="update" onclick="updateCurrentSegment()">Recargar ruta</button>
           <button id="update" onclick="previousSegment()">Destino previo</button>
           <button id="update" onclick="nextSegment()">Destino siguiente</button>
         </div>
       </div>
       {% if request.user.is_authenticated %}
-        <a href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a>
+        <a href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a><BR><BR>
         <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> <strong>Cerrar sesión</strong></a> 
       {% else %} 
         <a href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i> <strong>Iniciar sesión</strong></a>
@@ -158,12 +175,6 @@
       <div class="row">
         <div class="col-md-12">
           <div class="list-group" id="venue-list">
-            <!--<a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">List group</h5> <small>3 days ago</small>
-              </div>
-              <p class="mb-1">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p> <small>Donec id elit non mi porta.</small>
-            </a>-->
           </div>
         </div>
       </div>
@@ -179,10 +190,7 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-  <pingendo style="cursor:pointer;position: fixed;bottom: 10px;right:10px;padding:4px"><button id="filter-button" onclick="openOptionsNav()" class="btn btn-primary btn-lg btn-block mt-3"><strong>Calcular Ruta</strong></button><!--<select class="custom-select d-block w-100" id="sorting-criteria" required="">
-              <option value="rating">Mayor puntuación</option>
-              <option value="distance">Más cercano</option>
-            </select>--></pingendo>
+  <pingendo style="cursor:pointer;position: fixed;bottom: 10px;right:10px;padding:4px"><button id="filter-button" onclick="openOptionsNav()" class="btn btn-primary btn-lg btn-block mt-3"><strong>Calcular Ruta</strong></button></pingendo>
 </body>
 <script src="{% static 'venues/common.js' %}" async defer></script>
 <script>
@@ -207,39 +215,6 @@ var j_loc = JSON.parse(user_location.replace(/&#39;/g,'"'));
 var user_position = {lat: j_loc["lat"], lng: j_loc["long"]};
 var j = JSON.parse(venues_json.replace(/&#39;/g,'"').replace(/&quot;/g, ''));
 
-/*function showMarkers(){
-    for (e in markers){
-        markers[e].setVisible(true);
-    }
-}
-
-function hideMarkers(){
-    for (e in markers){
-        markers[e].setVisible(false);
-        markers[e].setMap(null);
-    }
-}
-
-
-function hideMarkersOutsideOfRoute(){
-    for (e in markers){
-        if (!Object.keys(route).includes(markers[e].getTitle())){
-            markers[e].setVisible(false);
-        }
-    }
-}
-
-function addToRoute(name, lat, lng) {
-    var checkBox = document.getElementById("check_"+name);
-    if (checkBox.checked == true){
-        console.log("true");
-        route[name] = {"lat":lat, "lng":lng};//new google.maps.LatLng(lat, lng) //{"lat":lat, "lng":lng};
-    } else {
-        console.log("false");
-        delete route[name];
-    }
-}*/
-
 
 function resultSearch(){
     var sorting_criteria = document.getElementById("sorting-criteria").value;
@@ -260,48 +235,25 @@ function resetMap() {
     closeNav();
     document.getElementById("map").style.marginRight = "400px";
     document.getElementById("directions-panel").style.display="block";
-    //showMarkers();
     hideMarkers();
     markers = [];
     nextDestination = {};
     instruction_panel=document.getElementById("directions-panel");
     instruction_panel.style.display="none";
-    //Reset directionsDisplay
     directionsDisplay.setMap(null);
     onRoute = false;
     segmentIndex = 0;
     segments = [];
-    //directionsDisplay = null;
-    //directionsDisplay = new google.maps.DirectionsRenderer;
-    //directionsDisplay.setMap(map);
 }
 
 
-/*function deg2rad(deg) {
-  return deg * (Math.PI/180)
-}
-
-function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2-lat1);  // deg2rad 
-  var dLon = deg2rad(lon2-lon1); 
-  var a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-    ; 
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  var d = R * c; // Distance in km
-  return d;
-}*/
-
-function generateSegments(sorting_criteria){
+function generateSegments(route_sorting){
 
     var start = user_position;
     start['name'] = "user_positon";
     var next = {};
     var segment = {};
-    if (sorting_criteria=="automatic-sorting"){
+    if (route_sorting=="automatic-sorting"){
         while (Object.keys(route).length>0){
             next = getClosest(start)
             segment = {'from':start, 'to':next}
@@ -327,7 +279,9 @@ function getNext(){
     next['lat'] = route[e]['lat'];
     next['lng'] = route[e]['lng'];
     delete route[e];
-    document.getElementById("check_"+e).checked = false;
+    if (document.getElementById("check_"+e) != null && document.getElementById("check_"+e).checked == true){
+        document.getElementById("check_"+e).checked = false;
+    }
     return next;
 
 }
@@ -345,7 +299,9 @@ function getClosest(start){
         }
     }
     delete route[next['name']];
-    document.getElementById("check_"+next['name']).checked = false;
+    if(document.getElementById("check_"+next['name']) != null && document.getElementById("check_"+next['name']).checked == true){
+        document.getElementById("check_"+next['name']).checked = false;
+    }
     return next;
 }
 
@@ -354,7 +310,6 @@ function nextSegment(){
     if (segmentIndex + 1 < segments.length){
         displaySegment(++segmentIndex);
     } else {
-        //resetMap();
         alert("Ha llegado a su destino");
     }
 
@@ -386,14 +341,13 @@ function startRoute(){
     var names = [];
 
     if (Object.keys(route).length>0){
-        //hideMarkersOutsideOfRoute();
         for (venue in route){names.push(venue);}
         placeMarkers(j,names);
         openNav(); 
         closeOptionsNav();
-        routeSorting = document.getElementById("route-sorting").value;
+        route_sorting = document.getElementById("route-sorting").value;
         segments = [];
-        generateSegments();
+        generateSegments(route_sorting);
         segmentIndex = 0;
         displaySegment(segmentIndex);
     } else {alert("Selecciona por lo menos un punto de interés para ver la ruta");}
@@ -402,28 +356,23 @@ function startRoute(){
 
 function calculateAndDisplayRoute(from, to) {
 
-    //Display options
-    //directionsDisplay.setOptions( { suppressMarkers: true } );
-    //directionsDisplay.setMap(map);
     directionsDisplay.setPanel(document.getElementById('directions-panel'));
 
     var transport;
     transport = document.getElementById("transport").value;
 
     if (transport == "transit-bus"){
-        console.log("transit-bus: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
             travelMode: 'TRANSIT',
             transitOptions: {
                 modes: ['BUS'],
-                routingPreference: 'FEWER_TRANSFERS' //La hora del siguiente bus depende de departureTime, así que si queremos que la hora de salida del bus tenga cierto margen por si la parada está más o menos lejos, poner un departureTime + X tiempo.
+                routingPreference: 'FEWER_TRANSFERS' 
             },
             unitSystem: google.maps.UnitSystem.METRIC
         }, routeCallback);
     } else if (transport == "transit-subway"){
-        console.log("transit-subway: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
@@ -435,19 +384,17 @@ function calculateAndDisplayRoute(from, to) {
             unitSystem: google.maps.UnitSystem.METRIC
         }, routeCallback);
     } else if (transport == "DRIVING"){
-        console.log("transit-driving: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
             travelMode: 'DRIVING',
             drivingOptions: {
-                departureTime: new Date(Date.now()),  //new Date(Date.now() + N) siendo N el nº de milisegundos desde ahora
+                departureTime: new Date(Date.now()),  
                 trafficModel: 'bestguess'
             },
             unitSystem: google.maps.UnitSystem.METRIC
         }, routeCallback);
     } else {
-        console.log("transit-walking-bicylcing: "+transport);
         directionsService.route({
             origin: from,
             destination: to,
@@ -459,8 +406,6 @@ function calculateAndDisplayRoute(from, to) {
 
 function routeCallback(response, status) {
     if (status === 'OK') {
-        console.log(response);
-        //hideMarkersOutsideOfRoute();
         instruction_panel=document.getElementById("directions-panel");
         instruction_panel.style.display="block";
         directionsDisplay.setMap(map);
@@ -491,9 +436,9 @@ function fillList(venue_list, sorting_criteria){
 
     var sorted = {};
     if (sorting_criteria=="distance"){
-        sorted = venue_list.sort(function(a, b) {return a.dist_from_user - b.dist_from_user}); //Ordena los lugares de mayor a menor valoración.
+        sorted = venue_list.sort(function(a, b) {return a.dist_from_user - b.dist_from_user}); 
     } else {
-        sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+        sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); 
     }
     sorted = removeDuplicatesByName(sorted);
     var venue_list = document.getElementById("venue-list");
@@ -501,7 +446,6 @@ function fillList(venue_list, sorting_criteria){
 
         var a = document.createElement("a");
         a.id = "mainElement_"+sorted[venue]['venue_name'];
-        //a.href = "#";
         a.className = "list-group-item list-group-item-action flex-column align-items-start";
 
         var div = document.createElement("div");
@@ -521,8 +465,6 @@ function fillList(venue_list, sorting_criteria){
 
         var small_dist = document.createElement("small");
         small_dist.id = "distance-"+sorted[venue]['venue_name'];
-        console.log("ID IS: ");
-        console.log(small_dist.id);
         small_dist.innerText = "A "+sorted[venue]['dist_from_user'].toFixed(2)+" km\n";
         
         div.appendChild(h5);
@@ -531,34 +473,30 @@ function fillList(venue_list, sorting_criteria){
         var p = document.createElement("p");
         p.appendChild(h9);
 
-        for (i=0; i<sorted[venue]['rating']; i++){
+        for (i=1; i<=sorted[venue]['rating']; i++){
             s = document.createElement("span");
             s.className = "fa fa-star checked";
             p.appendChild(s);
-            //star_rating += '<span class="fa fa-star checked"></span>'
         }
         for (i=0; i<MAX_STARS-sorted[venue]['rating']; i++){
             s = document.createElement("span");
             s.className = "fa fa-star";
             p.appendChild(s);
-            //star_rating += '<span class="fa fa-star"></span>'
         }
         var icon = document.createElement("img");
         icon.src = sorted[venue]["icon"];
         icon.style.height = "10%";
 
-        var small_addToRoute = document.createElement("small");
+        var small_addToRoute = document.createElement("p");
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "route_checkbox";
         checkbox.id = "check_"+sorted[venue]['venue_name'];
-        //checkbox.onclick = "addToRoute("+sorted[venue]['venue_name']+","+sorted[venue]["lat"]+","+sorted[venue]["lng"]+")";
-        //checkbox.addEventListener('click', addToRoute(sorted[venue]['venue_name'],sorted[venue]['lat'],sorted[venue]["lng"]));
 
         small_addToRoute.innerHTML = "<b style='color:gray;'>Añadir a ruta </b>";
         small_addToRoute.append(checkbox);
 
-        var small = document.createElement("small");
+        var small = document.createElement("div");
         var p_category = document.createElement("p");
         p_category.innerHTML = "<b style='color:gray;'>Categoría/s: "+getCategorySpanish(sorted[venue]['category'])+"</b>";
         small.appendChild(p_category);
@@ -576,14 +514,6 @@ function fillList(venue_list, sorting_criteria){
     });
 }
 
-/*function formatCategories(category_list){
-    var finalString = "";
-    for (category in category_list){
-        finalString += category_list[category].split(" ")[0]+"|";
-    }
-    return finalString.substring(0, finalString.length - 1);
-}*/
-
 function filterResults(){
     
     if (currentlyDisplayedCategories.length > 0){
@@ -591,17 +521,13 @@ function filterResults(){
         $.ajax({
             url : "{% url 'venues:filter' %}"+"?category="+formatCategories(currentlyDisplayedCategories)+"&user_position="+user_position["lat"]+","+user_position["lng"],  
             method : "GET",
-            //dataType: "json",
             success : function (data) {
-                console.log(data)
-                //var jqueryJson = $.parseJSON(data)
                 document.getElementById("venue-list").innerText = "";
                 var sorting_criteria = document.getElementById("sorting-criteria").value;
                 j = data;
                 fillList(data, sorting_criteria);
             },
             error : function (data){
-                console.log(data.status);
                 if (data.status == 404){
                     alert("No se han encontrado resultados para la/s categoría/s solicitadas")
                     document.getElementById("venue-list").innerText = "No se han encontrado resultados para la/s categoría/s solicitadas";
@@ -636,7 +562,6 @@ function initMap() {
     icon: user_icon
   });
 
-  //placeMarkers(j);
 }
 
 function openOptionsNav() {
@@ -653,7 +578,6 @@ function closeOptionsNav() {
 
 function openNav() {
   document.getElementById("mySidenav").style.width = "100%";
-  //initMap();
 }
 
 function closeNav() {
@@ -661,18 +585,16 @@ function closeNav() {
 }
 
 function placeMarkers(venue_list, names){
-  var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); //Ordena los lugares de mayor a menor valoración.
+  var sorted = venue_list.sort(function(a, b) {return b.rating - a.rating}); 
   sorted = removeDuplicatesByName(sorted);
   Object.keys(sorted).forEach(function(venue) {
     if (names.includes(sorted[venue]['venue_name'])){
-      //Marker placement------------------------------------------
       contentString = '<div id="content">'+
         '<div id="siteNotice">'+
         '</div>'+
         '<h4 id="firstHeading" class="firstHeading">'+sorted[venue]['venue_name']+'</h4>'+
         '<div id="bodyContent">'+
         '<p><b>'+sorted[venue]['formatted_address']+'</b></p>'+
-        //'<a href="https://www.google.es/#q='+sorted[venue]['venue_name']+'" target="_blank" style="font-size:15px;">Buscar con Google</a><BR>'+
         '</div>';
 
       var infowindow = new google.maps.InfoWindow({
@@ -688,8 +610,6 @@ function placeMarkers(venue_list, names){
       var marker = new google.maps.Marker({
         position : new google.maps.LatLng(sorted[venue]["lat"], sorted[venue]["lng"]),
         map : map,
-        //icon : marker_icon,
-        //animation: google.maps.Animation.DROP,
         infoWindow: infowindow,
         title: sorted[venue]['venue_name']
       });
@@ -729,10 +649,6 @@ $(window).on('load', function(){
     });
     fillList(j, sc.value);
     document.getElementById('filter-button').addEventListener('click', filterResults);
-    /*checkboxes = document.getElementsByClassName("route_checkbox");
-    for (i=0; i<checkboxes.length; i++){
-        checkboxes[i].addEventListener('click',addToRoute(name,lat,long))   
-    }*/
     var checkboxes = document.getElementsByClassName("filter-checkbox");
     catList = initial_category.split(",");
     for (i=0; i<checkboxes.length; i++){

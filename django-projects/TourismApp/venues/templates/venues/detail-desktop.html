@@ -73,16 +73,8 @@
   <div class="navbar navbar-dark bg-dark">
     <div class="container d-flex justify-content-between">
       <a href="{% url 'venues:mapview' %}" class="navbar-brand d-flex align-items-center"><i class="fa d-inline fa-chevron-circle-left mr-2"></i><strong>Volver a resultados</strong> </a>
-      <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader"> <span class="navbar-toggler-icon"></span> </button>-->
     {% if request.user.is_authenticated %}
-      <a class="navlink" id="passwd-change" href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
-      <!--<ul class="navbar-nav" style="list-style-type:none;">
-        <li class="nav-item" style="list-style:none;">
-          <p><i class="fas fa-user-circle"></i> Hola, {{ request.user.username }}</p>
-        </li>
-        <li class="nav-item" style="list-style:none;">
-          <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Log out</a>
-        </li> -->
+      <a class="nav-link" id="passwd-change" href="{% url 'venues:my-account' %}"><i class="fas fa-user-circle"></i><strong> Hola, {{ request.user.username }}</strong></a> <a class="nav-link" id="logout-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i><strong> Cerrar sesión</strong></a>
       {% else %} 
         <li class="nav-item" style="list-style:none;">
           <a class="nav-link" id="login-link" href="{% url 'venues:login' %}"><i class="fas fa-sign-in-alt"></i><strong> Iniciar sesión</strong></a>
@@ -170,13 +162,12 @@
             <p class="lead text-muted">Dirección: {{ address }}</p>
           {% endif %}
           {% if website %}
-            <p class="lead text-muted"><a href= "{{ website }}" ><b><i>Sitio web</i></b></a></p>
+            <p class="lead text-muted"><a href= "{{ website }}" target="_blank" ><b><i>Sitio web</i></b></a></p>
           {% endif %}
           {% if schedule %}
             <BR>
             <div class="list-group">
               {%for element in schedule %}
-                  <!-- <li><p class="lead text-muted">{{ element }}</p></li> -->
                   <a class="list-group-item list-group-item-action flex-column align-items-start">
                     <p class="mb-1">{{ element }}</p>
                  </a>
@@ -215,7 +206,6 @@
                 <textarea class="form-control" id="form26" name="text" rows="3" placeholder="Escribe aquí tu comentario"></textarea>
                 <input class="btn btn-primary" id="comment-form-submit" type="button" onclick="submissionHandler('comment')" value="Enviar" /> 
               </div>
-              <!-- <button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
             </form>
           {% else %}
 	    Sólo los usuarios registrados pueden dejar comentarios. Por favor, inicia sesión o regístrate.
@@ -228,23 +218,6 @@
   <div class="py-4 bg-light">
     <div class="container">
       <div class="row" id="main-comment-box">
-        <!--
-        <div class="col-md-4 p-3">
-          <div class="card box-shadow">
-            <img class="card-img-top" src="{{ comment.image }}">
-            <div class="card-body">
-              <p class="card-text">comentario</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                  <button type="button" href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
-                </div> 
-                <small class="text-muted">Date</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        -->
       </div>
     </div>
     <ul class="pagination" id="pagination-bar" style="margin:auto;width:10%;">
@@ -265,7 +238,6 @@
                 <BR>
                 <input class="btn btn-primary" id="image-form-submit" type="button" onclick="submissionHandler('image')" value="Enviar" /> 
               </div>
-              <!--<button class="btn btn-primary" id="comment-form-submit" onclick="submissionHandler()">Enviar</button> -->
             </form>
           {% else %}
 	    Sólo los usuarios registrados pueden subir fotos. Por favor, inicia sesión o regístrate.
@@ -281,23 +253,6 @@
     <div class="py-4 bg-light">
     <div class="container">
       <div class="row" id="main-image-box">
-        <!--
-        <div class="col-md-4 p-3">
-          <div class="card box-shadow">
-            <img class="card-img-top" src="{{ comment.image }}">
-            <div class="card-body">
-              <p class="card-text">comentario</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                  <button type="button" href="#" class="btn btn-sm btn-outline-secondary">Delete</button>
-                </div> 
-                <small class="text-muted">Date</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        -->
       </div>
     </div>
     <ul class="pagination" id="image-pagination-bar" style="margin:auto;width:10%;">
@@ -314,7 +269,6 @@
     </div>
   </footer>
   <script src="{% static 'venues/jquery-3.3.1.min.js' %}" async defer></script>
-  <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   <script>
@@ -348,7 +302,6 @@
               a = document.createElement("a");
               a.className = "page-link";
               a.innerText = i;
-              //var localIndex = i;
               a.addEventListener('click', function(){
                                               getComments(i,place_id);
                                           });
@@ -379,7 +332,6 @@
           li.appendChild(a);
           bar.appendChild(li);
           for (let i=currentImgPage; i<=currentImgPage+4; i++) {
-              console.log(i);
               li = document.createElement("li");
               if (i==currentImgPage){
                   li.className = "page-item-active";
@@ -390,7 +342,6 @@
               a = document.createElement("a");
               a.className = "page-link";
               a.innerText = i;
-              //var localIndex = i;
               a.addEventListener('click', function(){
                                               getImages(i,place_id);
                                           });
@@ -444,7 +395,6 @@
 
               var comment_text = document.createElement("p");
               comment_text.className = "card-text";
-              //comment_text.innerText = data[comment]['owner']+" :\n "+data[comment]['text'];
               comment_text.innerHTML = "<b><i>"+data[comment]['owner']+"</i>:</b><BR>"+data[comment]['text'];
               first_inner_div.appendChild(comment_text);
               for (i=0; i<data[comment]['rating']; i++){
@@ -513,7 +463,6 @@
           cbox.innerText = "";
  
           Object.keys(data).forEach(function(image){
-              console.log(data[image]);
               img_src = data[image]['image'];
               var caption_e = document.createElement("p");
               caption_e.className = "card-text";
@@ -584,16 +533,24 @@
               method : "GET",
               success : function (data) {
                   currentPage = parseInt(page);
-                  setComments(data['results'], data['count']);
-                  getAvgRating(place_id);
                   commentCount = data['count']
+                  if (typeof data['results'] !== 'undefined' && typeof data['count'] !== 'undefined'){
+                      setComments(data['results'], data['count']);
+                  } else {
+                      setComments({}, 0); 
+                      bar5.style.width = "0%";
+                      bar4.style.width = "0%";
+                      bar3.style.width = "0%";
+                      bar2.style.width = "0%";
+                      bar1.style.width = "0%";                    
+                  }
+                  getAvgRating(place_id);
                   if (commentCount>0){
                       var num_pages = Math.ceil(data['count']/10);
                       setPaginationBar(num_pages,place_id);
                   }
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
@@ -615,7 +572,6 @@
                   }
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
@@ -627,11 +583,9 @@
               dataType: "json",  
               method : "GET",
               success : function (data) {
-                  console.log(data);
                   updateRatingData(data['results'][0])
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
@@ -641,6 +595,7 @@
           var star_div = document.getElementById("userstars");
           star_div.innerHTML = "";
           var rating_text = document.getElementById("ratingtext");
+          if (data['avg_rating'] == null){data['avg_rating'] = 0.00};
           rating_text.innerText = data["avg_rating"]+" average based on "+String(data['review_number'])+" reviews"
 
           star_rating = "";
@@ -662,10 +617,8 @@
 
       function submissionHandler(type){ 
           if (type=='comment'){
-              console.log("About to submit a new comment about "+place_identifier);
               sendComment(place_identifier);
           } else if (type == 'image') {
-              console.log("About to submit a new image about "+place_identifier);
               sendImage(place_identifier);
           }
       }
@@ -677,22 +630,19 @@
               method : "POST",
               data: $("#comment-form").serialize(),
               success : function (data) {
-                  console.log(data)
                   getComments(currentPage, place_identifier);
                   $('#comment-form').each(function(){
                       this.reset();
                   });
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
       }
 
       function sendImage(place_id){
-          formData = new FormData($("#image-form")[0])
-          console.log(formData)
+          formData = new FormData($("#image-form")[0]);
           $.ajax({
               url : "{% url 'venues:newimage' %}"+"?venue_id="+place_id,
               dataType: "json",
@@ -702,14 +652,13 @@
               method : "POST",
               data: formData, 
               success : function (data) {
-                  console.log(data)
+                  if (data == 500){alert("Debes adjuntar una imagen.")}
                   getImages(currentImgPage, place_identifier);
                   $('#image-form').each(function(){
                       this.reset();
                   });
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
@@ -721,14 +670,12 @@
               dataType: "json",  
               method : "GET",
               success : function (data) {
-                  console.log(data)
                   if ((commentCount-1) % 10 == 0){
                       currentPage-=1;
                   }
                   getComments(currentPage, place_identifier);
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
@@ -740,21 +687,18 @@
               dataType: "json",  
               method : "GET",
               success : function (data) {
-                  console.log(data)
                   if ((imageCount-1) % 10 == 0){
                       currentImgPage-=1;
                   }
                   getImages(currentImgPage, place_identifier);
               },
               error : function (data){
-                  console.log(data);
                   alert("Ha habido un error, inténtalo más tarde.");
               }
           });
       }
 
       $(document).ready(function(){
-          console.log("Loading 1st page of comments")
           getComments("1",place_identifier);
           getImages("1",place_identifier);
       });

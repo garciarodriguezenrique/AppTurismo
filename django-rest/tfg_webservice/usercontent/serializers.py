@@ -54,6 +54,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     owner = serializers.ReadOnlyField(source='owner.username')
     venue_id = serializers.CharField(required=True)
+    text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Comment
@@ -63,8 +64,9 @@ class ImageSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     venue_id = serializers.CharField(required=True)
     image = Base64ImageField(
-        max_length=None, use_url=True, required=False,
+        max_length=None, use_url=True, required=True,
     )
+    caption = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Image
